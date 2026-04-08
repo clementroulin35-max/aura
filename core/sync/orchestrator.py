@@ -1,11 +1,15 @@
 """
 GSS Orion V3 — Sync Orchestrator.
 Sequentially runs brain_layer → rules_layer → srp_layer.
+Features: PID-based sync lock (V1 pattern), integrity hashing post-sync.
 Runnable as `python -m core.sync.orchestrator`.
 """
+import contextlib
 import logging
+import os
 import time
 
+from core.paths import ROOT
 from core.sync.brain_layer import sync_brain_layer
 from core.sync.manifest import compute_hashes, save_manifest
 from core.sync.rules_layer import sync_rules_layer
@@ -14,9 +18,46 @@ from core.ui import print_banner, print_detail, print_step
 
 logger = logging.getLogger(__name__)
 
+LOCK_FILE = ROOT / ".sync.lock"
+
+
+def _acquire_lock() -> bool:
+    """PID-based sync lock to prevent concurrent runs."""
+    if LOCK_FILE.exists():
+        try:
+            pid = int(LOCK_FILE.read_text().strip())
+            try:
+                os.kill(pid, 0)
+                logger.warning("Sync already running (PID %d). Aborting.", pid)
+                return False
+            except OSError:
+                pass  # Stale lock — process dead
+        except (ValueError, OSError):
+            pass
+    LOCK_FILE.write_text(str(os.getpid()), encoding="utf-8")
+    return True
+
+
+def _release_lock() -> None:
+    """Release sync lock."""
+    if LOCK_FILE.exists():
+        with contextlib.suppress(Exception):
+            LOCK_FILE.unlink()
+
 
 def run_sync(verbose: bool = True) -> dict:
-    """Execute full sync pipeline. Returns summary."""
+    """Execute full sync pipeline with lock protection. Returns summary."""
+    if not _acquire_lock():
+        return {"status": "LOCKED"}
+
+    try:
+        return _sync_impl(verbose)
+    finally:
+        _release_lock()
+
+
+def _sync_impl(verbose: bool) -> dict:
+    """Core sync implementation."""
     results: dict = {"brain": [], "rules": [], "srp": [], "status": "OK"}
 
     # Layer 1: Brain

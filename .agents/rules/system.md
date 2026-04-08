@@ -127,17 +127,43 @@ yaml.load(...)                   # → yaml.safe_load(...)
 
 ## Current State
 
-- **Tests**: 62 passed, 0 failed
-- **Coverage**: 66%
+- **Tests**: 70 passed, 0 failed
+- **Coverage**: 61% (more modules now)
 - **Ruff**: 0 errors
-- **Roadmap**: All 6 waves DONE (Foundation → Polish)
-- **Git**: 2 commits on `main`
+- **Roadmap**: All 6 waves DONE + Gap fixes applied
+- **Git**: 3 commits on `main`
 
-## Known Gaps (to address)
+## Resolved Gaps (V3.1)
 
-1. Teams are single-function nodes. V1 had multi-agent pipelines (critik → corrector → qualifier).
-2. No PulseServer (TCP liveness probe) — sentinelles ne peuvent pas vérifier le watchdog.
-3. No git drift detection — l'entropie Git n'est pas surveillée.
-4. No self-healing module — le watchdog n'est pas auto-ressuscité.
-5. No log rotation sentinel.
-6. No SKILL.md per agent (V1 had `.agents/skills/{name}/SKILL.md`).
+| Gap | Resolution |
+|:----|:-----------|
+| ~~Single-function teams~~ | ✅ Multi-agent pipelines (governance→core, critik→corrector→qualifier, captain→task→brainstorming) |
+| ~~No PulseServer~~ | ✅ Threaded TCP server in watchdog, responds `PULSE_OK` |
+| ~~No git drift~~ | ✅ `core/sentinels/git_drift.py` with WARN/CRITICAL thresholds |
+| ~~No self-healing~~ | ✅ `core/sentinels/self_healing.py` with 3-attempt restart |
+| ~~No log rotation~~ | ✅ `core/sentinels/log_rotator.py` with TTL + size limits |
+| ~~No SKILL.md~~ | ✅ 8 agents: governance, core, critik, corrector, qualifier, captain, task, brainstorming |
+
+## Sentinel Architecture (V3.1)
+
+```
+Watchdog (port 21230, PulseServer)
+├── atlas          — system snapshot (60s)
+├── resources      — CPU/RAM + ghost purge (15s)
+├── git_drift      — git status entropy (60s)
+└── log_rotator    — TTL-based archival (3600s)
+
+Self-Healing (independent)
+└── monitors port 21230, restarts watchdog if dead (max 3 attempts)
+```
+
+## Team Pipelines (V3.1)
+
+| Team | Pipeline | LLM Stages |
+|:-----|:---------|:-----------|
+| INTEGRITY | governance → core | 0 (pure filesystem) |
+| QUALITY | critik → corrector → qualifier | 2 (corrector, qualifier) |
+| STRATEGY | captain → task → brainstorming | 2 (task, brainstorming) |
+| DEV | single node + LLM | 1 |
+| MAINTENANCE | single node | 0 |
+
