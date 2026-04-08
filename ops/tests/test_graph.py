@@ -2,9 +2,9 @@
 Tests for LangGraph: state, router, compiler.
 Wave 2 validation.
 """
-from core.graph.state import GSSState, ALL_TEAMS, TEAM_NAMES
-from core.graph.router import route_task, _RULES
-from core.graph.compiler import build_graph, supervisor_node, execute_graph
+from core.graph.compiler import build_graph, execute_graph, supervisor_node
+from core.graph.router import _RULES, route_task
+from core.graph.state import ALL_TEAMS, GSSState
 
 
 class TestState:
@@ -52,8 +52,8 @@ class TestRouter:
     def test_visited_teams_penalized(self):
         """A team visited many times should eventually be skipped."""
         result = route_task("Review the audit", history=["QUALITY"] * 3)
-        # QUALITY should be penalized after 3 visits
-        assert result != "QUALITY" or True  # Depends on other keyword scores
+        # Result is valid regardless of which team wins after penalization
+        assert result in ("INTEGRITY", "QUALITY", "STRATEGY", "DEV", "MAINTENANCE")
 
     def test_rules_loaded_from_yaml(self):
         assert len(_RULES) >= 5, f"Expected 5+ teams, got {len(_RULES)}"

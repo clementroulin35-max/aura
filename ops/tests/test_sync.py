@@ -2,13 +2,13 @@
 import time
 from pathlib import Path
 
+from core.infra.event_bus import EventBus
+from core.infra.telemetry import Telemetry
 from core.sync.brain_layer import sync_brain_layer
+from core.sync.manifest import compute_hashes
+from core.sync.orchestrator import run_sync
 from core.sync.rules_layer import sync_rules_layer
 from core.sync.srp_layer import sync_srp_layer
-from core.sync.manifest import compute_hashes, detect_changes
-from core.sync.orchestrator import run_sync
-from core.infra.telemetry import Telemetry
-from core.infra.event_bus import EventBus
 
 
 class TestBrainLayer:

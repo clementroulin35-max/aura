@@ -5,7 +5,6 @@ Atomic read/write of system_health.json for sentinel coordination.
 import json
 import logging
 from datetime import datetime
-from pathlib import Path
 
 from core.paths import ROOT
 

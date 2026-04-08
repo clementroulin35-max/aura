@@ -51,7 +51,6 @@ def _count_bare_excepts(root: Path) -> list[dict]:
 
 def quality_node(state: dict) -> dict:
     """QUALITY team — SRP scan + LLM critique."""
-    task = state.get("task", "")
 
     # Stage 1: SRP scan
     violations = _scan_srp(ROOT)

@@ -2,8 +2,8 @@
 import json
 from pathlib import Path
 
-from core.sentinels.health import read_health, write_health, set_flag, clear_flags
-from core.sentinels.atlas import collect_snapshot, write_atlas
+from core.sentinels.atlas import collect_snapshot
+from core.sentinels.health import clear_flags, read_health, set_flag, write_health
 
 
 class TestHealthManager:

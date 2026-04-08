@@ -9,9 +9,7 @@ Evolutive hooks:
 """
 import logging
 import logging.handlers
-import os
 import sys
-from pathlib import Path
 from typing import Any
 
 import structlog

@@ -9,7 +9,6 @@ import socket
 import subprocess
 import sys
 import time
-from pathlib import Path
 
 from core.paths import ROOT
 
@@ -24,7 +23,7 @@ SENTINEL_MODULES = [
 ]
 
 
-class WatchdogAlreadyRunning(RuntimeError):
+class WatchdogAlreadyRunningError(RuntimeError):
     """Raised when another watchdog instance is detected."""
 
 
@@ -69,7 +68,7 @@ def watchdog_loop(interval: int = 15) -> None:
     3. Monitor and restart dead sentinels
     """
     if _is_singleton_port_taken():
-        raise WatchdogAlreadyRunning("Another watchdog is already running on port 21230")
+        raise WatchdogAlreadyRunningError("Another watchdog is already running on port 21230")
 
     # Bind the singleton port (hold it for lifetime)
     singleton_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

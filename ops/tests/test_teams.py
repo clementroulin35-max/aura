@@ -2,11 +2,11 @@
 Tests for all 5 team nodes.
 Validates: each team returns {"results": [<one_dict>], "messages": [...]}.
 """
+from core.graph.teams.dev import dev_node
 from core.graph.teams.integrity import integrity_node
+from core.graph.teams.maintenance import maintenance_node
 from core.graph.teams.quality import quality_node
 from core.graph.teams.strategy import strategy_node
-from core.graph.teams.dev import dev_node
-from core.graph.teams.maintenance import maintenance_node
 
 
 def _make_state(task: str = "Test task") -> dict:

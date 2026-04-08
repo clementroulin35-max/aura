@@ -3,12 +3,11 @@ GSS Orion V3 — Portal Launcher.
 Orchestrates Backend (FastAPI) + Frontend (Vite) in parallel.
 Includes sentinel lifecycle management.
 """
+import logging
 import os
 import signal
 import subprocess
 import sys
-import time
-import logging
 
 from core.paths import ROOT
 from core.ui import print_banner, print_step

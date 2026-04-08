@@ -2,12 +2,11 @@
 Tests for core foundation: paths, version, config, ui.
 Wave 1 validation — these must pass before proceeding.
 """
-import json
 from pathlib import Path
 
+from core.config import _deep_merge, load_full_config, load_json_safe, load_yaml_safe
 from core.paths import ROOT
 from core.version import get_version, get_version_tuple
-from core.config import load_json_safe, load_yaml_safe, load_full_config, _deep_merge
 
 
 class TestPaths:

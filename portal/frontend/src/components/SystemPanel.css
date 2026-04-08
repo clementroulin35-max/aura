@@ -1,0 +1,120 @@
+/* ═══════════════════════════════════════════════════
+   GSS ORION V3 — SystemPanel Component
+   Right sidebar: Pulse, Telemetry, Mission Results
+   ═══════════════════════════════════════════════════ */
+
+.system-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ── Pulse Card ── */
+.pulse-card {
+  text-align: center;
+  padding: var(--space-lg) var(--space-md);
+}
+
+.pulse-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid;
+  position: relative;
+}
+
+.pulse-ring.nominal {
+  border-color: var(--green-ok);
+  box-shadow: 0 0 20px rgba(105, 240, 174, 0.3), inset 0 0 20px rgba(105, 240, 174, 0.1);
+  animation: border-flow 3s ease-in-out infinite;
+}
+
+.pulse-ring.warning {
+  border-color: var(--amber-warn);
+  box-shadow: 0 0 20px rgba(255, 171, 64, 0.3), inset 0 0 20px rgba(255, 171, 64, 0.1);
+}
+
+.pulse-ring.error {
+  border-color: var(--red-alert);
+  box-shadow: 0 0 20px rgba(255, 82, 82, 0.3), inset 0 0 20px rgba(255, 82, 82, 0.1);
+}
+
+.pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid;
+  border-color: inherit;
+  opacity: 0.2;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.pulse-ring-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.pulse-ring-label.nominal { color: var(--green-ok); }
+.pulse-ring-label.warning { color: var(--amber-warn); }
+.pulse-ring-label.error { color: var(--red-alert); }
+
+/* ── Teams visited ── */
+.teams-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  justify-content: center;
+  margin-top: var(--space-sm);
+}
+
+.team-chip {
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  background: var(--cyan-ghost);
+  color: var(--cyan-glow);
+  border: 1px solid var(--cyan-border);
+  animation: fade-in-up var(--duration-fast) var(--ease-smooth) both;
+}
+
+.team-chip:nth-child(2) { animation-delay: 50ms; }
+.team-chip:nth-child(3) { animation-delay: 100ms; }
+.team-chip:nth-child(4) { animation-delay: 150ms; }
+
+/* ── Progress bar ── */
+.progress-container {
+  margin-top: var(--space-sm);
+}
+
+.progress-bar-bg {
+  height: 4px;
+  background: var(--hull-elevated);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan-dim), var(--cyan-glow));
+  border-radius: 2px;
+  transition: width var(--duration-normal) var(--ease-smooth);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}

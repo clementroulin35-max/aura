@@ -8,9 +8,9 @@ import logging
 from datetime import datetime
 
 from core.paths import ROOT
-from core.sentinels.atlas import collect_snapshot, write_atlas
-from core.version import get_version
+from core.sentinels.atlas import write_atlas
 from core.ui import print_step
+from core.version import get_version
 
 logger = logging.getLogger(__name__)
 

@@ -3,16 +3,15 @@ GSS Orion V3 — Aeronautical CLI Interface.
 Box-drawing characters + ANSI colors for structured console output.
 Rule R10 exception: print() is ALLOWED only in this module.
 """
+import contextlib
 import os
 import sys
 
 # Force UTF-8 on Windows
 if sys.platform == "win32":
     os.environ.setdefault("PYTHONUTF8", "1")
-    try:
+    with contextlib.suppress(Exception):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    except Exception:
-        pass
 
 # ANSI Colors
 CYAN = "\033[96m"

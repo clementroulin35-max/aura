@@ -6,7 +6,6 @@ Runnable as `python -m core.sync.orchestrator`.
 import logging
 import time
 
-from core.paths import ROOT
 from core.sync.brain_layer import sync_brain_layer
 from core.sync.manifest import compute_hashes, save_manifest
 from core.sync.rules_layer import sync_rules_layer
