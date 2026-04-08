@@ -5,25 +5,25 @@ roadmap:
     - id: W1
       name: FOUNDATION
       goal: "Arborescence, config, brain, registry."
-      status: IN_PROGRESS
+      status: DONE
     - id: W2
       name: LANGGRAPH
       goal: "State, Router, Compiler, 5 Teams."
-      status: TODO
+      status: DONE
     - id: W3
       name: SENTINELS
       goal: "Watchdog, Health, Atlas, Resources."
-      status: TODO
+      status: DONE
     - id: W4
       name: SYNC_OPS
       goal: "Sync pipeline, governance, crystallize."
-      status: TODO
+      status: DONE
     - id: W5
       name: PORTAL
       goal: "Backend FastAPI + Frontend React Atlantis."
-      status: TODO
+      status: DONE
     - id: W6
       name: POLISH
       goal: "Tests 100%, CI, documentation finale."
-      status: TODO
+      status: DONE
   last_validation: "2026-04-08"
