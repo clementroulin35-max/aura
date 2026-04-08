@@ -1,0 +1,10 @@
+# ═══════════════════════════════════════════════════
+# GSS ORION V3 — Session Boot Prompt
+# Usage : Copier-coller au début d'une nouvelle conversation
+# ═══════════════════════════════════════════════════
+
+# BOOT
+Tu travailles sur le projet GSS Orion V3, un orchestrateur IA multi-agents.
+Ton context est dans `.agents/rules/system.md` — lis-le en premier.
+Vérifie l'état du projet : `make status` puis `make test`.
+Reprends là où on s'est arrêté : consulte `brain/bridge.json` et `experts/rules/roadmap.yaml`.
