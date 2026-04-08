@@ -148,13 +148,13 @@ yaml.load(...)                   # → yaml.safe_load(...)
 
 ## Current State
 
-- **Tests**: 70 passed, 0 failed
+- **Tests**: 83 passed, 0 failed
 - **Coverage**: 61%
 - **Ruff**: 0 errors
-- **Roadmap**: All 6 waves DONE + V1 features merged
-- **Git**: 4 commits on `main` (v3.0, v3.1, v3.2)
+- **Roadmap**: All 6 waves DONE + V1 vestiges fully merged
+- **Git**: 6 commits on `main` (v3.0 → v3.3)
 
-## Resolved Gaps (V3.1)
+## Resolved Gaps (V3.1 → V3.3)
 
 | Gap | Resolution |
 |:----|:-----------|
@@ -163,19 +163,46 @@ yaml.load(...)                   # → yaml.safe_load(...)
 | ~~No git drift~~ | ✅ `core/sentinels/git_drift.py` with WARN/CRITICAL thresholds |
 | ~~No self-healing~~ | ✅ `core/sentinels/self_healing.py` with 3-attempt restart |
 | ~~No log rotation~~ | ✅ `core/sentinels/log_rotator.py` with TTL + size limits |
-| ~~No SKILL.md~~ | ✅ 8 agents: governance, core, critik, corrector, qualifier, captain, task, brainstorming |
+| ~~No SKILL.md~~ | ✅ 8 agents |
+| ~~No adaptive memory~~ | ✅ `ops/adaptive_memory.py` — CRUD on `brain/memory.json` |
+| ~~No cognitive flags~~ | ✅ `ops/cognitive_flag.py` — auto-inject findings → roadmap |
+| ~~No integrity hashes~~ | ✅ `ops/integrity_check.py` — SHA-256 on 7 protected files |
+| ~~No sync lock~~ | ✅ `.sync.lock` PID-based in `core/sync/orchestrator.py` |
+| ~~No sentinel manager~~ | ✅ `ops/sentinel_manager.py` — startup/stop/verify/lock |
+| ~~No score/weight~~ | ✅ `ops/dynamic_orchestrator.py` — adaptive agent promotion |
+| ~~No memory RAG~~ | ✅ `ops/memory_rag.py` — zero-dep semantic search |
+| ~~No knowledge sentinel~~ | ✅ `core/sentinels/knowledge.py` — ingestion threshold alerting |
+| ~~Basic crystallize~~ | ✅ 5-step pipeline: bridge → atlas → memory → flags → integrity |
 
-## Sentinel Architecture (V3.1)
+## Sentinel Architecture (V3.3)
 
 ```
 Watchdog (port 21230, PulseServer)
 ├── atlas          — system snapshot (60s)
 ├── resources      — CPU/RAM + ghost purge (15s)
 ├── git_drift      — git status entropy (60s)
-└── log_rotator    — TTL-based archival (3600s)
+├── log_rotator    — TTL-based archival (3600s)
+└── knowledge      — memory ingestion threshold (120s)
 
 Self-Healing (independent)
 └── monitors port 21230, restarts watchdog if dead (max 3 attempts)
+```
+
+## Intelligence Subsystem (V3.3)
+
+```
+Graph Compiler (execute_graph)
+├── supervisor → route_task → team pipeline
+└── POST-MISSION: record_activity() → score++ → auto_promote_weight()
+
+Memory RAG (zero-dep)
+├── build_index() — scans brain/ + .agents/
+├── query()       — TF-IDF-like + sovereign boost (2x)
+└── make rag-query Q="..."
+
+Knowledge Sentinel
+├── check_knowledge() — classify pending by target
+└── signal_alert()    — write to sentinel_alerts.jsonl
 ```
 
 ## Team Pipelines (V3.1)
