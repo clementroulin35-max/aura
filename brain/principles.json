@@ -1,0 +1,15 @@
+{
+  "meta": {"version": "3.0.0", "origin": "GSS Orion V3 — Constitutional DNA"},
+  "rules": [
+    {"id": "R01", "name": "SRP_200", "rule": "Max 200 lignes par fichier, 5 fonctions publiques max."},
+    {"id": "R02", "name": "SINGLE_VERSION", "rule": "VERSION file est la seule source de version."},
+    {"id": "R03", "name": "NO_BARE_EXCEPT", "rule": "Toujours except Exception as e: + logging."},
+    {"id": "R04", "name": "NO_HARDCODED_SECRETS", "rule": "Secrets via env vars uniquement."},
+    {"id": "R05", "name": "SINGLE_ROOT", "rule": "core/paths.py exporte ROOT. Tous l'importent."},
+    {"id": "R06", "name": "MAKEFILE_CLI", "rule": "Makefile est l'interface CLI unique."},
+    {"id": "R07", "name": "TESTS_MANDATORY", "rule": "Chaque module core/ a un test correspondant."},
+    {"id": "R08", "name": "NO_SINGLETONS", "rule": "Module-level instances, pas de pattern __new__."},
+    {"id": "R09", "name": "TYPE_HINTS", "rule": "Type hints sur toutes les fonctions publiques."},
+    {"id": "R10", "name": "STRUCTURED_LOGS", "rule": "structlog pour tout. Zéro print() hors ui.py."}
+  ]
+}

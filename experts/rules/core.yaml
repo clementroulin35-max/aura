@@ -1,0 +1,13 @@
+# GSS Orion V3 — Core Rules
+core:
+  identity: "GSS Orion V3 — Adaptive IA Orchestrator"
+  governance: "Triangle: USER ↔ ORCHESTRATOR ↔ AGENTS"
+  constraints:
+    - "SRP strict: max 200 lignes par fichier"
+    - "Zéro secret hardcodé"
+    - "structlog pour tout logging"
+    - "Type hints obligatoires"
+  boot_sequence:
+    - "make boot → tests + audit + sentinels"
+    - "make sync → pipeline de synchronisation"
+    - "make build → atomic commit pipeline"

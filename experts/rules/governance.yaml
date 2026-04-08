@@ -1,0 +1,13 @@
+# GSS Orion V3 — Governance Rules
+governance:
+  audit_checks:
+    - "R01: SRP < 200 lignes"
+    - "R02: VERSION file seule source"
+    - "R04: Zéro secret hardcodé"
+    - "R06: Makefile présent"
+  rex_policy:
+    - "Chaque leçon apprise → brain/memory.json"
+    - "Compaction automatique au-delà de 50 entrées"
+  escalation:
+    - "FAIL → log + continue (pas de sys.exit)"
+    - "CRITICAL → log + raise SystemError"

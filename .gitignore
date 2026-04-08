@@ -1,0 +1,49 @@
+# ═══════════════════════════════════════
+# GSS ORION V3 — .gitignore
+# ═══════════════════════════════════════
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+venv/
+.venv/
+
+# Environment
+.env
+
+# Logs (runtime generated)
+logs/*.log
+logs/*.jsonl
+logs/*.json
+logs/*.pid
+!logs/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+portal/frontend/node_modules/
+portal/frontend/dist/
+
+# Brain runtime artifacts
+brain/manifest.json
+
+# SQLite
+*.sqlite
+*.sqlite3
+
+# Misc
+tmp/
+*.bak

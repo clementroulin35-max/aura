@@ -1,0 +1,8 @@
+{
+  "version": "v3.0.0",
+  "last_session": null,
+  "pulse": "NOMINAL",
+  "health": {"build": "INIT", "sentinels": "OFFLINE"},
+  "last_task": null,
+  "active_rex": []
+}

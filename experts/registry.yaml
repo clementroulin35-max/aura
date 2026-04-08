@@ -1,0 +1,50 @@
+# GSS Orion V3 — Expert Registry (Skills)
+skills:
+  core:
+    type: static
+    weight: 30
+    description: "Constitution, triangle de gouvernance."
+  governance:
+    type: static
+    weight: 30
+    description: "Audit de conformité, REX."
+  critik:
+    type: dynamic
+    weight: 40
+    description: "Évaluation d'impact architecture."
+  corrector:
+    type: dynamic
+    weight: 40
+    description: "Implémentation corrective."
+  qualifier:
+    type: dynamic
+    weight: 40
+    description: "Validation post-correction."
+  captain:
+    type: static
+    weight: 60
+    description: "Supervision stratégique, roadmap."
+  brainstorming:
+    type: dynamic
+    weight: 40
+    description: "Analyse exploratoire."
+  tester:
+    type: dynamic
+    weight: 40
+    description: "TDD, couverture."
+  task:
+    type: dynamic
+    weight: 40
+    description: "Synchronisation roadmap."
+  design:
+    type: static
+    weight: 30
+    description: "Design system Atlantis."
+  backend_dev:
+    type: static
+    weight: 30
+    description: "FastAPI, Python, API."
+  frontend_dev:
+    type: static
+    weight: 30
+    description: "React, Vite, CSS."

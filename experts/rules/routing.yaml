@@ -1,0 +1,56 @@
+# GSS Orion V3 — Routing Keywords (Source of Truth for Supervisor)
+# Each keyword uses word-boundary regex matching (\b).
+# Weights: 1=low, 2=medium, 3=high affinity for a team.
+teams:
+  INTEGRITY:
+    keywords:
+      governance: 3
+      integrity: 3
+      constitution: 3
+      srp: 3
+      dogme: 3
+      security: 3
+      compliance: 2
+      rules: 2
+  QUALITY:
+    keywords:
+      audit: 3
+      review: 3
+      quality: 3
+      bug: 3
+      fix: 2
+      lint: 2
+      refactor: 2
+      rex: 2
+      debt: 2
+  STRATEGY:
+    keywords:
+      plan: 3
+      roadmap: 3
+      blueprint: 3
+      milestone: 2
+      strategy: 3
+      phase: 2
+      captain: 3
+      vision: 2
+  DEV:
+    keywords:
+      implement: 3
+      code: 2
+      create: 3
+      api: 3
+      frontend: 3
+      backend: 3
+      component: 2
+      feature: 2
+      build: 2
+  MAINTENANCE:
+    keywords:
+      coverage: 3
+      test: 2
+      document: 2
+      maintenance: 3
+      version: 2
+      release: 2
+      deploy: 2
+      health: 2

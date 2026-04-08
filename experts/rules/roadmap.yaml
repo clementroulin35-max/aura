@@ -1,0 +1,29 @@
+# GSS Orion V3 — Strategic Roadmap
+roadmap:
+  mission: "Orion V3 — Clean architecture, real intelligence."
+  milestones:
+    - id: W1
+      name: FOUNDATION
+      goal: "Arborescence, config, brain, registry."
+      status: IN_PROGRESS
+    - id: W2
+      name: LANGGRAPH
+      goal: "State, Router, Compiler, 5 Teams."
+      status: TODO
+    - id: W3
+      name: SENTINELS
+      goal: "Watchdog, Health, Atlas, Resources."
+      status: TODO
+    - id: W4
+      name: SYNC_OPS
+      goal: "Sync pipeline, governance, crystallize."
+      status: TODO
+    - id: W5
+      name: PORTAL
+      goal: "Backend FastAPI + Frontend React Atlantis."
+      status: TODO
+    - id: W6
+      name: POLISH
+      goal: "Tests 100%, CI, documentation finale."
+      status: TODO
+  last_validation: "2026-04-08"
