@@ -114,7 +114,7 @@ def query(text: str, limit: int = 5) -> list[dict]:
 
 
 if __name__ == "__main__":
-    from core.ui import print_step
+    from core.ui import print_detail, print_step
 
     if "--index" in sys.argv:
         idx = build_index()
@@ -125,11 +125,12 @@ if __name__ == "__main__":
             q = " ".join(sys.argv[qi:])
             results = query(q)
             if results:
-                print(f"\n  RAG results for '{q}':")
+                print_step("RAG", f"Results for '{q}'", "OK")
                 for r in results:
                     sov = " [SOV]" if r["sovereign"] else ""
-                    print(f"    [{r['score']:5.1f}] {r['title']}{sov}  ({r['path']})")
+                    print_detail(f"[{r['score']:5.1f}] {r['title']}{sov}  ({r['path']})", "OK")
             else:
-                print(f"  No results for '{q}'.")
+                print_step("RAG", f"No results for '{q}'", "WARN")
     else:
-        print("Usage: memory_rag.py [--index | --query \"your question\"]")
+        print_step("USAGE", "memory_rag.py [--index | --query \"your question\"]", "INFO")
+

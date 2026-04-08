@@ -8,19 +8,20 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Path injection for module resolution
-ROOT = Path(__file__).resolve().parent.parent.parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+# Bootstrap: inject project root for module resolution
+_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-from portal.backend.routers import atlas, events, graph
+from core.version import get_version  # noqa: E402
+from portal.backend.routers import atlas, events, graph  # noqa: E402
 
 
 def create_app() -> FastAPI:
     """Build and configure the FastAPI application."""
     application = FastAPI(
         title="GSS Orion V3 — Atlantis API",
-        version="3.0.0",
+        version=get_version(),
         description="Multi-agent orchestration API",
     )
 

@@ -117,7 +117,7 @@ def unlock() -> None:
 if __name__ == "__main__":
     from core.ui import print_step
     if len(sys.argv) < 2:
-        print("Usage: sentinel_manager.py [startup|stop|verify|lock|unlock]")
+        print_step("USAGE", "sentinel_manager.py [startup|stop|verify|lock|unlock]", "INFO")
         sys.exit(1)
 
     cmd = sys.argv[1].lower()

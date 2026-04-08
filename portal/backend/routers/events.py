@@ -5,6 +5,7 @@ Real-time event streaming via WebSocket.
 Evolutive hook: EventBus.register_ws() allows plugging this into live event flow.
 """
 import asyncio
+import contextlib
 import json
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -28,10 +29,8 @@ async def events_websocket(ws: WebSocket):
         if EVENTS_FILE.exists():
             lines = EVENTS_FILE.read_text(encoding="utf-8").strip().split("\n")
             for line in lines[-20:]:
-                try:
+                with contextlib.suppress(Exception):
                     await ws.send_json(json.loads(line))
-                except Exception:
-                    pass
 
         # Heartbeat loop
         while True:

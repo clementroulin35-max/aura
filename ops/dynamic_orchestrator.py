@@ -120,13 +120,15 @@ def get_leaderboard() -> list[dict]:
 if __name__ == "__main__":
     import sys
 
-    from core.ui import print_step
+    from core.ui import print_detail, print_step
 
     if len(sys.argv) >= 3 and sys.argv[1] == "--score":
         new = update_score(sys.argv[2])
         print_step("SCORE", f"{sys.argv[2]} -> score={new}", "OK")
     elif len(sys.argv) >= 2 and sys.argv[1] == "--leaderboard":
+        print_step("LEADERBOARD", "Agent rankings", "INFO")
         for entry in get_leaderboard():
-            print(f"  {entry['agent']:20s} W={entry['weight']:3d} S={entry['score']:3d} U={entry['usage_count']:3d}")
+            print_detail(f"{entry['agent']:20s} W={entry['weight']:3d} S={entry['score']:3d} U={entry['usage_count']:3d}", "OK")
     else:
-        print("Usage: dynamic_orchestrator.py [--score AGENT | --leaderboard]")
+        print_step("USAGE", "dynamic_orchestrator.py [--score AGENT | --leaderboard]", "INFO")
+
