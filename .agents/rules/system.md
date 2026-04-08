@@ -24,15 +24,19 @@ orion_v3/
 │   ├── config.py   # YAML+JSON loader with deep merge
 │   ├── llm.py      # Universal LLM client (Ollama → Cloud → SIM)
 │   ├── graph/      # LangGraph state machine
-│   │   ├── state.py, router.py, compiler.py
-│   │   └── teams/  # 5 team nodes (integrity, quality, strategy, dev, maintenance)
+│   │   ├── skills.py, state.py, router.py, compiler.py
+│   │   └── teams/  # 5 multi-agent pipelines (integrity, quality, strategy, dev, maintenance)
 │   ├── infra/      # logging, telemetry, event_bus
-│   ├── sentinels/  # health, atlas, resources, watchdog
-│   └── sync/       # brain_layer, rules_layer, srp_layer, manifest, orchestrator
+│   ├── sentinels/  # health, atlas, resources, watchdog, git_drift, log_rotator, self_healing, utils
+│   └── sync/       # brain_layer, rules_layer, srp_layer, manifest, orchestrator (with .sync.lock)
+├── .agents/
+│   ├── rules/      # system.md (THIS FILE — architect context)
+│   └── skills/     # 8 agent SKILL.md files (governance, core, critik, corrector, qualifier, captain, task, brainstorming)
 ├── brain/          # DATA ONLY. No Python. JSON files read by core/config.py.
 ├── experts/        # YAML rules + Jinja2 templates. Read by graph/router.py.
 ├── ops/            # Operational tools. Can import core/. Never imported by core/.
 │   ├── governance.py, crystallize.py, version_bump.py, launcher.py
+│   ├── adaptive_memory.py, cognitive_flag.py, integrity_check.py, sentinel_manager.py
 │   └── tests/      # All tests live here. pytest + coverage.
 ├── portal/
 │   ├── backend/    # FastAPI app. Imports core/.
@@ -76,14 +80,31 @@ core/   → portal/ ❌ FORBIDDEN
 ## Operational Sequence
 
 ```
-make install    → Setup venv + deps
-make test       → pytest with coverage
-make lint       → ruff check
-make sync       → Run sync pipeline (brain/rules/srp)
-make audit      → Governance check (R01-R06)
-make build      → lint + test + audit + sync + version bump
-make portal     → Launch Backend + Frontend + Sentinels
-make graph TASK="..." → Execute a LangGraph mission
+[SESSION PROTOCOL]
+make boot             → Sentinels + Sync + Status
+make build            → lint → test → sync → audit → crystallize → commit
+make exit             → Crystallize + Shutdown
+
+[CORE]
+make install          → Setup venv + deps
+make test             → pytest with coverage
+make lint             → ruff + format
+make sync             → Sync pipeline (locked)
+make audit            → Governance check
+
+[SENTINELS]
+make sentinels-start  → Launch watchdog + all sentinels
+make sentinels-stop   → Graceful shutdown
+make sentinels-verify → Health check
+
+[MEMORY]
+make memory-status    → Adaptive memory health
+make memory-log       → Log a learning entry
+make memory-compact   → Compact old entries
+make crystallize      → Seal session (bridge + atlas + memory + flags + integrity)
+make shadow-sync      → Git snapshot (local commit)
+make integrity        → Hash integrity of protected files
+make check-flags      → Inject cognitive flags into roadmap
 ```
 
 ## Two Cognitive Layers (DO NOT MIX)
@@ -128,10 +149,10 @@ yaml.load(...)                   # → yaml.safe_load(...)
 ## Current State
 
 - **Tests**: 70 passed, 0 failed
-- **Coverage**: 61% (more modules now)
+- **Coverage**: 61%
 - **Ruff**: 0 errors
-- **Roadmap**: All 6 waves DONE + Gap fixes applied
-- **Git**: 3 commits on `main`
+- **Roadmap**: All 6 waves DONE + V1 features merged
+- **Git**: 4 commits on `main` (v3.0, v3.1, v3.2)
 
 ## Resolved Gaps (V3.1)
 

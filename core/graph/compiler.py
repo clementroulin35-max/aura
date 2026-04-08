@@ -20,6 +20,11 @@ from core.graph.teams.quality import quality_node
 from core.graph.teams.strategy import strategy_node
 from core.infra.event_bus import event_bus
 
+try:
+    from ops.dynamic_orchestrator import record_activity
+except ImportError:
+    record_activity = None
+
 logger = logging.getLogger(__name__)
 
 MAX_ITERATIONS = 5
@@ -123,10 +128,28 @@ def execute_graph(task: str) -> dict:
     final_state = compiled.invoke(initial_state)
     event_bus.emit("COMPILER", "MissionEnd", "OK", f"Teams: {final_state.get('team_history', [])}")
 
+    # Score the agents that participated (adaptive learning)
+    teams_visited = final_state.get("team_history", [])
+    if record_activity and teams_visited:
+        # Map team names to agent IDs used in that team
+        agent_map = {
+            "INTEGRITY": ["governance", "core"],
+            "QUALITY": ["critik", "corrector", "qualifier"],
+            "STRATEGY": ["captain", "task", "brainstorming"],
+            "DEV": ["backend_dev"],
+            "MAINTENANCE": ["tester"],
+        }
+        agents_used = []
+        for team in set(teams_visited):
+            agents_used.extend(agent_map.get(team, []))
+        if agents_used:
+            record_activity(agents_used)
+            event_bus.emit("COMPILER", "ScoreUpdate", "OK", f"Scored: {agents_used}")
+
     return {
         "task": task,
         "status": "COMPLETED",
-        "teams_visited": final_state.get("team_history", []),
+        "teams_visited": teams_visited,
         "iterations": final_state.get("iteration", 0),
         "results": final_state.get("results", []),
     }

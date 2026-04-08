@@ -1,50 +1,67 @@
-# GSS Orion V3 — Expert Registry (Skills)
 skills:
   core:
     type: static
     weight: 30
-    description: "Constitution, triangle de gouvernance."
+    description: Constitution, triangle de gouvernance.
+    score: 4
+    usage_count: 4
   governance:
     type: static
     weight: 30
-    description: "Audit de conformité, REX."
+    description: Audit de conformité, REX.
+    score: 4
+    usage_count: 4
   critik:
     type: dynamic
-    weight: 40
-    description: "Évaluation d'impact architecture."
+    weight: 30
+    description: Évaluation d'impact architecture.
+    score: 4
+    usage_count: 4
   corrector:
     type: dynamic
-    weight: 40
-    description: "Implémentation corrective."
+    weight: 30
+    description: Implémentation corrective.
+    score: 4
+    usage_count: 4
   qualifier:
     type: dynamic
-    weight: 40
-    description: "Validation post-correction."
+    weight: 30
+    description: Validation post-correction.
+    score: 4
+    usage_count: 4
   captain:
     type: static
-    weight: 60
-    description: "Supervision stratégique, roadmap."
+    weight: 30
+    description: Supervision stratégique, roadmap.
+    score: 4
+    usage_count: 4
   brainstorming:
     type: dynamic
-    weight: 40
-    description: "Analyse exploratoire."
+    weight: 30
+    description: Analyse exploratoire.
+    score: 4
+    usage_count: 4
   tester:
     type: dynamic
-    weight: 40
-    description: "TDD, couverture."
+    weight: 30
+    description: TDD, couverture.
+    score: 2
+    usage_count: 2
   task:
     type: dynamic
-    weight: 40
-    description: "Synchronisation roadmap."
+    weight: 30
+    description: Synchronisation roadmap.
+    score: 4
+    usage_count: 4
   design:
     type: static
     weight: 30
-    description: "Design system Atlantis."
+    description: Design system Atlantis.
   backend_dev:
     type: static
     weight: 30
-    description: "FastAPI, Python, API."
+    description: FastAPI, Python, API.
   frontend_dev:
     type: static
     weight: 30
-    description: "React, Vite, CSS."
+    description: React, Vite, CSS.

@@ -48,6 +48,12 @@ help: ## Show available commands
 	@echo   make memory-status    — Memory health
 	@echo   make memory-log CAT=... MSG=...  — Log learning
 	@echo   make memory-compact   — Compact old entries
+	@echo   make rag-index        — Build knowledge index
+	@echo   make rag-query Q=...  — Semantic search
+	@echo.
+	@echo   [INTELLIGENCE]
+	@echo   make leaderboard      — Agent score/weight rankings
+	@echo   make knowledge        — Knowledge sentinel check
 	@echo.
 	@echo   [MAINTENANCE]
 	@echo   make crystallize      — Seal session state
@@ -157,6 +163,18 @@ integrity: ## Check hash integrity of protected files
 
 check-flags: ## Inject cognitive flags into roadmap
 	$(PYTHON) -m ops.cognitive_flag
+
+rag-index: ## Build knowledge index (brain + .agents)
+	$(PYTHON) -m ops.memory_rag --index
+
+rag-query: ## Semantic search (Q="your question")
+	$(PYTHON) -m ops.memory_rag --query "$(Q)"
+
+leaderboard: ## Agent score/weight rankings
+	$(PYTHON) -m ops.dynamic_orchestrator --leaderboard
+
+knowledge: ## Knowledge sentinel one-shot check
+	$(PYTHON) -m core.sentinels.knowledge
 
 # ══════════════════════════════════════════════════
 # ⚙️  MAINTENANCE

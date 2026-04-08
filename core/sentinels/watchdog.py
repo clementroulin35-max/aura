@@ -24,6 +24,7 @@ SENTINEL_MODULES = [
     "core.sentinels.resources",
     "core.sentinels.git_drift",
     "core.sentinels.log_rotator",
+    "core.sentinels.knowledge",
 ]
 
 
