@@ -1,10 +1,16 @@
 # ═══════════════════════════════════════════════════
-# GSS ORION V3 — Session Boot Prompt
+# GSS ORION V3 — Session Boot Prompt (V3.6)
 # Usage : Copier-coller au début d'une nouvelle conversation
 # ═══════════════════════════════════════════════════
 
-# BOOT
-Tu travailles sur le projet GSS Orion V3, un orchestrateur IA multi-agents.
-Ton context est dans `.agents/rules/system.md` — lis-le en premier.
-Vérifie l'état du projet : `make status` puis `make test`.
-Reprends là où on s'est arrêté : consulte `brain/bridge.json` et `experts/rules/roadmap.yaml`.
+# BOOT SEQUENCE
+Détecte ton identité réelle (Flash ou Claude/Sonnet) et aligne-toi :
+
+1. Détermine ton tier : Flash = FAST | Claude/GPT-4o = HIGH
+2. make llm-switch      → si le mode config ne correspond pas à ton tier réel
+3. make flash-sync      → (FAST uniquement) rebase flash sur main avant de travailler
+   OU git checkout high → (HIGH uniquement) basculer sur la bonne branche
+4. make boot            → identity-seal + sentinels + sync + status
+5. make test            → vérifier la santé de la suite
+
+Reprends via brain/bridge.json (dernier état) et experts/rules/roadmap.yaml (roadmap).
