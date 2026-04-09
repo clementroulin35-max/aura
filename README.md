@@ -1,6 +1,18 @@
 # GSS ORION V3 — Adaptive IA Orchestration Engine
 
 > Multi-agent AI orchestrator powered by LangGraph, designed for local sovereign operation.
+> **v3.0.8** — 100 tests · 3-branch sovereignty cycle (flash / high / main)
+
+## The Two LLM Systems
+
+Orion operates **two completely independent** LLM governance contexts. Do not mix them.
+
+| System | Who/What it governs | Key Files |
+|:-------|:--------------------|:----------|
+| **Architect Agent** | The external LLM (Flash/Claude) writing code & managing git branches | `brain/llm_config.json#sovereignty`, `ops/identity_seal.py`, `ops/sovereign_guard.py`, `ops/promote.py` |
+| **Orion Engine** | Internal supervisor, teams, agents running LangGraph missions | `brain/llm_config.json#chat,supervisor`, `core/llm.py`, `experts/*.yaml`, `.agents/skills/*.md` |
+
+`make llm-align` governs the **Architect**. `make graph TASK="..."` governs **Orion**. These are orthogonal.
 
 ## Architecture
 
@@ -10,7 +22,7 @@ orion_v3/
 │   ├── paths.py             # ROOT constant (single path anchor)
 │   ├── version.py           # VERSION file reader
 │   ├── config.py            # YAML+JSON config pipeline with deep merge
-│   ├── llm.py               # Universal LLM: Ollama → Cloud → SIM
+│   ├── llm.py               # Universal LLM: Ollama → Cloud → SIM  [Orion Engine]
 │   ├── ui.py                # Aeronautical CLI (only print() allowed here)
 │   ├── graph/               # LangGraph brain
 │   │   ├── state.py         # GSSState TypedDict with reducer annotations
@@ -44,17 +56,21 @@ orion_v3/
 │       ├── manifest.py      # SHA-256 change detection
 │       └── orchestrator.py  # Sequential sync runner (with .sync.lock)
 ├── brain/                   # Data only — NO Python (R07)
-│   ├── principles.json      # 10 verifiable rules
-│   ├── personality.json     # Orion persona
-│   ├── bridge.json          # Session persistence
-│   ├── memory.json          # Adaptive memory entries
-│   └── manifest.json        # File hash manifest (generated)
-├── experts/                 # Agent configuration
+│   ├── principles.json      # 10 verifiable rules                     [TRUTH]
+│   ├── personality.json     # Orion persona                           [TRUTH]
+│   ├── llm_config.json      # LLM config: Architect sovereignty + Orion inference [TRUTH]
+│   ├── bridge.json          # Session persistence                     [DERIVED]
+│   ├── memory.json          # Adaptive memory entries                 [TRUTH]
+│   └── manifest.json        # File hash manifest                      [DERIVED]
+├── experts/                 # Agent configuration  [Orion Engine]
 │   ├── registry.yaml        # 12 expert skills + score/weight
 │   ├── rules/               # Routing, governance, roadmap, core
 │   └── templates/           # Jinja2 system prompt template
+├── .agents/                 # Architect context  [Architect Agent]
+│   ├── rules/system.md      # THIS FILE — architect working context
+│   └── skills/*.md          # 8 agent SKILL files (Orion internal)
 ├── ops/                     # Operations — can import core/
-│   ├── governance.py        # R01-R10 compliance checker
+│   ├── governance.py        # R01-R11 compliance checker
 │   ├── version_bump.py      # Patch version incrementer
 │   ├── crystallize.py       # 5-step session sealer
 │   ├── launcher.py          # Backend + Frontend + Sentinels
@@ -64,17 +80,14 @@ orion_v3/
 │   ├── sentinel_manager.py  # Startup/stop/verify/lock
 │   ├── dynamic_orchestrator.py # Score/weight agent promotion
 │   ├── memory_rag.py        # Zero-dep TF-IDF semantic search
-│   └── tests/               # 83 tests across 7 files
+│   ├── identity_seal.py     # Agent identity certification  [Architect]
+│   ├── sovereign_guard.py   # 3-way push validation         [Architect]
+│   ├── promote.py           # high → main promotion         [Architect]
+│   ├── llm_tool.py          # LLM sovereignty management    [Architect]
+│   └── tests/               # 100 tests across 10 files
 ├── portal/
 │   ├── backend/             # FastAPI (CORS restricted to localhost)
-│   │   ├── app.py           # Factory with version from VERSION
-│   │   └── routers/         # graph, atlas, events (WebSocket)
 │   └── frontend/            # React 19 + Vite 8 + Framer Motion
-├── docs/
-│   ├── audits/              # Architecture audit reports
-│   ├── guides/              # User guides (prompt patterns)
-│   ├── archives/v2/         # V2 reference docs
-│   └── prototype/           # V3 specifications
 └── logs/                    # Runtime output (gitignored)
 ```
 
@@ -86,25 +99,48 @@ core/   → core/  ✅     core/   → ops/   ❌ FORBIDDEN
                         core/   → portal/ ❌ FORBIDDEN
 ```
 
+## 3-Branch Sovereignty Cycle
+
+```
+main  ←────────────── promotes on successful HIGH build
+ ↑                              │
+high  ← audits + refines flash  │
+ ↑                              │
+flash ← FAST dev (synced from main at session start via flash-sync)
+```
+
+| Branch | Tier | Session Start | make shadow-sync | make build |
+|:-------|:-----|:--------------|:-----------------|:-----------|
+| `flash` | FAST | `make flash-sync` (rebase from main) | push → `origin/flash` | push → `origin/flash` |
+| `high`  | HIGH | `git checkout high` | push → `origin/high` | push → `origin/high` + promote `high→main` |
+
 ## Quick Start
 
 ```bash
-# 1. Create virtual environment and install
-make install
+# 1. Setup
+make install                               # venv + deps + git config
 
-# 2. Run tests (83 tests, 61% coverage)
-make test
+# 2. Session boot
+make llm-align MODE=fast MODEL=gemini-2.5-flash  # or MODE=high MODEL=claude-sonnet-4-6
+make flash-sync                            # (FAST only) rebase flash from main
+make boot                                  # identity-seal + sentinels + sync + status
 
-# 3. Run a LangGraph mission
+# 3. Work cycle
+make test                                  # 100 tests, 2 workers
+make shadow-sync                           # commit + push to origin/<branch>
+
+# 4. Build + push
+make build                                 # Full cycle — FAST pushes flash, HIGH pushes high + main
+
+# 5. Run a LangGraph mission
 make graph TASK="Audit the system architecture"
 
-# 4. Launch the Atlantis Dashboard
+# 6. Launch the Atlantis Dashboard
 make portal
-# → Backend: http://localhost:8000
-# → Frontend: http://localhost:5173
+# → Backend: http://localhost:8000  │  Frontend: http://localhost:5173
 ```
 
-## 10 Rules (Constitution)
+## 11 Rules (Constitution)
 
 | ID | Rule | Enforcement |
 |:---|:-----|:------------|
@@ -118,7 +154,7 @@ make portal
 | R08 | Structured logging (`structlog`) — no `print()` except `ui.py` | R10 grep |
 | R09 | No singletons (`__new__`) — module-level instances | Pattern check |
 | R10 | `print()` only in `core/ui.py` | Governance audit |
-| R11 | Sovereignty — Model/Branch alignment | `sovereign_guard` check |
+| R11 | Sovereignty — Model+Branch alignment + Identity Seal | `sovereign_guard` 3-way check |
 
 ## Stack
 
@@ -126,36 +162,38 @@ make portal
 - **React** 19 · **Vite** 8 · **Framer Motion** · **Vanilla CSS**
 - **Local LLM**: Ollama (auto-detected) | **Cloud**: Gemini, OpenAI, Claude
 
-## All Commands (34)
+## All Commands (40+)
 
 ### Session Protocol
 
 | Command | Description |
 |:--------|:------------|
-| `make boot` | 🚀 Preflight: sentinels → sync → status |
-| `make build` | 🛡️ Atomic: guard → lint → test → sync → audit → bump → crystallize → commit |
+| `make llm-align MODE=X MODEL=Y` | 🎯 Align architect mode AND model atomically (session start) |
+| `make boot` | 🚀 Identity-seal → sentinels → sync → status |
+| `make flash-sync` | 🔄 Rebase flash on main (FAST agents, session start) |
+| `make build` | 🛡️ Full cycle: guard → lint → test → sync → audit → commit → push → promote |
+| `make shadow-sync` | 📸 Commit + push to `origin/<branch>` (mid-session snapshot) |
 | `make exit` | 🚪 Crystallize → shutdown sentinels |
-| `make shadow-sync` | 📸 Git snapshot (local commit with integrity check) |
+| `make promote` | 🚀 Manual high → main promotion (HIGH mode only) |
+
+### LLM — Architect Sovereignty
+
+| Command | Description |
+|:--------|:------------|
+| `make llm-align MODE=... MODEL=...` | Set mode AND model in one call (preferred) |
+| `make llm-status` | Show mode, model, consistency check |
+| `make identity-seal` | Auto-seal from `brain/llm_config.json` |
+| `make llm-switch` | Toggle mode only (legacy) |
 
 ### Core Operations
 
 | Command | Description |
 |:--------|:------------|
-| `make install` | Install Python venv + all dependencies |
-| `make test` | Run pytest with coverage (`ops/tests/`) |
+| `make install` | Install Python venv + all dependencies + git config |
+| `make test` | Run pytest with coverage (`ops/tests/`, 100 tests) |
 | `make lint` | Run ruff linter + formatter (`core/` + `ops/`) |
 | `make sync` | Sync pipeline: brain → rules → SRP → manifest |
 | `make audit` | Governance compliance check (R01-R11) |
-
-### LLM Sovereignty
-
-| Command | Description |
-|:--------|:------------|
-| `make llm-status` | Show current sovereignty mode and identity seal status |
-| `make llm-switch` | Toggle between FAST (Gemini) and HIGH (Claude) modes |
-
-### Portal & Graph
-... [rest of the tables remains same]
 
 ### Portal & Graph
 
@@ -209,9 +247,7 @@ make portal
 After each LangGraph mission, the compiler calls `record_activity()` which:
 1. Increments each agent's score
 2. Auto-promotes weight if score exceeds threshold
-3. Writes to `experts/registry.yaml`
-
-This creates a feedback loop: **mission → score → weight → routing**.
+3. Writes to `brain/scores.json`
 
 ### Memory RAG
 

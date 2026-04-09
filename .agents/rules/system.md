@@ -37,6 +37,7 @@ orion_v3/
 ├── ops/            # Operational tools. Can import core/. Never imported by core/.
 │   ├── governance.py, crystallize.py, version_bump.py, launcher.py
 │   ├── adaptive_memory.py, cognitive_flag.py, integrity_check.py, sentinel_manager.py
+│   ├── identity_seal.py, sovereign_guard.py, promote.py, llm_tool.py
 │   └── tests/      # All tests live here. pytest + coverage.
 ├── portal/
 │   ├── backend/    # FastAPI app. Imports core/.
@@ -54,7 +55,7 @@ core/   → ops/   ❌ FORBIDDEN
 core/   → portal/ ❌ FORBIDDEN
 ```
 
-## Constitution (10 Rules)
+## Constitution (11 Rules)
 
 | Rule | Name | Enforcement |
 |:-----|:-----|:------------|
@@ -68,7 +69,20 @@ core/   → portal/ ❌ FORBIDDEN
 | R08 | LOGGING | Use `structlog` or `logging.getLogger(__name__)`. No `print()` except `core/ui.py` |
 | R09 | SINGLETON | No `__new__` pattern. Use module-level instances or function-based |
 | R10 | PRINT | `print()` is allowed ONLY in `core/ui.py`. Everywhere else: logging |
-| R11 | SOVEREIGNTY | Model-Branch mapping: Flash -> flash; Claude -> high. Flash push to main BLOCKED |
+| R11 | SOVEREIGNTY | Model-Branch mapping + Identity Seal. Flash → flash. Claude → high.  |
+
+## The Two LLM Systems (DO NOT MIX)
+
+This project operates two completely independent LLM governance contexts.
+
+| Concern | What it governs | Key Files |
+|:--------|:----------------|:----------|
+| **Architect Agent** (YOU) | The external LLM (Flash/Claude) writing code, managing git, making architecture decisions | `brain/llm_config.json#sovereignty`, `ops/identity_seal.py`, `ops/sovereign_guard.py`, `ops/promote.py`, `ops/llm_tool.py` |
+| **Orion Engine** (INTERNAL) | Orion's own supervisor, teams, and agents running LangGraph missions | `brain/llm_config.json#chat,supervisor`, `core/llm.py`, `experts/*.yaml`, `.agents/skills/*.md` |
+
+**Rule**: Changing `make llm-align MODE=high MODEL=claude-sonnet` has NO effect on the model
+Orion uses internally for its graph. These are entirely orthogonal configurations.
+The Architect governs git branches and code quality. Orion governs mission execution.
 
 ## Source of Truth vs Derived
 
@@ -81,17 +95,31 @@ core/   → portal/ ❌ FORBIDDEN
 ## Operational Sequence
 
 ```
-[SESSION PROTOCOL]
-make boot             → Sentinels + Sync + Status
-make build            → lint → test → sync → audit → crystallize → commit
-make exit             → Crystallize + Shutdown
+[SESSION PROTOCOL — V3.6]
+1. make llm-align MODE=<fast|high> MODEL=<exact-model>  → Align mode+model (atomic)
+   ex FAST : make llm-align MODE=fast MODEL=gemini-2.5-flash
+   ex HIGH : make llm-align MODE=high MODEL=claude-sonnet-4-6
+2. make flash-sync      → (FAST only) rebase flash onto main before working
+   git checkout high    → (HIGH only) switch to the right branch
+3. make boot            → identity-seal + sentinels + sync + status
+4. make test            → verify test health
+
+[BUILD CYCLE]
+make build   → guard → lint → test → sync → audit → crystallize → commit → push → promote
+             → FAST: pushes to origin/flash
+             → HIGH: pushes to origin/high + promotes high→main
+
+make shadow-sync  → commit + push to origin/<current-branch> (no promotion)
+
+[EXIT]
+make exit    → Crystallize + Shutdown sentinels
 
 [CORE]
-make install          → Setup venv + deps
-make test             → pytest with coverage
-make lint             → ruff + format
-make sync             → Sync pipeline (locked)
-make audit            → Governance check
+make install  → Setup venv + deps + git config merge.ours.driver true
+make test     → pytest with coverage
+make lint     → ruff + format
+make sync     → Sync pipeline (locked)
+make audit    → Governance check
 
 [SENTINELS]
 make sentinels-start  → Launch watchdog + all sentinels
@@ -103,9 +131,16 @@ make memory-status    → Adaptive memory health
 make memory-log       → Log a learning entry
 make memory-compact   → Compact old entries
 make crystallize      → Seal session (bridge + atlas + memory + flags + integrity)
-make shadow-sync      → Git snapshot (local commit)
 make integrity        → Hash integrity of protected files
 make check-flags      → Inject cognitive flags into roadmap
+
+[LLM — ARCHITECT SOVEREIGNTY]
+make llm-align MODE=... MODEL=...  → Set mode AND model atomically (primary command)
+make llm-status      → Show mode, model, consistency check
+make identity-seal   → Auto-seal from llm_config.json
+make llm-switch      → Toggle mode only (legacy)
+make promote         → Manual high→main promotion (usually called by make build)
+make flash-sync      → Rebase flash on main (safe: stash → rebase → stash pop)
 ```
 
 ## Two Cognitive Layers (DO NOT MIX)
@@ -147,13 +182,13 @@ print("debug")                   # → logger.debug(...)
 yaml.load(...)                   # → yaml.safe_load(...)
 ```
 
-## Current State
+## Current State (V3.6)
 
-- **Tests**: 83 passed, 0 failed
-- **Coverage**: 61%
+- **Tests**: 100 passed, 0 failed
+- **Coverage**: 59%
 - **Ruff**: 0 errors
-- **Roadmap**: All 6 waves DONE + V1 vestiges fully merged
-- **Git**: 6 commits on `main` (v3.0 → v3.3)
+- **Roadmap**: All 6 waves DONE + V3.6 sovereignty cycle complete
+- **Git**: 3 branches (flash / high / main) — all synced at v3.0.8
 
 ## Resolved Gaps (V3.1 → V3.3)
 
@@ -174,6 +209,20 @@ yaml.load(...)                   # → yaml.safe_load(...)
 | ~~No memory RAG~~ | ✅ `ops/memory_rag.py` — zero-dep semantic search |
 | ~~No knowledge sentinel~~ | ✅ `core/sentinels/knowledge.py` — ingestion threshold alerting |
 | ~~Basic crystallize~~ | ✅ 5-step pipeline: bridge → atlas → memory → flags → integrity |
+
+## Resolved Gaps (V3.4 → V3.6)
+
+| Gap | Resolution |
+|:----|:-----------|
+| ~~No identity seal~~ | ✅ `ops/identity_seal.py` — `--auto` reads llm_config. Sealed at boot. |
+| ~~Sovereign guard v1~~ | ✅ `ops/sovereign_guard.py` — 3-way check (mode + seal + branch) |
+| ~~No flash→main promotion~~ | ✅ `ops/promote.py` — `make build` on HIGH auto-promotes high→main |
+| ~~flash-sync used merge~~ | ✅ `flash-sync` now uses stash → rebase → stash pop |
+| ~~No atomic llm-align~~ | ✅ `make llm-align MODE=X MODEL=Y` sets mode + model in one command |
+| ~~shadow-sync was local-only~~ | ✅ `make shadow-sync` now pushes to `origin/<branch>` |
+| ~~Recurring flash-sync conflicts~~ | ✅ `.gitattributes` with `merge=ours` for VERSION/bridge/scores |
+| ~~Model mismatch undetected~~ | ✅ `make llm-status` shows consistency guard (mode vs model name) |
+| ~~No tests for guard/seal/promote~~ | ✅ 16 new tests: test_identity_seal, test_sovereign_guard, test_promote |
 
 ## Sentinel Architecture (V3.3)
 
@@ -216,16 +265,18 @@ Knowledge Sentinel
 | DEV | single node + LLM | 1 |
 | MAINTENANCE | single node | 0 |
 
-## Sovereignty Protocol (V3.5)
+## Sovereignty Protocol (V3.6)
 
 | Mode | LLM Tiers | Authorized Branch | Push Target |
 |:-----|:----------|:------------------|:------------|
 | **FAST** | Gemini Flash, Llama 3.2 | `flash` | `origin flash` |
-| **HIGH** | Claude Opus, GPT-4o | `high`, `main` | `origin high`, `origin main` |
+| **HIGH** | Claude Opus/Sonnet, GPT-4o | `high` | `origin high` + `origin main` |
 
 **Operational Rules:**
-1. **Self-Alignment**: I (the Agent) MUST autonomously sync my work branch with my active LLM tier.
-2. **Identity Seal**: Before any `make build`, I MUST run `python -m ops.identity_seal` to certify my nature.
-3. **Flash Safeguard**: `make build` is HARD-BLOCKED from pushing to `main` if the active mode is `FAST` or if the Seal does not match.
-4. **Handoff**: Any work promoted from `flash` to `main` MUST be audited and validated on the `high` branch by a `HIGH` tier LLM.
-
+1. **Self-Alignment**: `make llm-align MODE=X MODEL=Y` — MUST be the first action of every session.
+2. **Identity Seal**: `make boot` auto-seals identity from `brain/llm_config.json`.
+3. **Branch Guard**: `make build` is HARD-BLOCKED if mode ≠ branch (e.g. FAST on high = FAIL).
+4. **HIGH Seal Required**: HIGH-tier build requires a valid, non-stale (<1h) identity seal.
+5. **Elevation Denied**: A FAST seal with HIGH config is rejected as an elevation attempt.
+6. **Promotion**: `make build` on HIGH automatically promotes `high → main` on success.
+7. **Handoff**: FAST work on `flash` must be picked up by HIGH for review before reaching `main`.

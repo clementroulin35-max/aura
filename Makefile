@@ -92,6 +92,8 @@ install: ## Install all dependencies
 	@if not exist venv python -m venv venv
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install -e ".[dev]"
+	git config merge.ours.driver true
+	@echo   merge.ours.driver configured (flash-sync auto-resolution active).
 
 test: ## Run pytest suite with coverage
 	$(PYTHON) -m pytest ops/tests/ -v --tb=short --cov=core --cov-report=term-missing -q -n 2

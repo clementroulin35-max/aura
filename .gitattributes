@@ -1,0 +1,15 @@
+# ═══════════════════════════════════════
+# GSS ORION V3 — .gitattributes
+# Automatic conflict resolution for runtime state files.
+# Requires: git config merge.ours.driver true  (run once per clone)
+# ═══════════════════════════════════════
+
+# Runtime state files — during rebase (flash→main), upstream (main) version wins
+# During merge, current branch's version wins.
+# This prevents recurring conflicts on every flash-sync.
+VERSION                merge=ours
+brain/bridge.json      merge=ours
+brain/scores.json      merge=ours
+
+# Coverage binary — never merge
+.coverage              -diff -merge
