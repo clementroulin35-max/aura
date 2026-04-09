@@ -7,12 +7,12 @@
 PYTHON = set PYTHONUTF8=1&& .\venv\Scripts\python.exe
 VERSION := $(shell type VERSION 2>NUL || echo v0.0.0)
 
-.PHONY: help install test lint sync audit
+.PHONY: test lint sync audit
 .PHONY: boot build exit crystallize shadow-sync
 .PHONY: portal graph status clean validate
 .PHONY: sentinels-start sentinels-stop sentinels-verify
 .PHONY: memory-status memory-log memory-compact memory-approve
-.PHONY: integrity check-flags
+.PHONY: integrity check-flags llm-switch llm-status
 
 # ══════════════════════════════════════════════════
 # 📋  HELP
@@ -32,6 +32,7 @@ help: ## Show available commands
 	@echo   [INTEL]    leaderboard / knowledge
 	@echo   [MAINT]    crystallize / shadow-sync / integrity / check-flags
 	@echo   [STATUS]   status / clean / validate / help
+	@echo   [LLM]      llm-switch / llm-status
 	@echo ""
 
 # ══════════════════════════════════════════════════
@@ -44,6 +45,7 @@ boot: sentinels-start sync status ## 🚀 BOOT: Sentinels → Sync → Status
 	@echo ""
 
 build: lint test sync ## 🛡️ BUILD: lint → test → sync → audit → crystallize → commit
+	$(PYTHON) -m ops.sovereign_guard
 	$(PYTHON) -m ops.governance
 	$(PYTHON) -m ops.version_bump
 	$(PYTHON) -m ops.crystallize
@@ -145,6 +147,12 @@ leaderboard: ## Agent score/weight rankings
 
 knowledge: ## Knowledge sentinel one-shot check
 	$(PYTHON) -m core.sentinels.knowledge
+
+llm-switch: ## Toggle sovereignty mode (fast <-> high)
+	$(PYTHON) -m ops.llm_tool --toggle
+
+llm-status: ## Show current sovereignty status
+	$(PYTHON) -m ops.llm_tool --status
 
 # ══════════════════════════════════════════════════
 # ⚙️  MAINTENANCE

@@ -68,6 +68,7 @@ core/   → portal/ ❌ FORBIDDEN
 | R08 | LOGGING | Use `structlog` or `logging.getLogger(__name__)`. No `print()` except `core/ui.py` |
 | R09 | SINGLETON | No `__new__` pattern. Use module-level instances or function-based |
 | R10 | PRINT | `print()` is allowed ONLY in `core/ui.py`. Everywhere else: logging |
+| R11 | SOVEREIGNTY | Model-Branch mapping: Flash -> flash; Claude -> high. Flash push to main BLOCKED |
 
 ## Source of Truth vs Derived
 
@@ -214,4 +215,16 @@ Knowledge Sentinel
 | STRATEGY | captain → task → brainstorming | 2 (task, brainstorming) |
 | DEV | single node + LLM | 1 |
 | MAINTENANCE | single node | 0 |
+
+## Sovereignty Protocol (V3.5)
+
+| Mode | LLM Tiers | Authorized Branch | Push Target |
+|:-----|:----------|:------------------|:------------|
+| **FAST** | Gemini Flash, Llama 3.2 | `flash` | `origin flash` |
+| **HIGH** | Claude Opus, GPT-4o | `high`, `main` | `origin high`, `origin main` |
+
+**Operational Rules:**
+1. **Self-Alignment**: I (the Agent) MUST autonomously sync my work branch with my active LLM tier.
+2. **Flash Safeguard**: `make build` is HARD-BLOCKED from pushing to `main` if the active mode is `FAST`.
+3. **Handoff**: Any work promoted from `flash` to `main` MUST be audited and validated on the `high` branch by a `HIGH` tier LLM.
 
