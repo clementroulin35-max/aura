@@ -7,6 +7,7 @@ Evolutive hooks:
 - Redis Pub/Sub can be added via set_external_sink() method
 - Middleware pipeline: self._middlewares list for event transformation
 """
+
 import json
 import logging
 import queue
@@ -33,6 +34,7 @@ class EventBus:
 
     def _start_writer(self) -> None:
         """Start background writer thread."""
+
         def writer() -> None:
             while True:
                 item = self._queue.get()

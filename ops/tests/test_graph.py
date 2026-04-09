@@ -2,6 +2,7 @@
 Tests for LangGraph: state, router, compiler.
 Wave 2 validation.
 """
+
 from core.graph.compiler import build_graph, execute_graph, supervisor_node
 from core.graph.router import _RULES, route_task
 from core.graph.state import ALL_TEAMS, GSSState

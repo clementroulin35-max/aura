@@ -3,6 +3,7 @@ GSS Orion V3 — Git Drift Sentinel.
 Monitors uncommitted changes via `git status --porcelain`.
 Raises health flags at configurable thresholds.
 """
+
 import logging
 import subprocess
 import time
@@ -22,7 +23,10 @@ def check_git_drift() -> dict:
     try:
         result = subprocess.run(
             ["git", "status", "--porcelain"],
-            cwd=str(ROOT), capture_output=True, text=True, timeout=10,
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         if result.returncode != 0:
             return {"status": "GIT_ERROR", "count": 0}

@@ -4,6 +4,7 @@ Sequentially runs brain_layer → rules_layer → srp_layer.
 Features: PID-based sync lock (V1 pattern), integrity hashing post-sync.
 Runnable as `python -m core.sync.orchestrator`.
 """
+
 import contextlib
 import logging
 import os
@@ -88,11 +89,19 @@ def _print_report(results: dict) -> None:
     """Print sync results to console."""
     print_banner("GSS ORION V3 — SYNC PIPELINE")
 
-    print_step("BRAIN", f"{len(results['brain'])} files", "OK" if all(r['status'] == 'OK' for r in results['brain']) else "WARN")
+    print_step(
+        "BRAIN",
+        f"{len(results['brain'])} files",
+        "OK" if all(r["status"] == "OK" for r in results["brain"]) else "WARN",
+    )
     for r in results["brain"]:
         print_detail(f"{r['file']}: {r['status']}", r["status"])
 
-    print_step("RULES", f"{len(results['rules'])} files", "OK" if all(r['status'] == 'OK' for r in results['rules']) else "WARN")
+    print_step(
+        "RULES",
+        f"{len(results['rules'])} files",
+        "OK" if all(r["status"] == "OK" for r in results["rules"]) else "WARN",
+    )
     for r in results["rules"]:
         print_detail(f"{r['file']}: {r['status']}", r["status"])
 

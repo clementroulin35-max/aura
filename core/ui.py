@@ -3,6 +3,7 @@ GSS Orion V3 — Aeronautical CLI Interface.
 Box-drawing characters + ANSI colors for structured console output.
 Rule R10 exception: print() is ALLOWED only in this module.
 """
+
 import contextlib
 import os
 import sys

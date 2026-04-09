@@ -2,6 +2,7 @@
 GSS Orion V3 — Atlas Sentinel.
 Periodically aggregates system state into system_atlas.json.
 """
+
 import json
 import logging
 import time

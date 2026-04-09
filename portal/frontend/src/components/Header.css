@@ -1,76 +1,198 @@
 /* ═══════════════════════════════════════════════════
-   GSS ORION V3 — Header Component
+   GSS ORION V3.6 — Atlantis Nexus Header
+   Gold branding + transparent bar + nav buttons
    ═══════════════════════════════════════════════════ */
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-sm) var(--space-md);
-  background: linear-gradient(180deg, var(--hull-deep), transparent);
-  border-bottom: var(--border-thin);
-  height: 56px;
-  position: sticky;
-  top: 0;
-  z-index: var(--z-overlay);
-  backdrop-filter: blur(16px);
+  padding: 0 var(--space-lg);
+  background: var(--hull-panel-solid);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  height: 48px;
+  z-index: 10;
 }
 
+/* ── Brand ── */
 .header-brand {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
 }
 
 .header-logo {
-  font-family: var(--font-display);
-  font-size: var(--font-size-lg);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.logo-atlantis {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  background: linear-gradient(135deg, var(--cyan-glow), var(--purple-accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--gold);
+  letter-spacing: 0.25em;
+  text-shadow: 0 0 12px var(--gold-glow);
 }
 
-.header-version {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  padding: 2px 8px;
-  border: 1px solid var(--hull-elevated);
-  border-radius: 100px;
+.logo-nexus {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--gold-light);
+  letter-spacing: 0.2em;
+  opacity: 0.8;
 }
 
-.header-nav {
+/* ── Center: Model info ── */
+.header-center {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
 }
 
+.model-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.model-dot.online {
+  background: var(--green-ok);
+  box-shadow: 0 0 6px var(--green-ok);
+}
+
+.model-dot.offline {
+  background: var(--red-alert);
+  box-shadow: 0 0 6px var(--red-alert);
+}
+
+.model-info {
+  letter-spacing: 0.02em;
+}
+
+.model-role {
+  color: var(--text-muted);
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-right: 3px;
+}
+
+.model-separator {
+  color: var(--text-muted);
+  opacity: 0.3;
+}
+
+/* ── Settings button ── */
+.header-settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: none;
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-radius: var(--radius-sm);
+  color: var(--gold);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.header-settings-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold-light);
+  box-shadow: 0 0 10px var(--gold-glow);
+  transform: rotate(90deg);
+}
+
+.header-settings-btn.active {
+  border-color: var(--gold);
+  color: var(--gold-light);
+  background: rgba(201, 168, 76, 0.1);
+}
+
+/* ── Pulse ── */
 .header-pulse {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  gap: 4px;
+  margin-left: var(--space-xs);
 }
 
 .pulse-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
 .pulse-dot.nominal { background: var(--green-ok); box-shadow: 0 0 8px var(--green-ok); }
+.pulse-dot.executing { background: var(--amber-warn); box-shadow: 0 0 8px var(--amber-warn); }
 .pulse-dot.warning { background: var(--amber-warn); box-shadow: 0 0 8px var(--amber-warn); }
 .pulse-dot.error { background: var(--red-alert); box-shadow: 0 0 8px var(--red-alert); }
 
-.header-time {
-  font-family: var(--font-mono);
+.pulse-label {
+  font-family: var(--font-display);
   font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.pulse-nominal { color: var(--green-ok); }
+.pulse-executing { color: var(--amber-warn); }
+.pulse-warning { color: var(--amber-warn); }
+.pulse-error { color: var(--red-alert); }
+
+/* ── Nav ── */
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.nav-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 5px 14px;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.nav-btn:hover {
+  border-color: var(--cyan-border);
+  color: var(--text-primary);
+  background: rgba(0, 229, 255, 0.05);
+}
+
+.nav-btn.active {
+  border-color: var(--cyan-glow);
+  color: var(--cyan-glow);
+  background: rgba(0, 229, 255, 0.08);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.1);
+}
+
+.nav-exit {
+  border-color: rgba(255, 82, 82, 0.2);
+  color: var(--red-alert);
+}
+
+.nav-exit:hover {
+  border-color: var(--red-alert);
+  background: var(--red-ghost);
 }

@@ -4,6 +4,7 @@ PID-based singleton + PulseServer TCP + sentinel subprocess management.
 Fixes V2: actually binds the singleton port, no sys.exit() in __init__.
 V3.1: PulseServer responds "PULSE_OK" for liveness probes.
 """
+
 import logging
 import os
 import socket

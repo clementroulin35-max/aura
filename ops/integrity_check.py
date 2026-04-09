@@ -4,6 +4,7 @@ SHA-256 hash protection on critical files.
 Detects unauthorized modifications between syncs.
 Ported from V1's tools/integrity_check.py.
 """
+
 import hashlib
 import json
 import logging
@@ -76,6 +77,7 @@ def check_integrity(update: bool = True) -> dict:
 
 if __name__ == "__main__":
     from core.ui import print_step
+
     r = check_integrity()
     drift_count = len(r["drifted"])
     missing_count = len(r["missing"])

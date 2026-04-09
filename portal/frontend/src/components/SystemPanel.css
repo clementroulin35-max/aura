@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   GSS ORION V3 — SystemPanel Component
-   Right sidebar: Pulse, Telemetry, Mission Results
+   GSS ORION V3.5 — System Panel (Supervisor)
    ═══════════════════════════════════════════════════ */
 
 .system-panel {
@@ -9,112 +8,193 @@
   gap: var(--space-md);
 }
 
-/* ── Pulse Card ── */
+/* ── Section Panels ── */
+.section-panel {
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  background: var(--hull-panel);
+  border: var(--border-thin);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: fade-in-up var(--duration-slow) var(--ease-smooth) both;
+}
+
+.section-panel:nth-child(2) { animation-delay: 100ms; }
+.section-panel:nth-child(3) { animation-delay: 200ms; }
+.section-panel:nth-child(4) { animation-delay: 300ms; }
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cyan-glow);
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+
+/* ── Pulse Ring ── */
 .pulse-card {
   text-align: center;
-  padding: var(--space-lg) var(--space-md);
 }
 
 .pulse-ring {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  margin: 0 auto var(--space-md);
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: var(--space-sm) auto;
   border: 2px solid;
-  position: relative;
+  transition: all var(--duration-normal) var(--ease-smooth);
 }
 
-.pulse-ring.nominal {
-  border-color: var(--green-ok);
-  box-shadow: 0 0 20px rgba(105, 240, 174, 0.3), inset 0 0 20px rgba(105, 240, 174, 0.1);
-  animation: border-flow 3s ease-in-out infinite;
-}
-
-.pulse-ring.warning {
-  border-color: var(--amber-warn);
-  box-shadow: 0 0 20px rgba(255, 171, 64, 0.3), inset 0 0 20px rgba(255, 171, 64, 0.1);
-}
-
-.pulse-ring.error {
-  border-color: var(--red-alert);
-  box-shadow: 0 0 20px rgba(255, 82, 82, 0.3), inset 0 0 20px rgba(255, 82, 82, 0.1);
-}
-
-.pulse-ring::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  border: 1px solid;
-  border-color: inherit;
-  opacity: 0.2;
-  animation: pulse-glow 3s ease-in-out infinite;
-}
+.pulse-ring.nominal { border-color: var(--green-ok); box-shadow: 0 0 20px rgba(105, 240, 174, 0.2); }
+.pulse-ring.executing { border-color: var(--amber-warn); animation: pulse-glow 1.5s infinite; }
+.pulse-ring.warning { border-color: var(--amber-warn); }
+.pulse-ring.error { border-color: var(--red-alert); }
 
 .pulse-ring-label {
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-  text-transform: uppercase;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
 }
 
 .pulse-ring-label.nominal { color: var(--green-ok); }
+.pulse-ring-label.executing { color: var(--amber-warn); }
 .pulse-ring-label.warning { color: var(--amber-warn); }
 .pulse-ring-label.error { color: var(--red-alert); }
 
-/* ── Teams visited ── */
-.teams-flow {
+/* ── Teams Pipeline ── */
+.teams-pipeline {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-  justify-content: center;
-  margin-top: var(--space-sm);
+  flex-direction: column;
+  gap: 6px;
 }
 
-.team-chip {
-  padding: 2px 10px;
-  border-radius: 100px;
+.team-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 4px var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.team-row.active {
+  background: rgba(255, 171, 64, 0.08);
+  border-left: 2px solid var(--amber-warn);
+}
+
+.team-row.done {
+  opacity: 0.6;
+}
+
+.team-indicator {
+  font-size: 0.7rem;
+  width: 16px;
+  text-align: center;
+}
+
+.team-row.active .team-indicator { color: var(--amber-warn); }
+.team-row.done .team-indicator { color: var(--green-ok); }
+.team-row:not(.done):not(.active) .team-indicator { color: var(--text-muted); }
+
+.team-name {
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: 600;
+  width: 90px;
+  color: var(--text-primary);
+}
+
+.team-agents {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.agent-chip {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  padding: 1px 6px;
+  border-radius: 100px;
   background: var(--cyan-ghost);
-  color: var(--cyan-glow);
-  border: 1px solid var(--cyan-border);
-  animation: fade-in-up var(--duration-fast) var(--ease-smooth) both;
+  color: var(--text-secondary);
+  border: 1px solid rgba(0, 229, 255, 0.1);
 }
 
-.team-chip:nth-child(2) { animation-delay: 50ms; }
-.team-chip:nth-child(3) { animation-delay: 100ms; }
-.team-chip:nth-child(4) { animation-delay: 150ms; }
-
-/* ── Progress bar ── */
-.progress-container {
-  margin-top: var(--space-sm);
+/* ── Metrics ── */
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.progress-bar-bg {
-  height: 4px;
-  background: var(--hull-elevated);
-  border-radius: 2px;
+.metric-row:last-child { border-bottom: none; }
+
+.metric-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.metric-value {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.metric-value.highlight { color: var(--cyan-glow); }
+
+/* ── Event Bus ── */
+.events-panel {
+  max-height: 200px;
   overflow: hidden;
 }
 
-.progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--cyan-dim), var(--cyan-glow));
-  border-radius: 2px;
-  transition: width var(--duration-normal) var(--ease-smooth);
-  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+.events-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.progress-label {
+.event-line {
   display: flex;
-  justify-content: space-between;
-  margin-top: var(--space-xs);
+  gap: var(--space-sm);
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-size: 0.6rem;
   color: var(--text-muted);
+}
+
+.event-actor {
+  color: var(--text-secondary);
+  min-width: 60px;
+}
+
+.event-msg {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

@@ -1,8 +1,11 @@
 {
   "version": "v3.0.0",
-  "last_session": null,
+  "last_session": "2026-04-09T05:49:12.664225",
   "pulse": "NOMINAL",
-  "health": {"build": "INIT", "sentinels": "OFFLINE"},
+  "health": {
+    "build": "SUCCESS",
+    "sentinels": "STANDBY"
+  },
   "last_task": null,
   "active_rex": []
 }

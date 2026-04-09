@@ -1,4 +1,5 @@
 """Tests for enhanced sentinels: git_drift, log_rotator, utils, resources."""
+
 import json
 from pathlib import Path
 from unittest.mock import patch
@@ -65,8 +66,10 @@ class TestLogRotator:
         logs_dir.mkdir()
         (logs_dir / "test.log").write_text("test log content")
 
-        with patch("core.sentinels.log_rotator.LOGS_DIR", logs_dir), \
-             patch("core.sentinels.log_rotator.ARCHIVE_DIR", logs_dir / "archive"):
+        with (
+            patch("core.sentinels.log_rotator.LOGS_DIR", logs_dir),
+            patch("core.sentinels.log_rotator.ARCHIVE_DIR", logs_dir / "archive"),
+        ):
             result = rotate_logs(max_age_hours=0)  # Force rotation
             assert isinstance(result, dict)
             assert "rotated" in result

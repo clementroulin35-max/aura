@@ -3,6 +3,7 @@ GSS Orion V3 — Version Bump.
 Auto-increments patch version in VERSION file.
 Runnable as `python -m ops.version_bump`.
 """
+
 from core.paths import ROOT
 from core.ui import print_step
 

@@ -2,6 +2,7 @@
 GSS Orion V3 — Rules Layer Sync.
 Validates that all YAML files in experts/rules/ are parsable.
 """
+
 import logging
 from pathlib import Path
 

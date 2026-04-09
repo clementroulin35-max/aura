@@ -5,6 +5,7 @@ Builds the LangGraph StateGraph and executes tasks.
 Architecture:
   START → supervisor → conditional_edges → team_nodes → supervisor → ... → FINISH
 """
+
 import argparse
 import logging
 
@@ -161,6 +162,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     from core.ui import print_banner, print_step
+
     print_banner("GSS ORION V3", "LangGraph Compiler")
     result = execute_graph(args.task)
     print_step("RESULT", f"Teams: {' → '.join(result['teams_visited'])}", "OK")

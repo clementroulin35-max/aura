@@ -4,6 +4,7 @@ Inverted JSON index for semantic search over brain/ and .agents/ files.
 No embeddings, no external deps — pure TF-IDF-like scoring.
 Ported from V1's tools/memory_rag.py.
 """
+
 import json
 import logging
 import re
@@ -104,12 +105,14 @@ def query(text: str, limit: int = 5) -> list[dict]:
     results = []
     for doc_id, score in sorted_results[:limit]:
         doc = index["docs"].get(doc_id, {})
-        results.append({
-            "path": doc.get("path", ""),
-            "title": doc.get("title", ""),
-            "score": round(score, 2),
-            "sovereign": doc.get("sovereign", False),
-        })
+        results.append(
+            {
+                "path": doc.get("path", ""),
+                "title": doc.get("title", ""),
+                "score": round(score, 2),
+                "sovereign": doc.get("sovereign", False),
+            }
+        )
     return results
 
 
@@ -132,5 +135,4 @@ if __name__ == "__main__":
             else:
                 print_step("RAG", f"No results for '{q}'", "WARN")
     else:
-        print_step("USAGE", "memory_rag.py [--index | --query \"your question\"]", "INFO")
-
+        print_step("USAGE", 'memory_rag.py [--index | --query "your question"]', "INFO")

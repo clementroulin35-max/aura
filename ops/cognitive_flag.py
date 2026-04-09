@@ -4,6 +4,7 @@ Analyzes bridge.json pending items and adaptive memory critical entries.
 Injects findings as new objectives in roadmap.yaml.
 Ported from V1's tools/cognitive_flag.py.
 """
+
 import json
 import logging
 
@@ -59,13 +60,15 @@ def inject_flags() -> int:
     existing_ids = {m.get("id") for m in milestones}
 
     if "CF" not in existing_ids:
-        milestones.append({
-            "id": "CF",
-            "name": "COGNITIVE_FLAGS",
-            "goal": "Auto-injected findings from bridge and memory.",
-            "status": "IN_PROGRESS",
-            "flags": pending,
-        })
+        milestones.append(
+            {
+                "id": "CF",
+                "name": "COGNITIVE_FLAGS",
+                "goal": "Auto-injected findings from bridge and memory.",
+                "status": "IN_PROGRESS",
+                "flags": pending,
+            }
+        )
     else:
         for m in milestones:
             if m.get("id") == "CF":
@@ -84,5 +87,6 @@ def inject_flags() -> int:
 
 if __name__ == "__main__":
     from core.ui import print_step
+
     count = inject_flags()
     print_step("FLAGS", f"{count} cognitive flags processed", "OK" if count else "SKIP")

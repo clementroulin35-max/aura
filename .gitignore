@@ -39,6 +39,7 @@ portal/frontend/dist/
 
 # Brain runtime artifacts
 brain/manifest.json
+brain/llm_config.json
 
 # SQLite
 *.sqlite

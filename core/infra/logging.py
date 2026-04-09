@@ -7,6 +7,7 @@ Evolutive hooks:
 - PILLARS dict can be extended for new packages (e.g. "plugins" → "plugins.log")
 - External log sinks (e.g. Loki) can be added as additional handlers
 """
+
 import logging
 import logging.handlers
 import sys
@@ -56,11 +57,7 @@ def setup_logging(name: str = "system", level: str = "INFO") -> Any:
         )
 
         formatter = structlog.stdlib.ProcessorFormatter(
-            processor=(
-                structlog.dev.ConsoleRenderer()
-                if sys.stderr.isatty()
-                else structlog.processors.JSONRenderer()
-            ),
+            processor=(structlog.dev.ConsoleRenderer() if sys.stderr.isatty() else structlog.processors.JSONRenderer()),
             foreign_pre_chain=processors,
         )
 

@@ -1,58 +1,40 @@
 skills:
   core:
     type: static
-    weight: 30
+    weight: 40
     description: Constitution, triangle de gouvernance.
-    score: 6
-    usage_count: 6
   governance:
     type: static
-    weight: 30
+    weight: 40
     description: Audit de conformité, REX.
-    score: 6
-    usage_count: 6
   critik:
     type: dynamic
-    weight: 30
+    weight: 40
     description: Évaluation d'impact architecture.
-    score: 6
-    usage_count: 6
   corrector:
     type: dynamic
-    weight: 30
+    weight: 40
     description: Implémentation corrective.
-    score: 6
-    usage_count: 6
   qualifier:
     type: dynamic
-    weight: 30
+    weight: 40
     description: Validation post-correction.
-    score: 6
-    usage_count: 6
   captain:
     type: static
-    weight: 30
+    weight: 40
     description: Supervision stratégique, roadmap.
-    score: 6
-    usage_count: 6
   brainstorming:
     type: dynamic
-    weight: 30
+    weight: 40
     description: Analyse exploratoire.
-    score: 6
-    usage_count: 6
   tester:
     type: dynamic
     weight: 30
     description: TDD, couverture.
-    score: 3
-    usage_count: 3
   task:
     type: dynamic
-    weight: 30
+    weight: 40
     description: Synchronisation roadmap.
-    score: 6
-    usage_count: 6
   design:
     type: static
     weight: 30

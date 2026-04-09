@@ -4,6 +4,7 @@ Monitors adaptive memory for ingestion thresholds.
 Signals alerts when pending entries exceed threshold.
 Ported from V1's engine/knowledge_sentinel.py.
 """
+
 import json
 import logging
 import time
@@ -113,4 +114,8 @@ if __name__ == "__main__":
     else:
         result = check_knowledge()
         signal_alert(result)
-        print_step("KNOWLEDGE", f"{result['status']} — {result['pending']} pending, {result['total']} total", "OK" if result["status"] == "OK" else "WARN")
+        print_step(
+            "KNOWLEDGE",
+            f"{result['status']} — {result['pending']} pending, {result['total']} total",
+            "OK" if result["status"] == "OK" else "WARN",
+        )

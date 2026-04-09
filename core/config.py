@@ -6,6 +6,7 @@ Evolutive hooks:
 - load_plugin_configs(root / "plugins") → future plugin system
 - config["extensions"] key reserved for plug-in modules
 """
+
 import json
 import logging
 from pathlib import Path
@@ -81,6 +82,7 @@ def load_full_config(root: Path | None = None) -> dict[str, Any]:
 
     # 5. Version
     from core.version import get_version
+
     config["version"] = get_version()
 
     # Evolutive: reserved key for future plug-ins

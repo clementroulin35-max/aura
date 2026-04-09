@@ -1,4 +1,25 @@
 {
-  "stats": {"total_entries": 0, "compactions": 0},
-  "entries": []
+  "stats": {
+    "total_entries": 1,
+    "compactions": 0
+  },
+  "entries": [
+    {
+      "id": "REX-MEM-001",
+      "timestamp": "2026-04-09T00:14:11.601004+00:00",
+      "category": "validation",
+      "learning": "Test entry from validate",
+      "resolution": "",
+      "tags": [],
+      "hit_count": 1,
+      "status": "pending"
+    }
+  ],
+  "version": "3.0.0",
+  "last_updated": "2026-04-09T00:14:11.601018+00:00",
+  "hot_paths": {
+    "most_edited_files": [],
+    "reinforced_links": []
+  },
+  "session_digest": ""
 }

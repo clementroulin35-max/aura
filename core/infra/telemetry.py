@@ -6,6 +6,7 @@ Evolutive hooks:
 - export_prometheus() → future Prometheus metrics endpoint
 - Snapshot can be persisted to logs/telemetry.json for historical analysis
 """
+
 import threading
 import time
 from typing import Any
@@ -62,9 +63,7 @@ class Telemetry:
                 "intelligence": self.metrics["intelligence"].copy(),
                 "errors": self.metrics["errors"].copy(),
                 "avg_latency": {
-                    ep: round(sum(durs) / len(durs), 4)
-                    for ep, durs in self.metrics["latency"].items()
-                    if durs
+                    ep: round(sum(durs) / len(durs), 4) for ep, durs in self.metrics["latency"].items() if durs
                 },
             }
 

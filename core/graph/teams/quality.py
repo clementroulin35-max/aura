@@ -3,6 +3,7 @@ GSS Orion V3 — QUALITY Team Node.
 Pipeline: critik (red-team) → corrector (blue-team) → qualifier (judge).
 Critik does real scans. Corrector + Qualifier use LLM.
 """
+
 import logging
 import re
 from pathlib import Path
@@ -63,7 +64,12 @@ def _critik_stage(root: Path) -> dict:
     threats["MENACE_DETTE"] = import_violations if import_violations else "Clean"
 
     has_threats = any(v not in ("Clean", "None detected") for v in threats.values())
-    return {"agent": "critik", "action": "AUDIT", "threats": threats, "verdict": "ISSUES_FOUND" if has_threats else "CLEAN"}
+    return {
+        "agent": "critik",
+        "action": "AUDIT",
+        "threats": threats,
+        "verdict": "ISSUES_FOUND" if has_threats else "CLEAN",
+    }
 
 
 def _corrector_stage(critik_result: dict) -> dict:
@@ -83,7 +89,12 @@ def _corrector_stage(critik_result: dict) -> dict:
         system_prompt=skill,
         user_message=f"Critik found these issues:\n{chr(10).join(summary)}\nPropose max 5 actionable fixes.",
     )
-    return {"agent": "corrector", "action": "PATCH", "proposals": resp.get("content", ""), "critique_ref": critik_result["verdict"]}
+    return {
+        "agent": "corrector",
+        "action": "PATCH",
+        "proposals": resp.get("content", ""),
+        "critique_ref": critik_result["verdict"],
+    }
 
 
 def _qualifier_stage(critik_result: dict, corrector_result: dict) -> dict:
@@ -91,7 +102,12 @@ def _qualifier_stage(critik_result: dict, corrector_result: dict) -> dict:
     skill = load_skill("qualifier")
 
     if corrector_result["action"] == "SKIP":
-        return {"agent": "qualifier", "action": "STAMP", "verdict": "CERTIFIED", "reason": "Codebase clean — no corrections needed"}
+        return {
+            "agent": "qualifier",
+            "action": "STAMP",
+            "verdict": "CERTIFIED",
+            "reason": "Codebase clean — no corrections needed",
+        }
 
     resp = call_llm(
         system_prompt=skill,
@@ -115,7 +131,9 @@ def quality_node(state: dict) -> dict:
     }
     return {
         "results": [result],
-        "messages": [SystemMessage(
-            content=f"[QUALITY] critik({critik['verdict']}) → corrector → qualifier({qualifier['verdict']})"
-        )],
+        "messages": [
+            SystemMessage(
+                content=f"[QUALITY] critik({critik['verdict']}) → corrector → qualifier({qualifier['verdict']})"
+            )
+        ],
     }

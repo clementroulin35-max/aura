@@ -2,6 +2,7 @@
 Pytest global configuration for GSS Orion V3.
 Provides fixtures for LLM mocking and temporary project structures.
 """
+
 import json
 import sys
 from pathlib import Path
@@ -18,16 +19,22 @@ if str(ROOT) not in sys.path:
 @pytest.fixture(autouse=True)
 def mock_llm():
     """Globally mock LLM calls to prevent real API calls in tests."""
+    mock_response = {
+        "content": "[TEST] Mock response for testing.",
+        "model": "test-mock",
+        "source": "simulation",
+    }
     try:
-        with patch("core.llm.call_llm") as mock:
-            mock.return_value = {
-                "content": "[TEST] Mock response for testing.",
-                "model": "test-mock",
-                "source": "simulation",
-            }
+        with (
+            patch("core.llm.call_llm", return_value=mock_response) as mock,
+            patch("core.llm._detect_ollama", return_value=False),
+            patch("core.llm._has_cloud_keys", return_value=False),
+            patch("core.graph.teams.quality.call_llm", return_value=mock_response),
+            patch("core.graph.teams.strategy.call_llm", return_value=mock_response),
+            patch("core.graph.teams.dev.call_llm", return_value=mock_response),
+        ):
             yield mock
     except (AttributeError, ModuleNotFoundError):
-        # core.llm may not exist yet (Wave 1). Yield None.
         yield None
 
 
@@ -53,6 +60,10 @@ def tmp_project(tmp_path: Path) -> Path:
     )
     (brain / "memory.json").write_text(
         json.dumps({"stats": {"total_entries": 0, "compactions": 0}, "entries": []}),
+        encoding="utf-8",
+    )
+    (brain / "scores.json").write_text(
+        json.dumps({"metadata": {}, "scores": {"core": {"score": 0, "usage_count": 0, "weight": 30}}}),
         encoding="utf-8",
     )
 

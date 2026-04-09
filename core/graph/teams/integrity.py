@@ -3,6 +3,7 @@ GSS Orion V3 — INTEGRITY Team Node.
 Pipeline: governance (R01-R06 scan) → core (structural preflight).
 No LLM calls — pure filesystem validation.
 """
+
 import json
 import logging
 import re
@@ -16,10 +17,15 @@ from core.paths import ROOT
 logger = logging.getLogger(__name__)
 
 REQUIRED_FILES = [
-    "VERSION", "Makefile", "pyproject.toml",
-    "brain/principles.json", "brain/personality.json",
-    "brain/bridge.json", "brain/memory.json",
-    "experts/registry.yaml", "experts/rules/routing.yaml",
+    "VERSION",
+    "Makefile",
+    "pyproject.toml",
+    "brain/principles.json",
+    "brain/personality.json",
+    "brain/bridge.json",
+    "brain/memory.json",
+    "experts/registry.yaml",
+    "experts/rules/routing.yaml",
     "experts/rules/roadmap.yaml",
 ]
 SKIP_DIRS = {"venv", "__pycache__", "node_modules", ".git", ".venv"}
@@ -31,9 +37,12 @@ def _governance_stage(root: Path) -> dict:
     checks = {}
 
     # R01: SRP
-    over = [p for p in root.rglob("*.py")
-            if not any(s in p.parts for s in SKIP_DIRS)
-            and len(p.read_text(encoding="utf-8", errors="ignore").splitlines()) > 200]
+    over = [
+        p
+        for p in root.rglob("*.py")
+        if not any(s in p.parts for s in SKIP_DIRS)
+        and len(p.read_text(encoding="utf-8", errors="ignore").splitlines()) > 200
+    ]
     checks["R01_SRP"] = "FAIL" if over else "PASS"
 
     # R03: bare except
@@ -85,7 +94,13 @@ def _core_stage(root: Path) -> dict:
         failures += 1
 
     verdict = "READY" if failures == 0 else f"FAIL({failures})"
-    return {"agent": "core", "action": "STRUCTURAL_CHECK", "checks": file_checks, "verdict": verdict, "failures": failures}
+    return {
+        "agent": "core",
+        "action": "STRUCTURAL_CHECK",
+        "checks": file_checks,
+        "verdict": verdict,
+        "failures": failures,
+    }
 
 
 def integrity_node(state: dict) -> dict:
@@ -103,7 +118,9 @@ def integrity_node(state: dict) -> dict:
 
     return {
         "results": [result],
-        "messages": [SystemMessage(
-            content=f"[INTEGRITY] Pipeline: governance({gov['compliance']}) → core({core['verdict']}). Final: {final_verdict}"
-        )],
+        "messages": [
+            SystemMessage(
+                content=f"[INTEGRITY] Pipeline: governance({gov['compliance']}) → core({core['verdict']}). Final: {final_verdict}"
+            )
+        ],
     }

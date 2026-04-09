@@ -3,6 +3,7 @@ GSS Orion V3 — STRATEGY Team Node.
 Pipeline: captain (direction) → task (decompose) → brainstorming (explore).
 Captain reads roadmap. Task/Brainstorming use LLM.
 """
+
 import logging
 
 import yaml
@@ -33,9 +34,11 @@ def _captain_stage(task: str) -> dict:
     progress = f"{done}/{total}" if total > 0 else "N/A"
 
     return {
-        "agent": "captain", "action": "ASSESS",
+        "agent": "captain",
+        "action": "ASSESS",
         "assessment": f"Strategic analysis for: '{task[:80]}'",
-        "roadmap_phases": phases, "progress": progress,
+        "roadmap_phases": phases,
+        "progress": progress,
         "recommendation": "Continue current wave" if done == total else "Focus on incomplete milestones",
     }
 
@@ -48,7 +51,8 @@ def _task_stage(task: str, captain_result: dict) -> dict:
         user_message=f"Captain assessment: {captain_result['assessment']}\nProgress: {captain_result['progress']}\nDecompose this task into 3-5 subtasks:\n{task}",
     )
     return {
-        "agent": "task", "action": "DECOMPOSE",
+        "agent": "task",
+        "action": "DECOMPOSE",
         "subtasks": resp.get("content", "No subtasks generated"),
         "guidance": captain_result["recommendation"],
     }
@@ -62,7 +66,8 @@ def _brainstorming_stage(task: str, task_result: dict) -> dict:
         user_message=f"Task: {task}\nSubtasks: {task_result['subtasks']}\nPropose 2-3 alternatives and identify risks.",
     )
     return {
-        "agent": "brainstorming", "action": "EXPLORE",
+        "agent": "brainstorming",
+        "action": "EXPLORE",
         "alternatives": resp.get("content", ""),
     }
 
@@ -83,7 +88,9 @@ def strategy_node(state: dict) -> dict:
     }
     return {
         "results": [result],
-        "messages": [SystemMessage(
-            content=f"[STRATEGY] captain(progress:{captain['progress']}) → task → brainstorming. Direction established."
-        )],
+        "messages": [
+            SystemMessage(
+                content=f"[STRATEGY] captain(progress:{captain['progress']}) → task → brainstorming. Direction established."
+            )
+        ],
     }

@@ -2,6 +2,7 @@
 GSS Orion V3 — SRP Layer Sync.
 Scans all Python files for SRP compliance (Rule R01: < 200 lines).
 """
+
 import logging
 from pathlib import Path
 
@@ -24,12 +25,14 @@ def sync_srp_layer(root: Path | None = None) -> list[dict]:
         try:
             lines = py_file.read_text(encoding="utf-8").splitlines()
             if len(lines) > MAX_LINES:
-                violations.append({
-                    "file": str(py_file.relative_to(r)),
-                    "lines": len(lines),
-                    "over_by": len(lines) - MAX_LINES,
-                    "status": "VIOLATION",
-                })
+                violations.append(
+                    {
+                        "file": str(py_file.relative_to(r)),
+                        "lines": len(lines),
+                        "over_by": len(lines) - MAX_LINES,
+                        "status": "VIOLATION",
+                    }
+                )
         except Exception as e:
             logger.warning("SRP scan error on %s: %s", py_file, e)
 

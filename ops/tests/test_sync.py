@@ -1,4 +1,5 @@
 """Tests for sync pipeline and infra modules."""
+
 import time
 from pathlib import Path
 

@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "last_updated": "2026-04-09T12:31:58.366270+00:00"
+  },
+  "scores": {
+    "governance": {
+      "score": 13,
+      "usage_count": 13,
+      "weight": 40
+    },
+    "corrector": {
+      "score": 12,
+      "usage_count": 12,
+      "weight": 40
+    },
+    "qualifier": {
+      "score": 14,
+      "usage_count": 14,
+      "weight": 40
+    },
+    "tester": {
+      "score": 8,
+      "usage_count": 8
+    },
+    "critik": {
+      "score": 12,
+      "usage_count": 12,
+      "weight": 40
+    },
+    "core": {
+      "score": 14,
+      "usage_count": 14,
+      "weight": 40
+    },
+    "captain": {
+      "score": 14,
+      "usage_count": 14,
+      "weight": 40
+    },
+    "task": {
+      "score": 10,
+      "usage_count": 10,
+      "weight": 40
+    },
+    "brainstorming": {
+      "score": 12,
+      "usage_count": 12,
+      "weight": 40
+    }
+  }
+}

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* ═══════════════════════════════════════════════════
    GSS ORION V3 — Atlantis Design System
@@ -13,6 +13,8 @@
   --hull-mid: #151b25;
   --hull-surface: #1c2333;
   --hull-elevated: #242d3d;
+  --hull-panel: rgba(10, 12, 16, 0.75);
+  --hull-panel-solid: rgba(10, 12, 16, 0.92);
 
   /* Accent palette */
   --cyan-glow: #00e5ff;
@@ -26,6 +28,9 @@
   --green-ok: #69f0ae;
   --green-ghost: rgba(105, 240, 174, 0.08);
   --purple-accent: #b388ff;
+  --gold: #c9a84c;
+  --gold-light: #e5c76b;
+  --gold-glow: rgba(201, 168, 76, 0.4);
 
   /* Text */
   --text-primary: #e6edf3;
@@ -45,6 +50,7 @@
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
   --font-sans: 'Inter', 'SF Pro', system-ui, -apple-system, sans-serif;
   --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-title: 'Cinzel', 'Georgia', serif;
   --font-size-xs: 0.7rem;
   --font-size-sm: 0.8rem;
   --font-size-base: 0.9rem;
@@ -144,11 +150,12 @@ body {
 
 /* ── Utility: Glass Panel ── */
 .glass-panel {
-  background: linear-gradient(135deg, rgba(13, 17, 23, 0.9), rgba(28, 35, 51, 0.7));
+  background: var(--hull-panel);
   border: var(--border-thin);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(12px);
-  box-shadow: var(--shadow-glow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-glow), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 /* ── Utility: Scanline overlay ── */

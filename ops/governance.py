@@ -2,6 +2,7 @@
 GSS Orion V3 — Governance Checker.
 Validates rules R01-R10 compliance. Runnable as `python -m ops.governance`.
 """
+
 import logging
 import re
 from pathlib import Path

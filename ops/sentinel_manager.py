@@ -3,6 +3,7 @@ GSS Orion V3 — Sentinel Manager.
 Lifecycle management: startup, stop, verify, purge.
 Ported from V1's tools/sentinel_manager.py with V3 clean architecture.
 """
+
 import contextlib
 import logging
 import os
@@ -116,6 +117,7 @@ def unlock() -> None:
 
 if __name__ == "__main__":
     from core.ui import print_step
+
     if len(sys.argv) < 2:
         print_step("USAGE", "sentinel_manager.py [startup|stop|verify|lock|unlock]", "INFO")
         sys.exit(1)

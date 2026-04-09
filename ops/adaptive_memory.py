@@ -3,6 +3,7 @@ GSS Orion V3 — Adaptive Memory Manager.
 CRUD operations on brain/memory.json.
 Ported from V1's tools/adaptive_memory.py with V3 architecture.
 """
+
 import contextlib
 import copy
 import json
@@ -131,7 +132,9 @@ def status() -> dict:
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] == "--status":
         s = status()
-        print_step("MEMORY", f"{s['total']} entries ({s['active']} active, {s['pending']} pending) — {s['status']}", "OK")
+        print_step(
+            "MEMORY", f"{s['total']} entries ({s['active']} active, {s['pending']} pending) — {s['status']}", "OK"
+        )
     elif sys.argv[1] == "--log" and len(sys.argv) >= 4:
         entry_id = log_entry(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "")
         print_step("MEMORY", f"Logged: {entry_id}", "OK")

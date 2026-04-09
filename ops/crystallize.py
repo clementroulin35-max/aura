@@ -4,6 +4,7 @@ Persists session state: bridge update, atlas snapshot, memory digest, cognitive 
 Combines V1's multi-step crystallization with V3 clean architecture.
 Runnable as `python -m ops.crystallize`.
 """
+
 import json
 import logging
 from datetime import datetime
@@ -37,6 +38,7 @@ def _persist_memory() -> None:
     """Persist session pills from brain/memory.json learnings."""
     try:
         from ops.adaptive_memory import status as mem_status
+
         s = mem_status()
         print_step("MEMORY", f"{s['total']} entries ({s['active']} active, {s['pending']} pending)", "OK")
         if s["status"] == "INGESTION_REQUIRED":
@@ -49,6 +51,7 @@ def _inject_cognitive_flags() -> None:
     """Auto-inject pending findings into roadmap."""
     try:
         from ops.cognitive_flag import inject_flags
+
         count = inject_flags()
         if count > 0:
             print_step("FLAGS", f"{count} cognitive flags injected into roadmap", "OK")
@@ -60,6 +63,7 @@ def _run_integrity() -> None:
     """Update integrity hashes for protected files."""
     try:
         from ops.integrity_check import check_integrity
+
         report = check_integrity()
         drift = len(report.get("drifted", []))
         print_step("INTEGRITY", f"Checked {report['checked']} files. Drift: {drift}.", "OK" if drift == 0 else "WARN")

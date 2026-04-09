@@ -2,6 +2,7 @@
 GSS Orion V3 — Version Reader.
 Reads from VERSION file only. Rule R02: single source of version.
 """
+
 from core.paths import ROOT
 
 

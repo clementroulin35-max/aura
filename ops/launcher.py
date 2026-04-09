@@ -3,6 +3,7 @@ GSS Orion V3 — Portal Launcher.
 Orchestrates Backend (FastAPI) + Frontend (Vite) in parallel.
 Includes sentinel lifecycle management.
 """
+
 import logging
 import os
 import signal
@@ -21,9 +22,7 @@ FRONTEND_PORT = 5173
 def _kill_port(port: int) -> None:
     """Kill process on a given port (Windows)."""
     try:
-        result = subprocess.run(
-            ["netstat", "-ano"], capture_output=True, text=True, timeout=5
-        )
+        result = subprocess.run(["netstat", "-ano"], capture_output=True, text=True, timeout=5)
         for line in result.stdout.splitlines():
             if f":{port}" in line and "LISTENING" in line:
                 pid = line.strip().split()[-1]
@@ -69,7 +68,17 @@ def launch_portal() -> None:
 
     python = sys.executable
     backend = subprocess.Popen(
-        [python, "-m", "uvicorn", "portal.backend.app:app", "--host", "0.0.0.0", "--port", str(BACKEND_PORT), "--reload"],
+        [
+            python,
+            "-m",
+            "uvicorn",
+            "portal.backend.app:app",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            str(BACKEND_PORT),
+            "--reload",
+        ],
         cwd=str(ROOT),
     )
 

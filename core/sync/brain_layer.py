@@ -2,6 +2,7 @@
 GSS Orion V3 — Brain Layer Sync.
 Validates that all brain/*.json files are parsable.
 """
+
 import json
 import logging
 from pathlib import Path
