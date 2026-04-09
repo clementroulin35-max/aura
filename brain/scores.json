@@ -1,51 +1,51 @@
 {
   "metadata": {
-    "last_updated": "2026-04-09T15:53:17.142407+00:00"
+    "last_updated": "2026-04-09T15:56:05.759889+00:00"
   },
   "scores": {
     "critik": {
-      "score": 17,
-      "usage_count": 17,
+      "score": 19,
+      "usage_count": 19,
       "weight": 40
     },
     "core": {
-      "score": 18,
-      "usage_count": 18,
-      "weight": 40
+      "score": 20,
+      "usage_count": 20,
+      "weight": 60
     },
     "corrector": {
-      "score": 16,
-      "usage_count": 16,
+      "score": 18,
+      "usage_count": 18,
       "weight": 40
     },
     "qualifier": {
-      "score": 17,
-      "usage_count": 17,
+      "score": 19,
+      "usage_count": 19,
       "weight": 40
     },
     "captain": {
-      "score": 17,
-      "usage_count": 17,
+      "score": 19,
+      "usage_count": 19,
       "weight": 40
     },
     "task": {
-      "score": 17,
-      "usage_count": 17,
+      "score": 19,
+      "usage_count": 19,
       "weight": 40
     },
     "brainstorming": {
+      "score": 20,
+      "usage_count": 20,
+      "weight": 60
+    },
+    "governance": {
       "score": 18,
       "usage_count": 18,
       "weight": 40
     },
-    "governance": {
-      "score": 16,
-      "usage_count": 16,
-      "weight": 40
-    },
     "tester": {
-      "score": 7,
-      "usage_count": 7
+      "score": 8,
+      "usage_count": 8
     }
   }
 }

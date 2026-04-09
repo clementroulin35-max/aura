@@ -93,8 +93,12 @@ def validate_push():
 
     # 3. HIGH tier branch check
     if mode == "high" and seal == "high":
+        if branch == "flash":
+            # HIGH can sync flash (administrative: e.g. make flash-sync from high branch)
+            print_step("GUARD", "HIGH tier on 'flash' — administrative sync authorized.", "OK")
+            return True
         if branch not in ALLOWED_BRANCHES["high"]:
-            print_step("GUARD", f"HIGH tier on unexpected branch '{branch}'. Expected: high or main.", "WARN")
+            print_step("GUARD", f"HIGH tier on unexpected branch '{branch}'. Expected: high, main, or flash.", "WARN")
             return False
         print_step("GUARD", f"Sovereignty Valid: HIGH on '{branch}'. Production access granted.", "OK")
         return True

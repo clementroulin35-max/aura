@@ -48,3 +48,4 @@ brain/llm_config.json
 # Misc
 tmp/
 *.bak
+.coverage
