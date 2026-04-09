@@ -9,6 +9,7 @@ VERSION := $(shell type VERSION 2>NUL || echo v0.0.0)
 
 .PHONY: test lint sync audit
 .PHONY: boot build exit crystallize shadow-sync flash-sync identity-seal
+.PHONY: promote llm-align
 .PHONY: portal graph status clean validate
 .PHONY: sentinels-start sentinels-stop sentinels-verify
 .PHONY: memory-status memory-log memory-compact memory-approve
@@ -23,7 +24,7 @@ help: ## Show available commands
 	@echo   GSS ORION V3 [$(VERSION)]
 	@echo   ════════════════════════════════════════
 	@echo ""
-	@echo   [SESSION]  boot / build / exit / flash-sync / identity-seal
+	@echo   [SESSION]  boot / build / exit / flash-sync / identity-seal / promote
 	@echo   [CORE]     install / test / lint / sync / audit
 	@echo   [PORTAL]   portal / graph TASK=...
 	@echo   [SENTINEL] sentinels-start / sentinels-stop / sentinels-verify
@@ -32,7 +33,7 @@ help: ## Show available commands
 	@echo   [INTEL]    leaderboard / knowledge
 	@echo   [MAINT]    crystallize / shadow-sync / integrity / check-flags
 	@echo   [STATUS]   status / clean / validate / help
-	@echo   [LLM]      llm-switch / llm-status
+	@echo   [LLM]      llm-align MODE=.. MODEL=.. / llm-switch / llm-status
 	@echo ""
 
 # ══════════════════════════════════════════════════
@@ -44,7 +45,7 @@ boot: identity-seal sentinels-start sync status ## 🚀 BOOT: Identity → Senti
 	@echo   == BOOT COMPLETE — $(VERSION) ==
 	@echo ""
 
-build: ## 🛡️ BUILD: guard → lint → test → sync → audit → crystallize → commit → push
+build: ## 🛡️ BUILD: guard → lint → test → sync → audit → crystallize → commit → push → promote
 	$(PYTHON) -m ops.sovereign_guard
 	$(MAKE) lint
 	$(MAKE) test
@@ -55,9 +56,13 @@ build: ## 🛡️ BUILD: guard → lint → test → sync → audit → crystall
 	git add -A
 	git commit -m "build(v3): Orion $(VERSION) [SOVEREIGN]" || echo Nothing to commit
 	git push origin $(shell git branch --show-current)
+	$(PYTHON) -m ops.promote
 	@echo ""
 	@echo   == BUILD COMPLETE — $(VERSION) ==
 	@echo ""
+
+promote: ## 🚀 PROMOTE: push high → main (HIGH mode only)
+	$(PYTHON) -m ops.promote
 
 flash-sync: ## 🔄 FLASH-SYNC: Rebase flash sur main (safe: stash → rebase → stash pop)
 	-git stash
@@ -72,11 +77,12 @@ exit: crystallize sentinels-stop ## 🚪 EXIT: Crystallize → Shutdown
 	@echo   == SESSION CLOSED — $(VERSION) ==
 	@echo ""
 
-shadow-sync: ## 📸 SHADOW-SYNC: Git snapshot (local commit)
+shadow-sync: ## 📸 SHADOW-SYNC: commit + push to origin/<branch>
 	$(PYTHON) -m ops.integrity_check
 	git add -A
 	-git commit -m "chore(shadow): GSS snapshot $(VERSION)" || echo Nothing to commit
-	@echo   Shadow sync OK (local commit).
+	git push origin $(shell git branch --show-current)
+	@echo   Shadow sync OK + pushed.
 
 # ══════════════════════════════════════════════════
 # 🔧  CORE OPERATIONS
@@ -160,10 +166,13 @@ leaderboard: ## Agent score/weight rankings
 knowledge: ## Knowledge sentinel one-shot check
 	$(PYTHON) -m core.sentinels.knowledge
 
-llm-switch: ## Toggle sovereignty mode (fast <-> high)
+llm-align: ## 🎯 Aligner mode ET modèle (MODE=fast|high MODEL=nom-exact)
+	$(PYTHON) -m ops.llm_tool --align "$(MODE)" "$(MODEL)"
+
+llm-switch: ## Toggle sovereignty mode fast ↔ high (legacy: préférer llm-align)
 	$(PYTHON) -m ops.llm_tool --toggle
 
-llm-status: ## Show current sovereignty status
+llm-status: ## Afficher le mode, modèle et diagnostic de cohérence
 	$(PYTHON) -m ops.llm_tool --status
 
 identity-seal: ## 🔏 Sceau d'identité auto depuis brain/llm_config.json
