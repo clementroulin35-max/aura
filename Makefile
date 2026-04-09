@@ -8,7 +8,7 @@ PYTHON = set PYTHONUTF8=1&& .\venv\Scripts\python.exe
 VERSION := $(shell type VERSION 2>NUL || echo v0.0.0)
 
 .PHONY: test lint sync audit
-.PHONY: boot build exit crystallize shadow-sync
+.PHONY: boot build exit crystallize shadow-sync flash-sync
 .PHONY: portal graph status clean validate
 .PHONY: sentinels-start sentinels-stop sentinels-verify
 .PHONY: memory-status memory-log memory-compact memory-approve
@@ -23,7 +23,7 @@ help: ## Show available commands
 	@echo   GSS ORION V3 [$(VERSION)]
 	@echo   ════════════════════════════════════════
 	@echo ""
-	@echo   [SESSION]  boot / build / exit
+	@echo   [SESSION]  boot / build / exit / flash-sync
 	@echo   [CORE]     install / test / lint / sync / audit
 	@echo   [PORTAL]   portal / graph TASK=...
 	@echo   [SENTINEL] sentinels-start / sentinels-stop / sentinels-verify
@@ -32,7 +32,7 @@ help: ## Show available commands
 	@echo   [INTEL]    leaderboard / knowledge
 	@echo   [MAINT]    crystallize / shadow-sync / integrity / check-flags
 	@echo   [STATUS]   status / clean / validate / help
-	@echo   [LLM]      llm-switch / llm-status
+	@echo   [LLM]      llm-switch / llm-status / identity-seal
 	@echo ""
 
 # ══════════════════════════════════════════════════
@@ -44,8 +44,11 @@ boot: sentinels-start sync status ## 🚀 BOOT: Sentinels → Sync → Status
 	@echo   == BOOT COMPLETE — $(VERSION) ==
 	@echo ""
 
-build: lint test sync ## 🛡️ BUILD: lint → test → sync → audit → crystallize → commit
+build: ## 🛡️ BUILD: guard → lint → test → sync → audit → crystallize → commit
 	$(PYTHON) -m ops.sovereign_guard
+	$(MAKE) lint
+	$(MAKE) test
+	$(MAKE) sync
 	$(PYTHON) -m ops.governance
 	$(PYTHON) -m ops.version_bump
 	$(PYTHON) -m ops.crystallize
@@ -54,6 +57,12 @@ build: lint test sync ## 🛡️ BUILD: lint → test → sync → audit → cry
 	@echo ""
 	@echo   == BUILD COMPLETE — $(VERSION) ==
 	@echo ""
+
+flash-sync: ## 🔄 FLASH-SYNC: Pull latest main into flash (before starting work)
+	git checkout flash
+	git pull origin main
+	@echo   Flash branch updated from main.
+
 
 exit: crystallize sentinels-stop ## 🚪 EXIT: Crystallize → Shutdown
 	@echo ""

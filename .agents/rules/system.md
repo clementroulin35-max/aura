@@ -225,6 +225,7 @@ Knowledge Sentinel
 
 **Operational Rules:**
 1. **Self-Alignment**: I (the Agent) MUST autonomously sync my work branch with my active LLM tier.
-2. **Flash Safeguard**: `make build` is HARD-BLOCKED from pushing to `main` if the active mode is `FAST`.
-3. **Handoff**: Any work promoted from `flash` to `main` MUST be audited and validated on the `high` branch by a `HIGH` tier LLM.
+2. **Identity Seal**: Before any `make build`, I MUST run `python -m ops.identity_seal` to certify my nature.
+3. **Flash Safeguard**: `make build` is HARD-BLOCKED from pushing to `main` if the active mode is `FAST` or if the Seal does not match.
+4. **Handoff**: Any work promoted from `flash` to `main` MUST be audited and validated on the `high` branch by a `HIGH` tier LLM.
 

@@ -118,6 +118,7 @@ make portal
 | R08 | Structured logging (`structlog`) — no `print()` except `ui.py` | R10 grep |
 | R09 | No singletons (`__new__`) — module-level instances | Pattern check |
 | R10 | `print()` only in `core/ui.py` | Governance audit |
+| R11 | Sovereignty — Model/Branch alignment | `sovereign_guard` check |
 
 ## Stack
 
@@ -125,14 +126,14 @@ make portal
 - **React** 19 · **Vite** 8 · **Framer Motion** · **Vanilla CSS**
 - **Local LLM**: Ollama (auto-detected) | **Cloud**: Gemini, OpenAI, Claude
 
-## All Commands (32)
+## All Commands (34)
 
 ### Session Protocol
 
 | Command | Description |
 |:--------|:------------|
 | `make boot` | 🚀 Preflight: sentinels → sync → status |
-| `make build` | 🛡️ Atomic: lint → test → sync → audit → bump → crystallize → commit |
+| `make build` | 🛡️ Atomic: guard → lint → test → sync → audit → bump → crystallize → commit |
 | `make exit` | 🚪 Crystallize → shutdown sentinels |
 | `make shadow-sync` | 📸 Git snapshot (local commit with integrity check) |
 
@@ -144,7 +145,17 @@ make portal
 | `make test` | Run pytest with coverage (`ops/tests/`) |
 | `make lint` | Run ruff linter + formatter (`core/` + `ops/`) |
 | `make sync` | Sync pipeline: brain → rules → SRP → manifest |
-| `make audit` | Governance compliance check (R01-R10) |
+| `make audit` | Governance compliance check (R01-R11) |
+
+### LLM Sovereignty
+
+| Command | Description |
+|:--------|:------------|
+| `make llm-status` | Show current sovereignty mode and identity seal status |
+| `make llm-switch` | Toggle between FAST (Gemini) and HIGH (Claude) modes |
+
+### Portal & Graph
+... [rest of the tables remains same]
 
 ### Portal & Graph
 
