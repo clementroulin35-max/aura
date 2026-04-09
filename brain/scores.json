@@ -1,52 +1,47 @@
 {
   "metadata": {
-    "last_updated": "2026-04-09T13:53:11.385598+00:00"
+    "last_updated": "2026-04-09T14:05:24.728054+00:00"
   },
   "scores": {
-    "governance": {
-      "score": 19,
-      "usage_count": 19,
-      "weight": 40
-    },
-    "corrector": {
-      "score": 18,
-      "usage_count": 18,
-      "weight": 40
-    },
-    "qualifier": {
-      "score": 20,
-      "usage_count": 20,
-      "weight": 60
-    },
-    "tester": {
-      "score": 10,
-      "usage_count": 10,
-      "weight": 40
-    },
     "critik": {
-      "score": 18,
-      "usage_count": 18,
-      "weight": 40
+      "score": 1,
+      "usage_count": 1,
+      "weight": 30
     },
     "core": {
-      "score": 19,
-      "usage_count": 19,
-      "weight": 40
+      "score": 2,
+      "usage_count": 2,
+      "weight": 30
+    },
+    "corrector": {
+      "score": 1,
+      "usage_count": 1,
+      "weight": 30
+    },
+    "qualifier": {
+      "score": 1,
+      "usage_count": 1,
+      "weight": 30
     },
     "captain": {
-      "score": 20,
-      "usage_count": 20,
-      "weight": 60
+      "score": 1,
+      "usage_count": 1,
+      "weight": 30
     },
     "task": {
-      "score": 15,
-      "usage_count": 15,
-      "weight": 40
+      "score": 1,
+      "usage_count": 1,
+      "weight": 30
     },
     "brainstorming": {
-      "score": 18,
-      "usage_count": 18,
-      "weight": 40
+      "score": 1,
+      "usage_count": 1,
+      "weight": 30
+    },
+    "governance": {
+      "score": 1,
+      "usage_count": 1,
+      "weight": 30
     }
   }
 }
