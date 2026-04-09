@@ -1,51 +1,51 @@
 {
   "metadata": {
-    "last_updated": "2026-04-09T15:56:05.759889+00:00"
+    "last_updated": "2026-04-09T16:15:33.040933+00:00"
   },
   "scores": {
     "critik": {
-      "score": 19,
-      "usage_count": 19,
-      "weight": 40
+      "score": 21,
+      "usage_count": 21,
+      "weight": 60
     },
     "core": {
-      "score": 20,
-      "usage_count": 20,
+      "score": 22,
+      "usage_count": 22,
       "weight": 60
     },
     "corrector": {
-      "score": 18,
-      "usage_count": 18,
-      "weight": 40
-    },
-    "qualifier": {
-      "score": 19,
-      "usage_count": 19,
-      "weight": 40
-    },
-    "captain": {
-      "score": 19,
-      "usage_count": 19,
-      "weight": 40
-    },
-    "task": {
-      "score": 19,
-      "usage_count": 19,
-      "weight": 40
-    },
-    "brainstorming": {
       "score": 20,
       "usage_count": 20,
       "weight": 60
     },
+    "qualifier": {
+      "score": 21,
+      "usage_count": 21,
+      "weight": 60
+    },
+    "captain": {
+      "score": 21,
+      "usage_count": 21,
+      "weight": 60
+    },
+    "task": {
+      "score": 21,
+      "usage_count": 21,
+      "weight": 60
+    },
+    "brainstorming": {
+      "score": 22,
+      "usage_count": 22,
+      "weight": 60
+    },
     "governance": {
-      "score": 18,
-      "usage_count": 18,
-      "weight": 40
+      "score": 20,
+      "usage_count": 20,
+      "weight": 60
     },
     "tester": {
-      "score": 8,
-      "usage_count": 8
+      "score": 9,
+      "usage_count": 9
     }
   }
 }

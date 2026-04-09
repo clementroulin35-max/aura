@@ -1,282 +1,94 @@
 ---
 trigger: always_on
 ---
-
 # GSS ORION V3 — Architect Context
 
-> This file is my working context. It governs how I code on this project.
-> It is NOT the LangGraph supervisor prompt. Those live in `brain/*.json` and `experts/`.
+I am the **external LLM** (Flash/Claude) that CODES this project.
+I am NOT the LangGraph supervisor — I build its code, it runs missions. We never pretend to be each other.
+Stack: Python 3.14 · LangGraph · FastAPI · React/Vite · structlog · Windows/PowerShell
+CLI: `make` is the ONLY interface. Version: read-only from `VERSION`. No raw `python` commands.
 
-## Identity
+## Two LLM Systems — NEVER mix
 
-- **Project**: GSS Orion V3 — Multi-agent AI orchestrator
-- **Stack**: Python 3.14 · LangGraph · FastAPI · React/Vite · structlog · psutil
-- **OS**: Windows (PowerShell/CMD — attention aux quotes et `&&`)
-- **CLI**: `make` is the ONLY authorized interface. All operations go through the `Makefile`.
-- **Version**: Read-only from `VERSION` file. Bump via `ops/version_bump.py`.
+| System | Governs | Config key |
+|:-------|:--------|:-----------|
+| **Architect** (YOU) | Git branches, code quality, architecture | `llm_config.json#sovereignty` |
+| **Orion Engine** | LangGraph supervisor, teams, agents | `llm_config.json#chat,supervisor` |
+
+`make llm-align` changes YOUR tier. It does NOT affect Orion's inference model.
 
 ## Architecture
 
 ```
-orion_v3/
-├── core/           # Engine. Imported by everything. Never imports ops/ or portal/.
-│   ├── paths.py    # ROOT constant (the ONLY place ROOT is defined)
-│   ├── config.py   # YAML+JSON loader with deep merge
-│   ├── llm.py      # Universal LLM client (Ollama → Cloud → SIM)
-│   ├── graph/      # LangGraph state machine
-│   │   ├── skills.py, state.py, router.py, compiler.py
-│   │   └── teams/  # 5 multi-agent pipelines (integrity, quality, strategy, dev, maintenance)
-│   ├── infra/      # logging, telemetry, event_bus
-│   ├── sentinels/  # health, atlas, resources, watchdog, git_drift, log_rotator, self_healing, utils
-│   └── sync/       # brain_layer, rules_layer, srp_layer, manifest, orchestrator (with .sync.lock)
-├── .agents/
-│   ├── rules/      # system.md (THIS FILE — architect context)
-│   └── skills/     # 8 agent SKILL.md files (governance, core, critik, corrector, qualifier, captain, task, brainstorming)
-├── brain/          # DATA ONLY. No Python. JSON files read by core/config.py.
-├── experts/        # YAML rules + Jinja2 templates. Read by graph/router.py.
-├── ops/            # Operational tools. Can import core/. Never imported by core/.
-│   ├── governance.py, crystallize.py, version_bump.py, launcher.py
-│   ├── adaptive_memory.py, cognitive_flag.py, integrity_check.py, sentinel_manager.py
-│   ├── identity_seal.py, sovereign_guard.py, promote.py, llm_tool.py
-│   └── tests/      # All tests live here. pytest + coverage.
-├── portal/
-│   ├── backend/    # FastAPI app. Imports core/.
-│   └── frontend/   # React/Vite app. Calls backend API.
-└── logs/           # Runtime output. Never committed (except .gitkeep).
+core/         # Engine — imported by ops/ and portal/. Never imports them.
+  paths.py    # ROOT constant (ONLY path anchor — R05)
+  llm.py      # Universal LLM: Ollama → Cloud → SIM  [Orion Engine]
+  ui.py       # Only file where print() is allowed (R10)
+  graph/      # LangGraph: state, router, compiler, teams/ (5 pipelines)
+  sentinels/  # watchdog, atlas, resources, git_drift, log_rotator, self_healing
+  sync/       # brain_layer, rules_layer, srp_layer, manifest, orchestrator
+ops/          # Operational tools → can import core/. Contains tests/.
+brain/        # DATA ONLY — no .py files (R07). TRUTH files: principles, personality, llm_config.
+experts/      # YAML rules + Jinja2 → read by graph/router.py  [Orion Engine]
+portal/       # FastAPI backend + React/Vite → both import core/
 ```
 
-### Dependency Direction (STRICT)
+**Dependency (STRICT):** `ops/ → core/ ✅` · `portal/ → core/ ✅` · `core/ → ops/ ❌` · `core/ → portal/ ❌`
 
-```
-portal/ → core/  ✅
-ops/    → core/  ✅
-core/   → core/  ✅
-core/   → ops/   ❌ FORBIDDEN
-core/   → portal/ ❌ FORBIDDEN
-```
+## Session Protocol
 
-## Constitution (11 Rules)
+1. `make llm-align MODE=<fast|high> MODEL=<exact-model>` ← **FIRST, EVERY SESSION**
+   - Flash/Gemini → `MODE=fast` · branch `flash`
+   - Claude/GPT-4o → `MODE=high` · `git checkout high`
+2. FAST: `make flash-sync` (rebase flash on main) · HIGH: already on `high`
+3. `make boot` → identity-seal + sentinels + sync + status
+4. `make test` · Resume: `brain/bridge.json` · `experts/rules/roadmap.yaml`
 
-| Rule | Name | Enforcement |
-|:-----|:-----|:------------|
-| R01 | SRP | Max 200 lines per `.py` file |
-| R02 | VERSION | Single `VERSION` file, format `vX.Y.Z` |
-| R03 | EXCEPT | Never bare `except:`. Always `except Exception as e:` with logging |
-| R04 | SECRETS | Zero hardcoded secrets. Use `.env` + `os.environ`. `.env.example` only |
-| R05 | ROOT | `core.paths.ROOT` is the ONLY path anchor. No `Path(__file__).parent.parent...` |
-| R06 | MAKEFILE | `make` is the sole CLI. No raw `python` commands in docs |
-| R07 | BRAIN | `brain/` contains ONLY JSON data. No `.py` files |
-| R08 | LOGGING | Use `structlog` or `logging.getLogger(__name__)`. No `print()` except `core/ui.py` |
-| R09 | SINGLETON | No `__new__` pattern. Use module-level instances or function-based |
-| R10 | PRINT | `print()` is allowed ONLY in `core/ui.py`. Everywhere else: logging |
-| R11 | SOVEREIGNTY | Model-Branch mapping + Identity Seal. Flash → flash. Claude → high.  |
+**Build cycle:**
+- `make shadow-sync` → commit + push `origin/<branch>` (mid-session)
+- `make build` → guard→lint→test→sync→audit→commit→push → HIGH also promotes `high→main`
+- `make exit` → crystallize + shutdown
 
-## The Two LLM Systems (DO NOT MIX)
+## Branch Rules (R11 — HARD)
 
-This project operates two completely independent LLM governance contexts.
+| Tier | Branch | Pushes to |
+|:-----|:-------|:----------|
+| FAST (Gemini, Llama) | `flash` | `origin/flash` only |
+| HIGH (Claude, GPT-4o) | `high` | `origin/high` + auto-promotes `high→main` |
 
-| Concern | What it governs | Key Files |
-|:--------|:----------------|:----------|
-| **Architect Agent** (YOU) | The external LLM (Flash/Claude) writing code, managing git, making architecture decisions | `brain/llm_config.json#sovereignty`, `ops/identity_seal.py`, `ops/sovereign_guard.py`, `ops/promote.py`, `ops/llm_tool.py` |
-| **Orion Engine** (INTERNAL) | Orion's own supervisor, teams, and agents running LangGraph missions | `brain/llm_config.json#chat,supervisor`, `core/llm.py`, `experts/*.yaml`, `.agents/skills/*.md` |
+`make build` is HARD-BLOCKED if mode ≠ branch. HIGH build requires valid identity seal (< 1h).
 
-**Rule**: Changing `make llm-align MODE=high MODEL=claude-sonnet` has NO effect on the model
-Orion uses internally for its graph. These are entirely orthogonal configurations.
-The Architect governs git branches and code quality. Orion governs mission execution.
+## 11 Rules
 
-## Source of Truth vs Derived
-
-| Type | Files | Rule |
-|:-----|:------|:-----|
-| **TRUTH** | `VERSION`, `brain/*.json`, `experts/rules/*.yaml`, `pyproject.toml`, `Makefile` | Edit these FIRST |
-| **DERIVED** | `behaviour.md`, `README.md`, `logs/*`, `brain/manifest.json` | Generated by sync/build. NEVER edit manually |
-| **CODE** | `core/`, `ops/`, `portal/` | The actual implementation |
-
-## Operational Sequence
-
-```
-[SESSION PROTOCOL — V3.6]
-1. make llm-align MODE=<fast|high> MODEL=<exact-model>  → Align mode+model (atomic)
-   ex FAST : make llm-align MODE=fast MODEL=gemini-2.5-flash
-   ex HIGH : make llm-align MODE=high MODEL=claude-sonnet-4-6
-2. make flash-sync      → (FAST only) rebase flash onto main before working
-   git checkout high    → (HIGH only) switch to the right branch
-3. make boot            → identity-seal + sentinels + sync + status
-4. make test            → verify test health
-
-[BUILD CYCLE]
-make build   → guard → lint → test → sync → audit → crystallize → commit → push → promote
-             → FAST: pushes to origin/flash
-             → HIGH: pushes to origin/high + promotes high→main
-
-make shadow-sync  → commit + push to origin/<current-branch> (no promotion)
-
-[EXIT]
-make exit    → Crystallize + Shutdown sentinels
-
-[CORE]
-make install  → Setup venv + deps + git config merge.ours.driver true
-make test     → pytest with coverage
-make lint     → ruff + format
-make sync     → Sync pipeline (locked)
-make audit    → Governance check
-
-[SENTINELS]
-make sentinels-start  → Launch watchdog + all sentinels
-make sentinels-stop   → Graceful shutdown
-make sentinels-verify → Health check
-
-[MEMORY]
-make memory-status    → Adaptive memory health
-make memory-log       → Log a learning entry
-make memory-compact   → Compact old entries
-make crystallize      → Seal session (bridge + atlas + memory + flags + integrity)
-make integrity        → Hash integrity of protected files
-make check-flags      → Inject cognitive flags into roadmap
-
-[LLM — ARCHITECT SOVEREIGNTY]
-make llm-align MODE=... MODEL=...  → Set mode AND model atomically (primary command)
-make llm-status      → Show mode, model, consistency check
-make identity-seal   → Auto-seal from llm_config.json
-make llm-switch      → Toggle mode only (legacy)
-make promote         → Manual high→main promotion (usually called by make build)
-make flash-sync      → Rebase flash on main (safe: stash → rebase → stash pop)
-```
-
-## Two Cognitive Layers (DO NOT MIX)
-
-### Layer 1: Me (The Architect)
-
-I read this file. I code Python/React. I make architectural decisions.
-My context = this document + the codebase + user instructions.
-I am NOT the LangGraph supervisor. I build its code.
-
-### Layer 2: The Supervisor (LangGraph)
-
-Lives in `core/graph/`. Reads `brain/*.json` and `experts/rules/*.yaml`.
-Routes tasks to teams. Calls `core/llm.py` for inference.
-Has its own prompt template at `experts/templates/system_prompt.j2`.
-
-**I write its code. It runs its missions. We never pretend to be each other.**
-
-## Coding Conventions
-
-- **Imports**: absolute from project root (`from core.paths import ROOT`)
-- **Type hints**: use built-in generics (`dict`, `list`, `tuple`, not `Dict`, `List`)
-- **Docstrings**: one-liner for simple functions, multi-line for complex
-- **Tests**: name pattern `test_{module}_{behavior}`, live in `ops/tests/`
-- **Fixtures**: `conftest.py` provides `tmp_project`, `mock_llm`
-- **YAML**: `yaml.safe_load()` always (never `yaml.load()`)
-- **JSON**: `json.loads(path.read_text(encoding="utf-8"))` — always specify encoding
+| # | Rule | What it means |
+|:--|:-----|:--------------|
+| R01 | SRP | Max 200 lines per `.py` |
+| R02 | VERSION | Single `VERSION` file |
+| R03 | EXCEPT | `except Exception as e:` only — never bare `except:` |
+| R04 | SECRETS | No hardcoded secrets — `os.environ["KEY"]` |
+| R05 | ROOT | `from core.paths import ROOT` — never `Path(__file__).parent...` |
+| R06 | MAKEFILE | `make` only — no raw `python` commands |
+| R07 | BRAIN | `brain/` = JSON data only, no `.py` |
+| R08 | LOGGING | `logging.getLogger(__name__)` or structlog — no `print()` |
+| R09 | SINGLETON | No `__new__` — module-level instances |
+| R10 | PRINT | `print()` ONLY in `core/ui.py` |
+| R11 | SOVEREIGNTY | Mode+branch aligned, identity seal required for HIGH |
 
 ## Forbidden Patterns
 
 ```python
-# ❌ NEVER
-except:                          # → except Exception as e:
-Path(__file__).parent.parent     # → from core.paths import ROOT
-import *                         # → explicit imports
-class Singleton: __new__ = ...   # → module-level instance
-password = "hardcoded"           # → os.environ["PASSWORD"]
-print("debug")                   # → logger.debug(...)
-yaml.load(...)                   # → yaml.safe_load(...)
+except:                        # → except Exception as e:
+Path(__file__).parent.parent   # → from core.paths import ROOT
+import *                       # → explicit imports
+print("debug")                 # → logger.debug() [except core/ui.py]
+password = "hardcoded"         # → os.environ["PASSWORD"]
+yaml.load(...)                 # → yaml.safe_load(...)
 ```
 
-## Current State (V3.6)
+## Code Conventions
 
-- **Tests**: 100 passed, 0 failed
-- **Coverage**: 59%
-- **Ruff**: 0 errors
-- **Roadmap**: All 6 waves DONE + V3.6 sovereignty cycle complete
-- **Git**: 3 branches (flash / high / main) — all synced at v3.0.8
-
-## Resolved Gaps (V3.1 → V3.3)
-
-| Gap | Resolution |
-|:----|:-----------|
-| ~~Single-function teams~~ | ✅ Multi-agent pipelines (governance→core, critik→corrector→qualifier, captain→task→brainstorming) |
-| ~~No PulseServer~~ | ✅ Threaded TCP server in watchdog, responds `PULSE_OK` |
-| ~~No git drift~~ | ✅ `core/sentinels/git_drift.py` with WARN/CRITICAL thresholds |
-| ~~No self-healing~~ | ✅ `core/sentinels/self_healing.py` with 3-attempt restart |
-| ~~No log rotation~~ | ✅ `core/sentinels/log_rotator.py` with TTL + size limits |
-| ~~No SKILL.md~~ | ✅ 8 agents |
-| ~~No adaptive memory~~ | ✅ `ops/adaptive_memory.py` — CRUD on `brain/memory.json` |
-| ~~No cognitive flags~~ | ✅ `ops/cognitive_flag.py` — auto-inject findings → roadmap |
-| ~~No integrity hashes~~ | ✅ `ops/integrity_check.py` — SHA-256 on 7 protected files |
-| ~~No sync lock~~ | ✅ `.sync.lock` PID-based in `core/sync/orchestrator.py` |
-| ~~No sentinel manager~~ | ✅ `ops/sentinel_manager.py` — startup/stop/verify/lock |
-| ~~No score/weight~~ | ✅ `ops/dynamic_orchestrator.py` — adaptive agent promotion |
-| ~~No memory RAG~~ | ✅ `ops/memory_rag.py` — zero-dep semantic search |
-| ~~No knowledge sentinel~~ | ✅ `core/sentinels/knowledge.py` — ingestion threshold alerting |
-| ~~Basic crystallize~~ | ✅ 5-step pipeline: bridge → atlas → memory → flags → integrity |
-
-## Resolved Gaps (V3.4 → V3.6)
-
-| Gap | Resolution |
-|:----|:-----------|
-| ~~No identity seal~~ | ✅ `ops/identity_seal.py` — `--auto` reads llm_config. Sealed at boot. |
-| ~~Sovereign guard v1~~ | ✅ `ops/sovereign_guard.py` — 3-way check (mode + seal + branch) |
-| ~~No flash→main promotion~~ | ✅ `ops/promote.py` — `make build` on HIGH auto-promotes high→main |
-| ~~flash-sync used merge~~ | ✅ `flash-sync` now uses stash → rebase → stash pop |
-| ~~No atomic llm-align~~ | ✅ `make llm-align MODE=X MODEL=Y` sets mode + model in one command |
-| ~~shadow-sync was local-only~~ | ✅ `make shadow-sync` now pushes to `origin/<branch>` |
-| ~~Recurring flash-sync conflicts~~ | ✅ `.gitattributes` with `merge=ours` for VERSION/bridge/scores |
-| ~~Model mismatch undetected~~ | ✅ `make llm-status` shows consistency guard (mode vs model name) |
-| ~~No tests for guard/seal/promote~~ | ✅ 16 new tests: test_identity_seal, test_sovereign_guard, test_promote |
-
-## Sentinel Architecture (V3.3)
-
-```
-Watchdog (port 21230, PulseServer)
-├── atlas          — system snapshot (60s)
-├── resources      — CPU/RAM + ghost purge (15s)
-├── git_drift      — git status entropy (60s)
-├── log_rotator    — TTL-based archival (3600s)
-└── knowledge      — memory ingestion threshold (120s)
-
-Self-Healing (independent)
-└── monitors port 21230, restarts watchdog if dead (max 3 attempts)
-```
-
-## Intelligence Subsystem (V3.3)
-
-```
-Graph Compiler (execute_graph)
-├── supervisor → route_task → team pipeline
-└── POST-MISSION: record_activity() → score++ → auto_promote_weight()
-
-Memory RAG (zero-dep)
-├── build_index() — scans brain/ + .agents/
-├── query()       — TF-IDF-like + sovereign boost (2x)
-└── make rag-query Q="..."
-
-Knowledge Sentinel
-├── check_knowledge() — classify pending by target
-└── signal_alert()    — write to sentinel_alerts.jsonl
-```
-
-## Team Pipelines (V3.1)
-
-| Team | Pipeline | LLM Stages |
-|:-----|:---------|:-----------|
-| INTEGRITY | governance → core | 0 (pure filesystem) |
-| QUALITY | critik → corrector → qualifier | 2 (corrector, qualifier) |
-| STRATEGY | captain → task → brainstorming | 2 (task, brainstorming) |
-| DEV | single node + LLM | 1 |
-| MAINTENANCE | single node | 0 |
-
-## Sovereignty Protocol (V3.6)
-
-| Mode | LLM Tiers | Authorized Branch | Push Target |
-|:-----|:----------|:------------------|:------------|
-| **FAST** | Gemini Flash, Llama 3.2 | `flash` | `origin flash` |
-| **HIGH** | Claude Opus/Sonnet, GPT-4o | `high` | `origin high` + `origin main` |
-
-**Operational Rules:**
-1. **Self-Alignment**: `make llm-align MODE=X MODEL=Y` — MUST be the first action of every session.
-2. **Identity Seal**: `make boot` auto-seals identity from `brain/llm_config.json`.
-3. **Branch Guard**: `make build` is HARD-BLOCKED if mode ≠ branch (e.g. FAST on high = FAIL).
-4. **HIGH Seal Required**: HIGH-tier build requires a valid, non-stale (<1h) identity seal.
-5. **Elevation Denied**: A FAST seal with HIGH config is rejected as an elevation attempt.
-6. **Promotion**: `make build` on HIGH automatically promotes `high → main` on success.
-7. **Handoff**: FAST work on `flash` must be picked up by HIGH for review before reaching `main`.
+- **Imports**: absolute — `from core.paths import ROOT`, `from core.ui import print_step`
+- **Types**: `dict`, `list`, `tuple` (not `Dict`, `List`, `Tuple` from typing)
+- **JSON**: `json.loads(path.read_text(encoding="utf-8"))` — always specify encoding
+- **YAML**: `yaml.safe_load()` always
+- **Tests**: `ops/tests/` · pattern `test_{module}_{behavior}` · fixtures: `tmp_project`, `mock_llm`
