@@ -5,7 +5,8 @@
 .hyperspace-jump-overlay {
     position: fixed;
     inset: 0;
-    z-index: 5; /* Precisely between L0 (0) and L1 (10) */
+    z-index: 5;
+    /* Precisely between L0 (0) and L1 (10) */
     pointer-events: none;
     overflow: hidden;
 }
@@ -20,6 +21,8 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
+    z-index: 150;
+    /* Above the shatter layer */
 }
 
 .jump-radial-glow {
@@ -27,12 +30,14 @@
     width: 100%;
     height: 100%;
     background: radial-gradient(circle at center,
-        rgba(255, 255, 255, 1) 0%,
-        rgba(255, 255, 255, 0.8) 10%,
-        rgba(255, 255, 255, 0.2) 40%,
-        rgba(255, 255, 255, 0) 70%
-    );
-    mix-blend-mode: screen;
+            rgb(255, 255, 255) 0%,
+            rgba(178, 241, 252, 0.651) 3%,
+            rgba(41, 117, 204, 0.664) 5%,
+            rgba(16, 20, 77, 0.877) 8%,
+            rgba(0, 0, 5, 0.897) 20%,
+            transparent 50%);
+    mix-blend-mode: plus-lighter;
+    filter: blur(10px);
 }
 
 .jump-streaks {
@@ -41,7 +46,7 @@
     background-size: cover;
     background-position: center;
     mix-blend-mode: screen;
-    opacity: 0.6;
+    opacity: 0.9;
     filter: brightness(1.5) contrast(1.2);
 }
 
@@ -50,12 +55,14 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 50px;
-    height: 50px;
+    width: 25px;
+    height: 25px;
     background: white;
     border-radius: 50%;
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 100px 50px white;
+    box-shadow: 0 0 150px 70px white;
+    z-index: 200;
+    /* Blinding flash is on top */
 }
 
 .jump-shatter-layer {
@@ -64,11 +71,11 @@
     background: white;
     z-index: 100;
     /* Shatter-inspired clip path */
-    clip-path: polygon(
-        0% 0%, 50% 5%, 100% 0%,
-        95% 45%, 100% 100%, 55% 95%,
-        0% 100%, 5% 55%
-    );
+    clip-path: polygon(0% 0%, 50% 5%, 100% 0%,
+            95% 45%, 100% 100%, 55% 95%,
+            0% 100%, 5% 55%);
+    mix-blend-mode: overlay;
+    opacity: 0.3;
 }
 
 /* ── UI Elements ───────────────────────────────────── */
@@ -76,8 +83,8 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 4px;
-    height: 4px;
+    width: 0px;
+    height: 0px;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 50%;
     transform: translate(-50%, -50%);
