@@ -1,0 +1,100 @@
+/* ═══════════════════════════════════════════════════════
+   ORION V3 — AETHERIS HUD — Global Design Tokens
+   Source of truth: docs/design/ORION_V3_VIBE.md
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Reset ────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Design Tokens ────────────────────────────────────── */
+:root {
+  /* Chroma Keys */
+  --chroma-green: #00ff00;
+  --chroma-blue: #0000ff;
+
+  /* Core Palette — Aetheris HUD */
+  --neon-yellow: #ffd900;
+  --neon-orange: #803605;
+  --neon-orange-glow: rgba(255, 140, 46, 0.74);
+  --neon-orange-border: rgba(206, 122, 12, 0.849);
+  --cool-slate: #2c3e50;
+  --slate-mid: #636e72;
+  --slate-light: #b2bec3;
+
+  /* Surfaces — Glass */
+  --surface-glass: rgba(248, 249, 250, 0.55);
+  --surface-glass-high: rgba(248, 249, 250, 0.80);
+  --surface-glass-low: rgba(248, 249, 250, 0.30);
+  --glass-border: rgba(255, 255, 255, 0.25);
+  --glass-blur: blur(16px);
+
+  /* Status */
+  --status-ok: #00b894;
+  --status-warn: #fdcb6e;
+  --status-error: #d63031;
+
+  /* Typography */
+  --font-brand: 'Cinzel Decorative', serif;
+  --font-title: 'Cinzel', serif;
+  --font-ui: 'Space Grotesk', sans-serif;
+  --font-body: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* Z-index layers */
+  --z-l0-vista: 0;
+  --z-l1-chassis: 10;
+  --z-l2-props: 20;
+  --z-l3-hud: 30;
+  --z-overlay: 40;
+  --z-header: 50;
+  --z-modal: 60;
+}
+
+/* ── Base ─────────────────────────────────────────────── */
+body {
+  font-family: var(--font-ui);
+  color: var(--cool-slate);
+  background: #1a2634;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}

@@ -1,0 +1,132 @@
+/* ═══════════════════════════════════════════════════════
+   ORION V3 — Header Component
+   Brand: "ATLANTIS NEXUS" · Nav: Dashboard/Superviseur/Mémoire
+   ═══════════════════════════════════════════════════════ */
+
+.nexus-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-xl);
+  background: rgba(26, 38, 52, 0.6);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+/* ── Brand ─────────────────────────────────────────── */
+.nexus-brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  text-decoration: none;
+  user-select: none;
+}
+
+.brand-name {
+  font-family: var(--font-brand);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.brand-version {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--neon-yellow);
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+/* ── Navigation ────────────────────────────────────── */
+.nexus-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.nav-btn {
+  position: relative;
+  padding: 6px var(--space-md);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--slate-light);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.nav-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 80%;
+  height: 2px;
+  background: var(--neon-yellow);
+  border-radius: var(--radius-full);
+  transition: transform var(--transition-base);
+}
+
+.nav-btn:hover {
+  color: #ffffff;
+}
+
+.nav-btn:hover::after {
+  transform: translateX(-50%) scaleX(0.4);
+}
+
+.nav-btn.active {
+  color: var(--neon-yellow);
+}
+
+.nav-btn.active::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* ── Status Pill ───────────────────────────────────── */
+.nexus-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--slate-light);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-ok);
+  box-shadow: 0 0 6px var(--status-ok);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(0.85);
+  }
+}

@@ -1,0 +1,62 @@
+/* SupervisorView HUD */
+.supervisor-hud {
+  position: absolute;
+  inset: 56px 0 0 0;
+  display: grid;
+  grid-template-columns: 200px 1fr 200px;
+  grid-template-rows: auto;
+  gap: 12px;
+  padding: 16px;
+  pointer-events: none;
+}
+.supervisor-hud .glass-panel { pointer-events: auto; }
+
+.glass-panel {
+  background: var(--surface-glass);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+}
+
+.panel-title {
+  font-family: var(--font-title);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--neon-orange);
+  margin-bottom: var(--space-sm);
+}
+
+.pulse-panel { grid-column: 1; align-self: start; }
+.pipeline-panel { grid-column: 2; align-self: start; }
+.telemetry-panel { grid-column: 3; align-self: start; }
+
+/* Pulse */
+.pulse-gauge {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 0;
+}
+.pulse-ring {
+  width: 64px; height: 64px; border-radius: 50%;
+  border: 2px solid var(--neon-orange);
+  box-shadow: 0 0 12px var(--neon-orange-glow);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.pulse-label { font-family: var(--font-mono); font-size: 10px; color: var(--slate-mid); letter-spacing: 0.1em; }
+
+/* Pipeline */
+.pipeline-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.pipeline-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.05); }
+.pipeline-name { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--cool-slate); }
+.pipeline-status { font-family: var(--font-mono); font-size: 9px; padding: 2px 6px; border-radius: var(--radius-full); }
+.pipeline-status.done    { background: rgba(0,184,148,0.2); color: var(--status-ok); }
+.pipeline-status.active  { background: rgba(255,95,0,0.2);  color: var(--neon-orange); }
+.pipeline-status.pending { background: rgba(99,110,114,0.2); color: var(--slate-mid); }
+
+/* Telemetry */
+.metric-list { display: flex; flex-direction: column; gap: 8px; }
+.metric-row  { display: flex; justify-content: space-between; }
+.metric-row dt { font-family: var(--font-mono); font-size: 10px; color: var(--slate-mid); text-transform: uppercase; letter-spacing: 0.08em; }
+.metric-row dd { font-family: var(--font-mono); font-size: 11px; color: var(--cool-slate); font-weight: 600; }
+.metric-row dd.ok { color: var(--status-ok); }

@@ -12,7 +12,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from core.llm import _detect_ollama, _has_cloud_keys, call_llm
-from portal.backend.orion_prompt import build_system_prompt
+from portal.backend.utils.prompt_builder import build_system_prompt
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/v1/orion", tags=["orion"])

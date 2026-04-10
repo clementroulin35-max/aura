@@ -1,0 +1,17 @@
+/* ═══════════════════════════════════════════════════════
+   ORION V3 — DashboardPage (Assembly: L0 + L1-D + L2 Props + L3 HUD)
+   ═══════════════════════════════════════════════════════ */
+
+.dashboard-chassis {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+  z-index: var(--z-l1-chassis);
+  /* Chroma key: green windows → transparent, revealing L0 Vista */
+  filter: url(#chroma-key-green);
+}
+
+/* HUD overlay panels are positioned via hud/ component styles */

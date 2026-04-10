@@ -1,0 +1,20 @@
+.memory-hud {
+  position: absolute; inset: 56px 0 0 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px;
+  pointer-events: none;
+}
+.memory-hud .glass-panel { pointer-events: auto; }
+.glass-panel { background: var(--surface-glass); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-md); }
+.panel-title { font-family: var(--font-title); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--neon-orange); margin-bottom: var(--space-sm); border-bottom: 1px solid var(--neon-orange-border); padding-bottom: 6px; }
+.archive-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.archive-card { display: grid; grid-template-columns: auto 1fr auto auto; gap: 8px; align-items: center; padding: 8px; background: rgba(255,255,255,0.06); border-radius: var(--radius-sm); }
+.archive-id    { font-family: var(--font-mono); font-size: 10px; color: var(--neon-orange); }
+.archive-title { font-family: var(--font-ui); font-size: 12px; color: var(--cool-slate); }
+.archive-date  { font-family: var(--font-mono); font-size: 10px; color: var(--slate-mid); }
+.expand-btn    { font-family: var(--font-mono); font-size: 9px; padding: 2px 8px; background: transparent; border: 1px solid var(--neon-orange-border); color: var(--neon-orange); border-radius: var(--radius-sm); cursor: pointer; transition: background var(--transition-fast); }
+.expand-btn:hover { background: var(--neon-orange-glow); }
+.docs-grid { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.doc-card  { display: flex; flex-direction: column; gap: 4px; padding: 10px; background: rgba(255,255,255,0.06); border-radius: var(--radius-sm); }
+.doc-icon  { font-size: 18px; }
+.doc-name  { font-family: var(--font-mono); font-size: 10px; color: var(--cool-slate); word-break: break-all; }
+.doc-type  { font-family: var(--font-mono); font-size: 9px; color: var(--neon-orange); letter-spacing: 0.1em; }

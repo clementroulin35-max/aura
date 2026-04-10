@@ -1,0 +1,79 @@
+/* ═══════════════════════════════════════════════════════
+   ORION V3 — App Root Layout
+   Full-bleed immersive cockpit — no scroll, no overflow
+   ═══════════════════════════════════════════════════════ */
+
+.app-shell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── L0 — THE VISTA (fixed deep background) ─────────── */
+.l0-vista {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-l0-vista);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ── L1 — THE CHASSIS (page frame, chroma-keyed) ────── */
+.l1-chassis {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-l1-chassis);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  /* Chroma key green (#00ff00) → transparent via SVG filter */
+  filter: url(#chroma-key-green);
+}
+
+/* ── L2 — PROPS (diegetic objects) ──────────────────── */
+.l2-props-layer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-l2-props);
+  pointer-events: none; /* children opt-in with pointer-events: auto */
+}
+
+/* ── L3 — HUD (React overlays) ──────────────────────── */
+.l3-hud-layer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-l3-hud);
+  pointer-events: none;
+}
+.l3-hud-layer > * {
+  pointer-events: auto;
+}
+
+/* ── Page transition ─────────────────────────────────── */
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+.page-exit {
+  opacity: 1;
+}
+.page-exit-active {
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+/* ── SVG Chroma Filters (injected once at root) ──────── */
+.svg-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
