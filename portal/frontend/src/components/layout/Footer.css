@@ -1,0 +1,110 @@
+/* ═══════════════════════════════════════════════════════
+   ORION V3 — Footer Component — Cinematic Selection
+   ═══════════════════════════════════════════════════════ */
+
+.nexus-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header); /* Same as header */
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-xl);
+  background: rgba(10, 15, 20, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-content {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── Carousel Labels ────────────────────────────────── */
+.carousel-label, .footer-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--slate-light);
+  opacity: 0.6;
+}
+
+/* ── Carousel Thumbnails ───────────────────────────── */
+.carousel-thumbnails {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.thumb-bubble {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
+}
+
+.thumb-preview {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(100%) brightness(0.7);
+  transition: all 0.3s ease;
+}
+
+.thumb-bubble:hover .thumb-preview {
+  filter: grayscale(0%) brightness(1);
+  transform: scale(1.1);
+}
+
+.thumb-bubble.active .thumb-preview {
+  filter: grayscale(0%) brightness(1.2);
+  transform: scale(1.2);
+}
+
+.thumb-bubble.active {
+  border-color: var(--neon-yellow);
+  box-shadow: 0 0 15px rgba(255, 217, 0, 0.3);
+}
+
+.thumb-ring {
+  position: absolute;
+  inset: -6px;
+  border: 1px solid var(--neon-yellow);
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.1); opacity: 0.1; }
+  100% { transform: scale(1); opacity: 0.4; }
+}
+
+.thumb-bubble.disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  filter: saturate(0);
+}
+
+/* ── Responsive ────────────────────────────────────── */
+@media (max-width: 768px) {
+  .carousel-label, .footer-status {
+    display: none;
+  }
+}

@@ -1,19 +1,22 @@
 import './styles/index.css';
 import './styles/App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { VIEWS } from './lib/constants.js';
 import Header from './components/layout/Header.jsx';
+import Footer from './components/layout/Footer.jsx';
 import DashboardPage  from './pages/DashboardPage.jsx';
 import SupervisorPage from './pages/SupervisorPage.jsx';
 import MemoryPage     from './pages/MemoryPage.jsx';
-import vistaImg from './assets/backgrounds/l0_vista.jpg';
+import HyperspaceJump from './components/shared/HyperspaceJump.jsx';
 
-// SVG Chroma-Key filters (injected once)
+// Discover all background images dynamically
+const bgModules = import.meta.glob('./assets/backgrounds/*.{jpg,png,jpeg,webp}', { eager: true });
+const BACKGROUNDS = Object.values(bgModules).map(m => m.default);
+
 function ChromaFilters() {
   return (
     <svg className="svg-filters" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        {/* Green chroma key — removes #00ff00 from L1 chassis windows */}
         <filter id="chroma-key-green" color-interpolation-filters="sRGB">
           <feColorMatrix type="matrix" values="
             1  0  0  0  0
@@ -22,7 +25,6 @@ function ChromaFilters() {
            -1  2 -1  0  0" result="mask" />
           <feComposite in="SourceGraphic" in2="mask" operator="out" />
         </filter>
-        {/* Blue chroma key — removes #0000ff from L2 prop backgrounds */}
         <filter id="chroma-key-blue" color-interpolation-filters="sRGB">
           <feColorMatrix type="matrix" values="
             1  0  0  0  0
@@ -43,18 +45,23 @@ const PAGES = {
 };
 
 export default function App() {
-  const [view, setView]     = useState(VIEWS.DASHBOARD);
-  const [ui, setUi]         = useState({ chatOpen: false, settingsOpen: false, executing: false });
+  const [view, setView] = useState(VIEWS.DASHBOARD);
+  const [ui, setUi]     = useState({ chatOpen: false, settingsOpen: false, executing: false });
+  
+  // Hyperspace Jump State Management
+  const [bgIndex, setBgIndex]       = useState(0);
+  const [isJumping, setIsJumping]   = useState(false);
+  const [jumpPhase, setJumpPhase]   = useState('idle'); // idle | departure | arrival
 
-  function handlePropClick(panel) {
+  const handlePropClick = (panel) => {
     setUi(prev => ({
       ...prev,
-      chatOpen:     panel === 'chat'     ? !prev.chatOpen     : false,
+      chatOpen: panel === 'chat' ? !prev.chatOpen : false,
       settingsOpen: panel === 'settings' ? !prev.settingsOpen : false,
     }));
-  }
+  };
 
-  async function handleExecute() {
+  const handleExecute = async () => {
     setUi(prev => ({ ...prev, executing: true }));
     try {
       await fetch('/api/graph/run', { method: 'POST' });
@@ -63,30 +70,61 @@ export default function App() {
     } finally {
       setTimeout(() => setUi(prev => ({ ...prev, executing: false })), 2000);
     }
-  }
+  };
+
+  /**
+   * Cinematic Jump Trigger
+   * Coordinates the L0 animations (in App.css) with precisely timed state swaps.
+   */
+  const initiateJump = (index) => {
+    if (index === bgIndex || isJumping) return;
+
+    setIsJumping(true);
+    setJumpPhase('departure');
+    
+    // 1. Departure peak: Switch the background source under the tunnel/flash
+    setTimeout(() => {
+        setBgIndex(index);
+        setJumpPhase('arrival');
+    }, 800);
+
+    // 2. Cleanup: End jump sequence
+    setTimeout(() => {
+        setIsJumping(false);
+        setJumpPhase('idle');
+    }, 2000); 
+  };
 
   const PageComponent = PAGES[view] || DashboardPage;
+  const currentBgSrc = BACKGROUNDS[bgIndex];
 
   return (
-    <div className="app-shell">
-      {/* SVG filter definitions */}
+    <div className={`app-shell state-${jumpPhase} ${isJumping ? 'is-jumping' : ''}`}>
       <ChromaFilters />
 
-      {/* L0 — THE VISTA (fixed ocean background) */}
+      {/* L0 — THE VISTA (Main background layer) */}
       <div
-        className="l0-vista"
-        style={{ backgroundImage: `url(${vistaImg})` }}
+        className={`l0-vista phase-${jumpPhase}`}
+        style={{ backgroundImage: `url(${currentBgSrc})` }}
         aria-hidden="true"
       />
 
-      {/* Persistent Header (z-index above all layers) */}
+      {/* THE CINEMATIC JUMP OVERLAY (Framer Motion) - Nested between L0 and L1 */}
+      <HyperspaceJump isJumping={isJumping} />
+
       <Header currentView={view} onNavigate={setView} />
 
-      {/* Active Page (L1 chassis + L2 props + L3 HUD) */}
       <PageComponent
         ui={ui}
         onPropClick={handlePropClick}
         onExecute={handleExecute}
+      />
+
+      <Footer 
+        backgrounds={BACKGROUNDS} 
+        activeIndex={bgIndex} 
+        onSelect={initiateJump} 
+        isJumping={isJumping}
       />
     </div>
   );

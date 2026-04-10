@@ -28,6 +28,7 @@ body {
   --chroma-blue: #0000ff;
 
   /* Core Palette — Aetheris HUD */
+  --grey-light: #ebeae4;
   --neon-yellow: #ffd900;
   --neon-orange: #803605;
   --neon-orange-glow: rgba(255, 140, 46, 0.74);
@@ -49,8 +50,8 @@ body {
   --status-error: #d63031;
 
   /* Typography */
-  --font-brand: 'Cinzel Decorative', serif;
-  --font-title: 'Cinzel', serif;
+  --font-brand: 'Cinzel', serif;
+  --font-title: 'Cinzel Decorative', serif;
   --font-ui: 'Space Grotesk', sans-serif;
   --font-body: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;

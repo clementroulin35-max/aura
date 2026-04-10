@@ -1,0 +1,188 @@
+==== JAVASCRIPT FILE =====
+
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+
+export default function WarpJump() {
+  const [jumping, setJumping] = useState(false);
+
+  const startJump = () => {
+    setJumping(true);
+    setTimeout(() => setJumping(false), 1600);
+  };
+
+  return (
+    <div className="container">
+      <button onClick={startJump} className="btn">
+        🚀 Warp Jump
+      </button>
+
+      <AnimatePresence>
+        {jumping && (
+          <motion.div
+            className="warp-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {/* IMAGE QUI RECULE */}
+            <motion.div
+              className="scene"
+              initial={{ scale: 1, filter: "blur(0px)" }}
+              animate={{
+                scale: 0.3,
+                filter: "blur(12px) brightness(1.8)",
+              }}
+              transition={{ duration: 0.4, ease: "easeIn" }}
+            />
+
+            {/* TUNNEL LUMIÈRE */}
+            <motion.div
+              className="light-tunnel"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{
+                scale: 6,
+                opacity: [0, 1, 1, 0],
+              }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+            />
+
+            {/* FLASH CENTRAL */}
+            <motion.div
+              className="flash"
+              initial={{ scale: 0 }}
+              animate={{ scale: 20 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            />
+
+            {/* SHATTER SIMPLIFIÉ */}
+            <motion.div
+              className="shatter"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 0, scale: 1.5 }}
+              transition={{ delay: 0.9, duration: 0.3 }}
+            />
+
+            {/* ARRIVÉE (REBOND) */}
+            <motion.div
+              className="arrival"
+              initial={{ scale: 1.4 }}
+              animate={{ scale: [1.4, 0.95, 1.05, 1] }}
+              transition={{ delay: 1.0, duration: 0.5 }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+==== CSS FILE =====
+
+.container {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background: black;
+}
+
+.btn {
+  position: absolute;
+  z-index: 10;
+  top: 20px;
+  left: 20px;
+  padding: 10px 20px;
+}
+
+.warp-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* SCÈNE */
+.scene {
+  position: absolute;
+  inset: 0;
+  background: url("/your-image.jpg") center/cover no-repeat;
+}
+
+/* TUNNEL LUMIÈRE */
+.light-tunnel {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center,
+    rgba(255,255,255,1) 0%,
+    rgba(255,255,255,0.8) 10%,
+    rgba(255,255,255,0.2) 40%,
+    rgba(255,255,255,0) 70%);
+  mix-blend-mode: screen;
+}
+
+/* FLASH CENTRAL */
+.flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* SHATTER FAKE */
+.shatter {
+  position: absolute;
+  inset: 0;
+  background: white;
+  clip-path: polygon(
+    0% 0%, 50% 10%, 100% 0%,
+    90% 50%, 100% 100%, 50% 90%,
+    0% 100%, 10% 50%
+  );
+}
+
+/* ARRIVÉE */
+.arrival {
+  position: absolute;
+  inset: 0;
+  background: url("/your-next-image.jpg") center/cover no-repeat;
+  filter: brightness(1.2) contrast(1.1);
+}
+
+==== Features =====
+
+#CSS FILE
+
+1. Ajouter des streaks (ULTRA recommandé)
+
+.light-tunnel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/streaks.png") center/cover;
+  mix-blend-mode: screen;
+  opacity: 0.6;
+  animation: streakMove 0.6s linear;
+}
+
+@keyframes streakMove {
+  from { transform: scale(1); }
+  to { transform: scale(2); }
+}
+
+#JAVASCRIPT FILE
+
+2. Ajouter vibration caméra
+
+animate={{
+  x: [0, -2, 2, -1, 1, 0],
+  y: [0, 1, -1, 2, -2, 0],
+}}
+
+#CSS FILE
+
+3. Boost “cinéma” : Ajoute
+
+filter: blur(8px) brightness(2) contrast(1.3);

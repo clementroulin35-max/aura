@@ -1,8 +1,17 @@
+import HologramTerminal from "./HologramTerminal/HologramTerminal";
+import "./DashboardView.css";
+
 /* DashboardView — L3 HUD layer for Dashboard page */
-export default function DashboardView() {
+// - isChatOpen: toggled by PropOrion
+// - onToggleChat: close callback
+export default function DashboardView({ isChatOpen, onToggleChat }) {
   return (
     <div className="view-dashboard">
-      {/* Minimal welcome — cockpit background is the hero */}
+      {isChatOpen && (
+        <div className="dashboard-terminal-wrapper">
+          <HologramTerminal onClose={onToggleChat} />
+        </div>
+      )}
     </div>
   );
 }
