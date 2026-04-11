@@ -18,6 +18,7 @@ import MemoryDocsWindow from './components/hud/MemoryDocsWindow.jsx';
 import MemoryRapportHUD from './components/hud/MemoryRapportHUD.jsx';
 
 import { useSystemStatus } from './hooks/useSystemStatus.js';
+import { useOrionIntelligence } from './hooks/useOrionIntelligence.js';
 
 // Discover all background images dynamically
 const bgModules = import.meta.glob('./assets/backgrounds/*.{jpg,png,jpeg,webp}', { eager: true });
@@ -59,7 +60,7 @@ const PAGES = {
 export default function App() {
   const [view, setView] = useState(VIEWS.DASHBOARD);
   const [logHistory, setLogHistory] = useState([]);
-  
+
   // HUD State — Windows are manually opened
   const [ui, setUi] = useState({
     chatOpen: false,
@@ -77,20 +78,21 @@ export default function App() {
   const yTerminal = useMotionValue(100);
   const xSettings = useMotionValue(window.innerWidth - 1055);
   const ySettings = useMotionValue(100);
-  const xTeams = useMotionValue(100);
-  const yTeams = useMotionValue(145);
-  const xMonitor = useMotionValue(window.innerWidth - 350);
-  const yMonitor = useMotionValue(145);
-  const xDocs = useMotionValue(200);
-  const yDocs = useMotionValue(190);
-  const xArchives = useMotionValue(window.innerWidth - 500);
-  const yArchives = useMotionValue(190);
+  const xTeams = useMotionValue(35);
+  const yTeams = useMotionValue(610);
+  const xMonitor = useMotionValue(window.innerWidth - 1365);
+  const yMonitor = useMotionValue(100);
+  const xDocs = useMotionValue(835);
+  const yDocs = useMotionValue(610);
+  const xArchives = useMotionValue(370);
+  const yArchives = useMotionValue(610);
 
   const [bgIndex, setBgIndex] = useState(0);
   const [isJumping, setIsJumping] = useState(false);
   const [jumpPhase, setJumpPhase] = useState('idle');
-  
+
   const { status: systemStatus, config: systemConfig, ollamaReachability, allModels } = useSystemStatus();
+  const orion = useOrionIntelligence(isJumping, ui);
 
   const handlePropClick = (panel) => {
     setUi(prev => ({
@@ -149,14 +151,13 @@ export default function App() {
   return (
     <div className={`app-shell state-${jumpPhase} ${isJumping ? 'is-jumping' : ''}`}>
       <ChromaFilters />
+      <HyperspaceJump isJumping={isJumping} />
 
       <div
         className={`l0-vista phase-${jumpPhase}`}
         style={{ backgroundImage: `url(${currentBgSrc})` }}
         aria-hidden="true"
       />
-
-      <HyperspaceJump isJumping={isJumping} />
 
       <Header
         currentView={view}
@@ -172,33 +173,38 @@ export default function App() {
         {/* Memory Windows (Background) */}
         {ui.archivesOpen && <MemoryRapportHUD onClose={() => toggleHUD("archivesOpen")} x={xArchives} y={yArchives} />}
         {ui.docsOpen && <MemoryDocsWindow onClose={() => toggleHUD("docsOpen")} x={xDocs} y={yDocs} />}
-        
+
         {/* Supervisor Windows */}
         {ui.monitorOpen && <MonitoringWindow onClose={() => toggleHUD("monitorOpen")} x={xMonitor} y={yMonitor} status={systemStatus} />}
         {ui.teamsOpen && <TeamsWindow onClose={() => toggleHUD("teamsOpen")} x={xTeams} y={yTeams} />}
-        
+
         {/* Core Windows (Foreground) */}
         {ui.settingsOpen && (
-          <LLMConfigWindow 
-            onClose={() => toggleHUD("settingsOpen")} 
-            x={xSettings} 
-            y={ySettings} 
+          <LLMConfigWindow
+            onClose={() => toggleHUD("settingsOpen")}
+            x={xSettings}
+            y={ySettings}
             initialConfig={systemConfig}
             initialReachability={ollamaReachability}
             initialModels={allModels}
           />
         )}
         {ui.chatOpen && (
-          <HologramTerminal 
-            onClose={() => toggleHUD("chatOpen")} 
-            x={xTerminal} 
-            y={yTerminal} 
+          <HologramTerminal
+            onClose={() => toggleHUD("chatOpen")}
+            x={xTerminal}
+            y={yTerminal}
             initialLogs={logHistory}
           />
         )}
       </div>
 
-      <PageComponent ui={ui} onPropClick={handlePropClick} onExecute={handleExecute} />
+      <PageComponent
+        ui={ui}
+        onPropClick={handlePropClick}
+        onExecute={handleExecute}
+        orion={orion}
+      />
 
       <Footer
         backgrounds={BACKGROUNDS}

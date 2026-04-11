@@ -1,65 +1,105 @@
 /* ═══════════════════════════════════════════════════════
-   ORION V3 — OrionCompanion Specific Styles
+   ORION V4.8 — Neuro-Visual Hardening (Cartoon Polish)
+   Ver 5.4: High-Contrast Static Casing
    ═══════════════════════════════════════════════════════ */
 
 .orion-companion-wrap {
   left: var(--prop-orion-left);
   bottom: var(--prop-orion-bottom);
   width: var(--prop-orion-width);
+  cursor: pointer;
+  z-index: var(--z-l2-props);
+}
+
+/* ── Chroma Fix ────────────────────────────────── */
+.orion-companion-wrap .prop-img {
+  width: 100%;
+}
+
+.orion-companion-wrap.active .prop-img,
+.orion-companion-wrap:hover .prop-img {
+  filter: url(#chroma-key-blue) brightness(1.1) drop-shadow(0 0 12px rgba(0, 243, 255, 0.4));
 }
 
 .orion-img-anchor {
   position: relative;
   width: 100%;
-}
-
-/* ── BD Style Speech Bubbles ────────────────────────── */
-.orion-bubble {
-  position: absolute;
-  bottom: calc(100% + 10px); /* Reliable floating above the head */
-  left: 80%; /* Shifted right as requested */
-  transform: translateX(-50%);
-  background: #fffef0; /* Permanent White/BD Cream */
-  border: 2px solid #0a0a0a;
-  padding: 12px 18px;
-  border-radius: 4px;
-  width: max-content;
-  max-width: 260px;
-  color: #0c0c0c;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.8);
-  z-index: 2000; /* Over everything */
   pointer-events: none;
 }
 
-.bubble-notif {
-  background: #fffef0;
-  border-color: #0a0a0a;
-}
-
-.bubble-tail {
+/* ── BD / Cartoon Bubbles ────────────────────────── */
+.orion-bubble {
   position: absolute;
-  top: 100%;
-  left: 20%; /* Tail shifted left relative to bubble to point back to cat's head */
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 12px solid #0a0a0a;
+  bottom: calc(100% + 10px);
+  left: 60%; /* Offset right to point better at head */
+  transform: translateX(-50%);
+  min-width: 180px;
+  max-width: 260px;
+  background: #ffffff !important; /* Forced Static White */
+  border: 4px solid #000000 !important; /* Forced Heavy Black */
+  padding: 14px 20px;
+  color: #000000 !important; /* Forced Static Black */
+  font-family: var(--font-cartoon);
+  font-size: 1.25rem;
+  letter-spacing: 0.2px;
+  line-height: 1.1;
+  text-transform: none; /* Allow natural Pixar-style casing */
+  z-index: 5; /* Relative to L2 layer parent */
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.bubble-tail::after {
+/* --- Tail Logic: Speech --- */
+.bubble-speech::after {
   content: '';
   position: absolute;
-  top: -14px;
-  left: -8px;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 10px solid #fffef0; /* Inner fill */
+  bottom: -15px;
+  left: 15px;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 14px solid #000000 !important; /* Standardized Black */
 }
 
-.bubble-notif .bubble-tail::after {
-  border-top-color: #fffef0; /* Fixed to white */
+.bubble-speech::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 17px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid #ffffff !important; /* Standardized White */
+  z-index: 1;
 }
+
+/* --- Tail Logic: Thought --- */
+.thought-puffs {
+  position: absolute;
+  bottom: -15px;
+  left: 20px;
+}
+
+.puff {
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.puff-1 { width: 14px; height: 14px; bottom: 0; left: 0; }
+.puff-2 { width: 8px; height: 8px; bottom: -12px; left: -10px; }
+
+/* --- Bubble Variants --- */
+.bubble-speech { border-radius: 12px; }
+.bubble-thought { border-radius: 30px; font-style: italic; }
+
+/* 
+   MOOD OVERRIDES: REMOVED V5.4
+   Bubbles stay High-Contrast regardless of Mood.
+*/
+
+.thought-hint { opacity: 0.5; font-weight: 300; }

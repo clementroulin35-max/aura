@@ -1,19 +1,16 @@
 /* ═══════════════════════════════════════════════════════
-   ORION V3 — HYPERSPACE JUMP v2 — Cinematic FX
+   ORION V3 — HYPERSPACE JUMP v2.1 — Cinematic FX
    ═══════════════════════════════════════════════════════ */
 
 .hyperspace-jump-overlay {
     position: fixed;
     inset: 0;
-    z-index: 5;
-    /* Precisely between L0 (0) and L1 (10) */
+    z-index: calc(var(--z-l0-vista) + 1); /* Locked between Vista (0) and Chassis (10) */
     pointer-events: none;
     overflow: hidden;
 }
 
-/* Removed .jump-scene divs to use the live App.jsx L0-vista instead */
-
-/* ── Light Tunnel Layers ───────────────────────────── */
+/* ── Light Tunnel Layers (Safe Layering) ───────────── */
 .jump-tunnel-container {
     position: absolute;
     inset: -50%;
@@ -21,8 +18,7 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    z-index: 150;
-    /* Above the shatter layer */
+    z-index: 2; /* Local depth */
 }
 
 .jump-radial-glow {
@@ -61,16 +57,14 @@
     border-radius: 50%;
     transform: translate(-50%, -50%);
     box-shadow: 0 0 150px 70px white;
-    z-index: 200;
-    /* Blinding flash is on top */
+    z-index: 4; /* On top of tunnel */
 }
 
 .jump-shatter-layer {
     position: absolute;
     inset: 0;
     background: white;
-    z-index: 100;
-    /* Shatter-inspired clip path */
+    z-index: 1; /* Below tunnel */
     clip-path: polygon(0% 0%, 50% 5%, 100% 0%,
             95% 45%, 100% 100%, 55% 95%,
             0% 100%, 5% 55%);
@@ -89,7 +83,7 @@
     border-radius: 50%;
     transform: translate(-50%, -50%);
     box-shadow: 0 0 15px 2px rgba(255, 217, 0, 0.5);
-    z-index: 1000;
+    z-index: 10; /* Local top */
 }
 
 /* ── Ambient Noise FX ──────────────────────────────── */
@@ -100,5 +94,5 @@
     background: url("https://grainy-gradients.vercel.app/noise.svg");
     opacity: 0.05;
     pointer-events: none;
-    z-index: 200;
+    z-index: 3;
 }

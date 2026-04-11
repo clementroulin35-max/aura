@@ -1,17 +1,22 @@
 /* ═══════════════════════════════════════════════════════
-   ORION V3 — DashboardPage (Assembly: L0 + L1-D + L2 Props + L3 HUD)
+   ORION V3 — DashboardPage (Assembly: L0 + L1 + L2 + L3 HUD)
+   Ver 5.1: Logic Consolidated into App.css
    ═══════════════════════════════════════════════════════ */
 
-.dashboard-chassis {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center bottom;
-  z-index: var(--z-l1-chassis);
-  /* Chroma key: green windows → transparent, revealing L0 Vista */
-  filter: url(#chroma-key-green);
-}
+/* 
+   NOTE: ALL Core Layer logic (.l1-chassis, etc.) has been migrated 
+   to App.css to ensure a Single Source of Truth for the 
+   Atlantis Nexus Stacking Protocol.
+*/
 
-/* HUD overlay panels are positioned via hud/ component styles */
+.dashboard-empty-hint {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   height: 100%;
+   color: var(--slate-mid);
+   font-family: var(--font-mono);
+   font-size: 12px;
+   letter-spacing: 0.1em;
+   opacity: 0.5;
+}

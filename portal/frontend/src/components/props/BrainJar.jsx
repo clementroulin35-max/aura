@@ -1,20 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import vegaJar from "../../assets/props/l2_vega_jar.png";
-import vegaBrain from "../../assets/props/l2_vega_brain.png";
+import vegaBrainV2 from "../../assets/props/l2_vega_brain_v2.png";
 import "./props.css";
 import "./BrainJar.css";
 
 /**
  * 🛰️ BrainJar — Cerebro-Laboratory (Multi-Layer Architecture)
  * Symmetrical companion to Orion.
- * Layers: [Jar Frame] -> [Liquid] -> [Bubbles] -> [Brain Core]
+ * Ver 4.8: Enforced clipping and Pixar V2 brain integration.
+ * Layers: [Jar Frame] -> [CLIP: Liquid -> Bubbles -> Brain Core]
  */
-export default function BrainJar() {
+export default function BrainJar({ onClick, orion }) {
+  const { mood, showBubble } = orion || {};
   const [activity, setActivity] = useState(0);
 
-  // 🎧 Sync with ORION_LOG activity
+  // Determine Liquid Color based on Mood
+  const MOOD_COLORS = {
+    happy: "var(--cyan-glow)",
+    alert: "var(--amber-glow)",
+    error: "var(--error-red)",
+    travel: "var(--purple-glow)"
+  };
+
+  const currentLiquidColor = MOOD_COLORS[mood] || MOOD_COLORS.happy;
+
+  // 🎧 Sync with ORION_LOG activity or Orion speaking
   useEffect(() => {
+    if (showBubble) setActivity(0.8);
+
     let decayTimer;
     const handleLog = () => {
       setActivity(1.0);
@@ -37,10 +51,9 @@ export default function BrainJar() {
       window.removeEventListener('ORION_LOG', handleLog);
       clearTimeout(decayTimer);
     };
-  }, []);
+  }, [showBubble]);
 
-  const handleClick = () => {
-    // Neural shock animation
+  const handleJarClick = () => {
     const jar = document.querySelector(".brain-jar-wrap");
     if (jar) {
       jar.animate(
@@ -53,81 +66,90 @@ export default function BrainJar() {
         { duration: 250, easing: "ease-in-out" }
       );
     }
+    onClick?.();
   };
 
   return (
-    <div className="brain-jar-wrap prop-wrap lite-mode" onClick={handleClick}>
+    <div className={`brain-jar-wrap prop-wrap mood-${mood}`} onClick={handleJarClick}>
       <div className="jar-label">
         <span className={`jar-status-dot ${activity > 0.1 ? 'active' : ''}`} />
         NEURAL_PROCESSOR_VEGA
       </div>
 
       <div className="vega-composition-container">
-        {/* Layer 1: Liquid Mask (Inside Jar) */}
-        <motion.div
-          className="layer-liquid"
-          animate={{
-            height: ["45%", "50%", "45%"],
-            borderRadius: ["20% 20% 0 0", "30% 30% 0 0", "20% 20% 0 0"]
-          }}
-          transition={{
-            duration: 3 / (1 + activity),
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-
-        {/* Layer 2: Bubbles */}
-        {[...Array(5)].map((_, i) => (
+        {/* Diegetic Clipping Boundary (Limits the liquid to the jar's interior) */}
+        <div className="inner-jar-clip">
+          {/* Layer 1: Liquid Mask */}
           <motion.div
-            key={i}
-            className="layer-bubble"
-            initial={{ y: 50, x: (i * 10) - 20, opacity: 0 }}
+            className="layer-liquid"
+            style={{ backgroundColor: currentLiquidColor }}
             animate={{
-              y: -80,
-              opacity: [0, 0.6, 0],
-              x: (i * 10) - 20 + Math.sin(i + Date.now()) * 5
+              height: ["45%", "50%", "45%"],
+              borderRadius: ["20% 20% 0 0", "30% 30% 0 0", "20% 20% 0 0"],
+              filter: `blur(10px) brightness(${0.7 + activity * 0.4})`
             }}
             transition={{
-              duration: 2 / (0.6 + Math.random() + activity),
+              duration: 3 / (1 + activity),
               repeat: Infinity,
-              delay: i * 0.5
+              ease: "easeInOut"
             }}
           />
-        ))}
 
-        <motion.img
-          src={vegaBrain}
-          className="layer-brain-core prop-img"
-          alt="Vega Core"
-          animate={{
-            y: [-3, 3, -3],
-            scale: [1, 1.05 + activity * 0.15, 1],
-            opacity: [0.85, 1, 0.85]
-          }}
-          style={{
-            filter: `url(#chroma-key-blue) brightness(${0.9 + activity * 0.4}) contrast(1.1)`
-          }}
-          transition={{
-            duration: 2 / (1 + activity),
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
+          {/* Layer 2: Bubbles */}
+          {[...Array(5)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="layer-bubble"
+              initial={{ y: 50, x: (i * 10) - 20, opacity: 0 }}
+              animate={{
+                y: -100,
+                opacity: [0, 0.4, 0],
+                x: (i * 10) - 20 + Math.sin(i + Date.now()/1000) * 8
+              }}
+              transition={{
+                duration: 2 / (0.6 + Math.random() + activity),
+                repeat: Infinity,
+                delay: i * 0.4
+              }}
+            />
+          ))}
 
-        {/* Layer 0 (RE-RENDERED ON TOP): Jar Structure (Chroma Blue) */}
+          {/* Layer 3: Pixar Brain Core (V2 Green Chroma) */}
+          <motion.img
+            src={vegaBrainV2}
+            className="layer-brain-core prop-img"
+            alt="Vega Core"
+            animate={{
+              y: [-2, 2, -2],
+              scale: [1.6, 1.7 + activity * 0.1, 1.6],
+              opacity: [0.9, 1, 0.9]
+            }}
+            style={{
+              filter: 'url(#chroma-key-green)'
+            }}
+            transition={{
+              duration: 2 / (1 + activity),
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+        </div>
+
+        {/* Layer 0: Jar Structure (Chroma Blue) - Always on Top */}
         <img
           src={vegaJar}
           className="layer-jar-frame prop-img"
           alt="Jar Frame"
+          style={{ filter: 'url(#chroma-key-blue)' }}
         />
 
-        {/* Layer 4: Interior Glow */}
+        {/* Layer 4: Ambient Glow (Behind Jar) */}
         <div
           className="layer-pulsar-glow"
           style={{
-            opacity: 0.1 + activity * 0.6,
-            transform: `scale(${1 + activity * 0.5})`
+            '--glow-color': currentLiquidColor,
+            opacity: 0.1 + activity * 0.4,
+            transform: `translate(-50%, -50%) scale(${1.0 + activity * 0.2})`
           }}
         />
       </div>

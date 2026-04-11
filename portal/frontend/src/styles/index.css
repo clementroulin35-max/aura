@@ -3,7 +3,7 @@
    Source of truth: docs/design/ORION_V3_VIBE.md
    ═══════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Luckiest+Guy&family=Bangers&display=swap');
 
 /* ── Reset ────────────────────────────────────────────── */
 *,
@@ -73,6 +73,7 @@ body {
   --font-ui: 'Space Grotesk', sans-serif;
   --font-body: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-cartoon: 'Luckiest Guy', cursive;
 
   /* Spacing */
   --space-xs: 4px;
@@ -117,6 +118,20 @@ body {
   --terminal-min-w: 400px;
   --terminal-min-h: 350px;
   --config-sidebar-w: 220px;
+
+  /* Narrative Matrix Moods */
+  --cyan-glow: #00f3ff;
+  --amber-glow: #ffbf00;
+  --error-red: #ff3030;
+  --purple-glow: #bc13fe;
+
+  /* Diegetic Expert Tuning — Props V5.4 */
+  --prop-brain-clip-w: 240px;
+  --prop-brain-clip-h: 300px; /* Increased for high-liquid */
+  --prop-brain-core-y: 10px;  /* Higher anchor */
+  --prop-brain-core-scale: 1.7;
+  --prop-brain-liquid-h: 78%; /* 3/4 level */
+  --prop-brain-glow-radius: 65%; /* Concentrated aura */
 }
 
 /* ── Base ─────────────────────────────────────────────── */

@@ -2,11 +2,11 @@ import "./DashboardPage.css";
 import chassisImg from "../assets/decors/l1_dashboard.jpg";
 import OrionCompanion from "../components/props/OrionCompanion";
 import BrainJar from "../components/props/BrainJar";
-export default function DashboardPage({ ui, onPropClick, onExecute }) {
+export default function DashboardPage({ ui, onPropClick, onExecute, orion }) {
   return (
     <>
       {/* L1 — Cockpit Chassis (chroma green windows -> transparent) */}
-      <img src={chassisImg} alt="" className="dashboard-chassis" aria-hidden="true" />
+      <img src={chassisImg} alt="" className="l1-chassis" aria-hidden="true" />
 
       {/* L2 — Diegetic Props */}
       <div className="l2-props-layer">
@@ -14,8 +14,12 @@ export default function DashboardPage({ ui, onPropClick, onExecute }) {
           onClick={() => onPropClick("chat")}
           isActive={ui.chatOpen}
           ui={ui}
+          orion={orion}
         />
-        <BrainJar />
+        <BrainJar 
+          onClick={() => orion.handleManualClick("vega")}
+          orion={orion}
+        />
       </div>
 
       {/* 

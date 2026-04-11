@@ -39,9 +39,9 @@ export default function Header({ currentView, onNavigate, onToggleHUD, status = 
 
         {/* Global Apps Launch — All HUD Triggers Always Visible */}
         <div className="nexus-apps-launch">
-          <button 
-            className={`app-btn ${ui?.chatOpen ? 'active' : ''}`} 
-            onClick={() => onToggleHUD("chatOpen")} 
+          <button
+            className={`app-btn ${ui?.chatOpen ? 'active' : ''}`}
+            onClick={() => onToggleHUD("chatOpen")}
             title="Terminal Orion"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -49,9 +49,9 @@ export default function Header({ currentView, onNavigate, onToggleHUD, status = 
               <path d="M8 12H16M8 9H13M8 15H11" strokeLinecap="round" />
             </svg>
           </button>
-          <button 
-            className={`app-btn ${ui?.teamsOpen ? 'active' : ''}`} 
-            onClick={() => onToggleHUD("teamsOpen")} 
+          <button
+            className={`app-btn ${ui?.teamsOpen ? 'active' : ''}`}
+            onClick={() => onToggleHUD("teamsOpen")}
             title="Équipes"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -61,18 +61,19 @@ export default function Header({ currentView, onNavigate, onToggleHUD, status = 
               <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11903 19.0078 7.01C19.0078 7.90097 18.7122 8.76608 18.1676 9.46768C17.623 10.1693 16.8604 10.6697 16 10.89" />
             </svg>
           </button>
-          <button 
-            className={`app-btn ${ui?.monitorOpen ? 'active' : ''}`} 
-            onClick={() => onToggleHUD("monitorOpen")} 
-            title="Monitoring"
+          <button
+            className={`app-btn ${ui?.archivesOpen ? 'active' : ''}`}
+            onClick={() => onToggleHUD("archivesOpen")}
+            title="Archives"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M22 12H18L15 21L9 3L6 12H2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M21 8V21H3V8M1 3H23V8H1V3Z" />
+              <path d="M10 12H14" strokeLinecap="round" />
             </svg>
           </button>
-          <button 
-            className={`app-btn ${ui?.docsOpen ? 'active' : ''}`} 
-            onClick={() => onToggleHUD("docsOpen")} 
+          <button
+            className={`app-btn ${ui?.docsOpen ? 'active' : ''}`}
+            onClick={() => onToggleHUD("docsOpen")}
             title="Documents"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -81,18 +82,19 @@ export default function Header({ currentView, onNavigate, onToggleHUD, status = 
               <path d="M16 13H8M16 17H8M10 9H8" strokeLinecap="round" />
             </svg>
           </button>
-          <button 
-            className={`app-btn ${ui?.archivesOpen ? 'active' : ''}`} 
-            onClick={() => onToggleHUD("archivesOpen")} 
-            title="Archives"
+
+
+          <button
+            className={`app-btn ${ui?.monitorOpen ? 'active' : ''}`}
+            onClick={() => onToggleHUD("monitorOpen")}
+            title="Monitoring"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M21 8V21H3V8M1 3H23V8H1V3Z" />
-              <path d="M10 12H14" strokeLinecap="round" />
+              <path d="M22 12H18L15 21L9 3L6 12H2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <button 
-            className={`app-btn settings-gear-btn ${ui?.settingsOpen ? 'active' : ''}`} 
+          <button
+            className={`app-btn settings-gear-btn ${ui?.settingsOpen ? 'active' : ''}`}
             onClick={() => onToggleHUD("settingsOpen")}
             aria-label="Configuration LLM"
             title="Neural Sync Config"

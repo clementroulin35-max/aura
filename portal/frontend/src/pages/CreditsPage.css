@@ -1,40 +1,47 @@
+/* ═══════════════════════════════════════════════════════
+   ORION V5.7.1 — Credits Design Tokenization & Stacking
+   ═══════════════════════════════════════════════════════ */
+
 .credits-page {
   position: relative;
   width: 100vw;
   height: 100vh;
-  z-index: var(--z-l1-chassis); /* Aligned with chassis layer (10) */
+  /* Redundant z-index removed to avoid stacking conflicts with global HUD */
 }
 
-.dashboard-chassis {
+/* ── L1 — THE CHASSIS (Background Decor) ────────── */
+.l1-chassis {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 1;
+  z-index: var(--z-l1-chassis); /* Unified with Global Hierarchy (10) */
+  filter: url(#chroma-key-green);
 }
 
+/* ── L2 — CONTENT OVERLAY (Glass Panel) ────────── */
 .credits-overlay {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2;
+  z-index: 10; /* Fixed: Placed ON TOP of the chassis */
   pointer-events: none;
 }
 
 .credits-content {
   pointer-events: auto;
-  background: rgba(10, 15, 20, 0.4);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--hud-panel-bg); /* Use Global Token */
+  backdrop-filter: var(--hud-glass-blur); /* Use Global Token */
+  -webkit-backdrop-filter: var(--hud-glass-blur);
+  border: var(--hud-border-glow); /* Use Global Token */
   padding: 60px;
   border-radius: var(--radius-lg);
   max-width: 800px;
   text-align: center;
-  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8);
 }
 
 .credits-title {
@@ -42,7 +49,8 @@
   font-size: 32px;
   letter-spacing: 0.3em;
   color: #fff;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .credits-subtitle {
@@ -52,7 +60,6 @@
   letter-spacing: 0.15em;
   text-transform: uppercase;
   margin-bottom: 50px;
-  opacity: 0.8;
 }
 
 .credits-grid {
@@ -65,27 +72,28 @@
 .credit-section h3 {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--slate-mid);
+  color: var(--neon-yellow); /* Use Global Mood Token */
   letter-spacing: 0.2em;
   margin-bottom: 15px;
+  text-transform: uppercase;
 }
 
 .credit-section p {
   font-family: var(--font-body);
   font-size: 13px;
-  color: var(--grey-light);
+  color: var(--grey-light); /* Use Global Token */
   line-height: 1.8;
   margin: 5px 0;
 }
 
 .credits-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: var(--hud-border-glow);
   padding-top: 30px;
 }
 
 .credits-footer p {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--slate-mid);
-  opacity: 0.5;
+  color: var(--slate-light); /* Use Global Token */
+  letter-spacing: 1px;
 }

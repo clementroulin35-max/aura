@@ -197,7 +197,7 @@
     width: 20px;
     height: 20px;
     cursor: nwse-resize;
-    z-index: 100;
+    z-index: 5; /* Relative to HUD container */
     background: linear-gradient(135deg, transparent 50%, rgba(255, 217, 0, 0.3) 50%);
     border-radius: 0 0 var(--radius-md) 0;
 }

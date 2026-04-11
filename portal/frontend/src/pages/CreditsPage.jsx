@@ -5,7 +5,7 @@ export default function CreditsPage() {
   return (
     <div className="credits-page">
       {/* L1 — Cockpit Chassis */}
-      <img src={chassisImg} alt="" className="dashboard-chassis" aria-hidden="true" />
+      <img src={chassisImg} alt="" className="l1-chassis" aria-hidden="true" />
       
       {/* Content Overlay */}
       <div className="credits-overlay">
