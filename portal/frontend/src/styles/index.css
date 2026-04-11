@@ -30,6 +30,7 @@ body {
   /* Core Palette — Aetheris HUD */
   --grey-light: #ebeae4;
   --neon-yellow: #ffd900;
+  --neon-blue: #00d2ff;
   --neon-orange: #803605;
   --neon-orange-glow: rgba(255, 140, 46, 0.74);
   --neon-orange-border: rgba(206, 122, 12, 0.849);
@@ -41,8 +42,25 @@ body {
   --surface-glass: rgba(248, 249, 250, 0.55);
   --surface-glass-high: rgba(248, 249, 250, 0.80);
   --surface-glass-low: rgba(248, 249, 250, 0.30);
-  --glass-border: rgba(255, 255, 255, 0.25);
+  --glass-border: rgba(255, 255, 255, 0.15);
   --glass-blur: blur(16px);
+
+  /* HUD Specific Surfaces — Premium Dark */
+  --hud-panel-bg: rgba(10, 15, 20, 0.68); /* Lighter than before, but richer */
+  --hud-header-bg: rgba(0, 0, 0, 0.5);
+  --hud-border-glow: 1px solid rgba(129, 127, 113, 0.08);
+  --hud-glass-blur: blur(24px); /* Increased blur for more 'Solid Hologram' feel */
+  
+  /* Advanced Layering */
+  --z-hud-base: 30;
+  --z-hud-focus: 35; /* Priority window layer */
+  
+  --hud-z-frame: 5;
+  --hud-z-header: 10;
+  --hud-z-handle: 20;
+
+  --hud-surface-dark: rgba(0, 0, 0, 0.55);
+  --hud-surface-light: rgba(255, 255, 255, 0.08);
 
   /* Status */
   --status-ok: #00b894;
@@ -82,6 +100,23 @@ body {
   --z-overlay: 40;
   --z-header: 50;
   --z-modal: 60;
+  --z-index-footer: 100;
+
+  /* Diegetic Prop Positioning */
+  --prop-ledge-bottom: 75px;
+  --prop-orion-bottom: 75px; /* Aligned with ledge */
+  /* Sits lower on the foreground table */
+  --prop-brain-bottom: 140px;
+  /* Sits higher on the console ledge */
+  --prop-orion-width: 160px;
+  --prop-orion-left: 80px;
+  --prop-brain-width: 380px;
+  --prop-brain-right: 120px;
+
+  /* HUD Geometry */
+  --terminal-min-w: 400px;
+  --terminal-min-h: 350px;
+  --config-sidebar-w: 220px;
 }
 
 /* ── Base ─────────────────────────────────────────────── */

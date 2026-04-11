@@ -1,0 +1,221 @@
+Parfait 👍 très bon choix — tu vas garder 90% du wow pour 10% du coût GPU.
+On va faire un fake WebGL look en pur React + CSS + Framer Motion :
+
+👉 rendu : verre + liquide + vie + glow
+👉 perf : ultra léger (aucun canvas)
+
+🧠✨ Concept final (version “soft next-gen”)
+
+On simule :
+
+🧪 verre → backdrop-filter + gradients
+💧 liquide → mask + wave + blur
+🧠 cerveau → image/SVG + glow + pulse
+🫧 bulles → div animées
+⚡ activité → intensité contrôlée par JS
+⚛️ 1. Composant React prêt à l’emploi
+import { motion } from "framer-motion";
+
+export default function BrainJar({ activity = 0, onClick }) {
+  return (
+    <div className="jar" onClick={onClick}>
+      
+      {/* 💡 Glow global */}
+      <div
+        className="jar-glow"
+        style={{
+          opacity: 0.2 + activity * 0.6,
+        }}
+      />
+
+      {/* 💧 Liquide */}
+      <motion.div
+        className="liquid"
+        animate={{
+          y: [0, -5, 0],
+        }}
+        transition={{
+          repeat: Infinity,
+          duration: 3 - activity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* 🫧 Bulles */}
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="bubble"
+          initial={{
+            y: 60,
+            x: Math.random() * 40 - 20,
+            opacity: 0,
+          }}
+          animate={{
+            y: -60,
+            opacity: [0, 1, 0],
+          }}
+          transition={{
+            duration: 2 + Math.random(),
+            repeat: Infinity,
+            delay: i * 0.3,
+          }}
+        />
+      ))}
+
+      {/* 🧠 Cerveau */}
+      <motion.img
+        src="/brain.png"
+        className="brain"
+        animate={{
+          scale: [1, 1.05 + activity * 0.1, 1],
+          filter: `brightness(${1 + activity})`,
+        }}
+        transition={{
+          repeat: Infinity,
+          duration: 1.5,
+        }}
+      />
+    </div>
+  );
+}
+🎨 2. CSS (le cœur du rendu)
+.jar {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 120px;
+  height: 160px;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+
+  /* 🧪 verre */
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.2);
+
+  box-shadow:
+    inset 0 0 20px rgba(255,255,255,0.1),
+    0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* ✨ glow */
+.jar-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center,
+    rgba(0,255,255,0.4),
+    transparent 70%);
+  pointer-events: none;
+}
+
+/* 💧 liquide */
+.liquid {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 55%;
+
+  background: linear-gradient(
+    to top,
+    rgba(0, 200, 255, 0.6),
+    rgba(0, 255, 255, 0.2)
+  );
+
+  backdrop-filter: blur(4px);
+
+  border-top-left-radius: 50%;
+  border-top-right-radius: 50%;
+}
+
+/* 🧠 cerveau */
+.brain {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+
+  filter: drop-shadow(0 0 10px rgba(255, 0, 100, 0.6));
+}
+
+/* 🫧 bulles */
+.bubble {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+⚡ 3. Interaction “tap bocal” (ultra satisfaisant)
+
+Ajoute ça :
+
+onClick={() => {
+  // petit choc visuel
+  document.querySelector(".jar").animate(
+    [
+      { transform: "translateX(0)" },
+      { transform: "translateX(-2px)" },
+      { transform: "translateX(2px)" },
+      { transform: "translateX(0)" }
+    ],
+    { duration: 200 }
+  );
+}}
+
+👉 amélioration :
+
+ajoute une onde dans le liquide (scaleY rapide)
+joue un petit son “toc”
+🧠 4. Connecter à ton système
+<BrainJar activity={tokensPerSecond / 50} />
+🎮 5. États visuels stylés
+🟢 Normal
+bleu cyan
+mouvement doux
+🟡 Actif
+glow + bulles rapides
+cerveau pulse
+🔴 Overload
+background: linear-gradient(to top, rgba(255,0,0,0.6), transparent);
+⚪ Idle
+quasi figé
+glow faible
+🔥 6. Petit détail qui fait TOUT
+
+Ajoute une ligne de réflexion du verre :
+
+.jar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 20%;
+  width: 20%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255,255,255,0.2),
+    transparent
+  );
+}
+
+👉 instant +300% réalisme
+
+💡 Résultat
+
+👉 sans WebGL tu obtiens :
+
+effet verre crédible
+liquide vivant
+cerveau animé
+feedback système
+
+👉 perf :
+
+🔋 mobile friendly
+🧊 zéro GPU stress

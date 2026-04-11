@@ -1,44 +1,36 @@
 /* ═══════════════════════════════════════════════════════
-   ORION V3 — Props Layer (L2 Diegetic Objects)
-   Shared styles for Orion
+   ORION V3 — Props Shared Layer (L2 Diegetic Objects)
    ═══════════════════════════════════════════════════════ */
 
-/* ── Container ─────────────────────────────────────── */
 .prop-wrap {
-  position: absolute;
+  position: absolute !important; /* Force absolute despite any inherits */
+  bottom: var(--prop-ledge-bottom); /* Aligned via global tokens */
   cursor: pointer;
   pointer-events: auto;
   user-select: none;
+  transition: transform var(--transition-base), filter var(--transition-base);
+  z-index: var(--z-l2-props);
 }
 
-/* ── Image (Chroma Blue removal) ─────────────────── */
 .prop-img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   object-fit: contain;
-  /* Chroma Blue (#0000ff) → transparent */
+  /* Chroma Blue removal applied to all props */
   filter: url(#chroma-key-blue);
-  transition: transform var(--transition-base), filter var(--transition-fast);
 }
 
-/* ── Hover ──────────────────────────────────────────── */
-.prop-wrap:hover .prop-img {
-  transform: scale(1.04) translateY(-3px);
-  filter: url(#chroma-key-blue) brightness(1.08);
+/* ── Generic Hover/Active ───────────────────────────── */
+.prop-wrap:hover {
+  transform: translateY(-5px);
 }
 
-/* ── Click ripple ───────────────────────────────────── */
-.prop-wrap:active .prop-img {
+.prop-wrap:active {
   transform: scale(0.97);
 }
 
-/* ── Orion (Bottom-Left) ────────────────────────────── */
-.prop-orion {
-  bottom: 8.2%;
-  left: 5.5%;
-  width: 11vw;
-  max-width: 210px;
-  min-width: 165px;
-  aspect-ratio: 1;
+/* Active state (used for toggling UI) */
+.prop-wrap.active {
+  transform: translateY(-8px) scale(1.02);
 }

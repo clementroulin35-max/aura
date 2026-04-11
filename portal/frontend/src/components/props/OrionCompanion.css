@@ -1,0 +1,65 @@
+/* ═══════════════════════════════════════════════════════
+   ORION V3 — OrionCompanion Specific Styles
+   ═══════════════════════════════════════════════════════ */
+
+.orion-companion-wrap {
+  left: var(--prop-orion-left);
+  bottom: var(--prop-orion-bottom);
+  width: var(--prop-orion-width);
+}
+
+.orion-img-anchor {
+  position: relative;
+  width: 100%;
+}
+
+/* ── BD Style Speech Bubbles ────────────────────────── */
+.orion-bubble {
+  position: absolute;
+  bottom: calc(100% + 10px); /* Reliable floating above the head */
+  left: 80%; /* Shifted right as requested */
+  transform: translateX(-50%);
+  background: #fffef0; /* Permanent White/BD Cream */
+  border: 2px solid #0a0a0a;
+  padding: 12px 18px;
+  border-radius: 4px;
+  width: max-content;
+  max-width: 260px;
+  color: #0c0c0c;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.8);
+  z-index: 2000; /* Over everything */
+  pointer-events: none;
+}
+
+.bubble-notif {
+  background: #fffef0;
+  border-color: #0a0a0a;
+}
+
+.bubble-tail {
+  position: absolute;
+  top: 100%;
+  left: 20%; /* Tail shifted left relative to bubble to point back to cat's head */
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 12px solid #0a0a0a;
+}
+
+.bubble-tail::after {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: -8px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid #fffef0; /* Inner fill */
+}
+
+.bubble-notif .bubble-tail::after {
+  border-top-color: #fffef0; /* Fixed to white */
+}

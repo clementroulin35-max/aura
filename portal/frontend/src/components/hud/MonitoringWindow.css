@@ -1,0 +1,115 @@
+.monitoring-content {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Pulse Animation */
+.pulse-section {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.pulse-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.pulse-ring {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 2px solid var(--slate-mid);
+  position: relative;
+  transition: all 0.5s ease;
+}
+
+.pulse-green {
+  border-color: var(--status-ok);
+  color: var(--status-ok);
+  box-shadow: 0 0 25px rgba(0, 184, 148, 0.4);
+}
+
+.pulse-red {
+  border-color: var(--status-error);
+  color: var(--status-error);
+  box-shadow: 0 0 25px rgba(214, 48, 49, 0.4);
+}
+
+.pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.2;
+  animation: pulse-ring-expand 2s ease-out infinite;
+}
+
+.pulse-green::after { color: var(--status-success); }
+.pulse-red::after { color: var(--status-error); }
+
+@keyframes pulse-ring-expand {
+  0% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.pulse-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  opacity: 0.8;
+  transition: color 0.5s ease;
+}
+
+.is-online .pulse-label { color: var(--status-success); }
+.is-offline .pulse-label { color: var(--status-error); }
+
+/* Telemetry Metrics */
+.section-header {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--slate-mid);
+  letter-spacing: 0.2em;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.metric-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-row dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--slate-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric-row dd {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.metric-row dd.status-ok {
+  color: var(--status-ok);
+  text-shadow: 0 0 8px rgba(0, 184, 148, 0.5);
+}

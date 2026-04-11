@@ -3,8 +3,7 @@ export const API_BASE = '/api';
 
 export const VIEWS = {
   DASHBOARD: 'DASHBOARD',
-  SUPERVISOR: 'SUPERVISEUR',
-  MEMORY: 'MEMOIRE',
+  INFO: 'INFO',
 };
 
 export const CHROMA_GREEN = '#00ff00';

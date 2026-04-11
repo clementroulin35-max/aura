@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, useDragControls, AnimatePresence } from 'framer-motion';
+import './hud.css';
 import './LLMConfigWindow.css';
 import { API_BASE } from '../../lib/constants.js';
 
@@ -57,9 +58,9 @@ const TierSelector = ({ activeTier, onChange }) => {
 
 // --- Main Window ---
 
-const LLMConfigWindow = ({ onClose, x, y }) => {
-    const [config, setConfig] = useState(null);
-    const [allModels, setAllModels] = useState({});
+const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, initialModels }) => {
+    const [config, setConfig] = useState(initialConfig || null);
+    const [allModels, setAllModels] = useState(initialModels || {});
     const [saving, setSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | success
     const [activeSection, setActiveSection] = useState('PROVIDERS');
@@ -70,6 +71,7 @@ const LLMConfigWindow = ({ onClose, x, y }) => {
     const [supervisorTier, setSupervisorTier] = useState('GOLD');
 
     const [dimensions, setDimensions] = useState({ width: 1020, height: 705 });
+    const [ollamaReachability, setOllamaReachability] = useState(initialReachability || 'idle');
     const dragControls = useDragControls();
 
     const KEY_PREFIXES = {
@@ -83,26 +85,85 @@ const LLMConfigWindow = ({ onClose, x, y }) => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const configRes = await fetch(`${API_BASE}/v1/llm/config`);
-                const configData = await configRes.json();
-                setConfig(configData);
-
-                // Fetch models for all enabled providers
-                const providersRes = await fetch(`${API_BASE}/v1/llm/providers`);
-                const providers = await providersRes.json();
-
-                const modelMap = {};
-                for (const p of providers) {
-                    const mRes = await fetch(`${API_BASE}/v1/llm/models/${p.id}`);
-                    modelMap[p.id] = await mRes.json();
+                // Phase 1: Immediate Config Delivery (Skip fetch if initialConfig is provided)
+                let configData = initialConfig;
+                if (!configData) {
+                    const configRes = await fetch(`${API_BASE}/v1/llm/config`);
+                    configData = await configRes.json();
+                    setConfig(configData);
                 }
-                setAllModels(modelMap);
+
+                // Phase 2: Parallel Model Handshake (Skip if already provided by root)
+                if (!initialModels || Object.keys(initialModels).length === 0) {
+                    const providersRes = await fetch(`${API_BASE}/v1/llm/providers`);
+                    const providers = await providersRes.json();
+
+                    const modelPromises = providers.map(p => 
+                        fetch(`${API_BASE}/v1/llm/models/${p.id}`).then(res => res.json().then(data => ({ id: p.id, data })))
+                    );
+                    
+                    const results = await Promise.all(modelPromises);
+                    const modelMap = {};
+                    results.forEach(r => { modelMap[r.id] = r.data; });
+                    setAllModels(modelMap);
+                }
+
+                // Phase 3: Background Llama Sweep (Handled by Global Audit)
+                // We don't auto-ping here anymore to avoid duplicates in logs.
+                // The HUD uses the 'initialReachability' prop from App.jsx.
             } catch (e) {
                 setConfig({ error: true });
             }
         };
         loadData();
     }, []);
+
+    const pingOllama = async (url) => {
+        if (!url) return;
+        setOllamaReachability('checking');
+        
+        // Log start of attempt
+        window.dispatchEvent(new CustomEvent('ORION_LOG', { 
+            detail: { message: `[SYS] Tentative de connexion au serveur Llama: ${url}...`, type: 'info' } 
+        }));
+
+        try {
+            const res = await fetch(`${API_BASE}/v1/llm/test`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ provider: 'ollama', api_key: url }),
+            });
+            const data = await res.json();
+            const reachable = data.success;
+            setOllamaReachability(reachable ? 'reachable' : 'unreachable');
+            
+            // Dispatch global status update based on result
+            // This ensures the Header turns Green ONLY on success
+            const othersValid = Object.entries(config.providers).some(([id, p]) => {
+                if (p.enabled && id !== 'ollama' && p.api_key && p.api_key.length > 8) return true;
+                if (p.enabled && id === 'ollama' && ollamaReachability === 'reachable') return true;
+                return false;
+            });
+            const nextStatus = (reachable || othersValid) ? 'ONLINE' : 'OFFLINE';
+            window.dispatchEvent(new CustomEvent('ORION_SYNC_REQ', { detail: { status: nextStatus } }));
+
+            window.dispatchEvent(new CustomEvent('ORION_LOG', { 
+                detail: { 
+                    content: reachable ? `[SUCCESS] Serveur Llama détecté et opérationnel!` : `[ERROR] Échec de connexion Llama à ${url}.`, 
+                    type: reachable ? 'success' : 'error' 
+                } 
+            }));
+
+            return reachable;
+        } catch (e) {
+            setOllamaReachability('unreachable');
+            window.dispatchEvent(new CustomEvent('ORION_SYNC_REQ', { detail: { status: 'OFFLINE' } }));
+            window.dispatchEvent(new CustomEvent('ORION_LOG', { 
+                detail: { content: `[ERROR] Serveur Llama hors ligne ou URL invalide.`, type: 'error' } 
+            }));
+            return false;
+        }
+    };
 
 
     // Categorization Engine - Strict Validation Filter
@@ -297,6 +358,9 @@ const LLMConfigWindow = ({ onClose, x, y }) => {
         return Object.entries(config.providers).some(([pid, p]) => {
             if (!p.enabled) return false;
 
+            // SPECIAL CASE: Ollama must be reachable to count as active
+            if (pid === 'ollama') return ollamaReachability === 'reachable';
+
             // If we have a session validation result, follow it strictly
             if (validation[pid]) {
                 return validation[pid].status === 'valid';
@@ -304,31 +368,51 @@ const LLMConfigWindow = ({ onClose, x, y }) => {
 
             // Fallback for initial boot (Sovereign Trust):
             // If enabled and has plausible key/URL, consider it ACTIVE until tested otherwise.
-            if (pid === 'ollama') return !!p.base_url;
             return p.api_key && p.api_key.length > 8;
         });
-    }, [config, validation]);
+    }, [config, validation, ollamaReachability]);
+
+    const unfoldVariants = {
+        hidden: { opacity: 0, filter: 'blur(20px)', scale: 0.95 },
+        visible: { 
+            opacity: 1, 
+            filter: 'blur(0px)', 
+            scale: 1,
+            transition: { 
+                type: "spring",
+                stiffness: 100,
+                damping: 20,
+                delay: 0.1
+            }
+        }
+    };
 
     return (
         <motion.div
-            className="llm-config-container"
+            className="nexus-hud-panel config-panel"
             drag
             dragControls={dragControls}
             dragListener={false}
             dragMomentum={false}
             dragConstraints={{ top: 64, left: 0, right: window.innerWidth - dimensions.width, bottom: window.innerHeight - 120 }}
             dragElastic={0}
-            style={{ width: dimensions.width, height: dimensions.height, x, y }}
-            layout="position"
-            initial={false}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            style={{ 
+                width: dimensions.width, 
+                height: dimensions.height, 
+                x, 
+                y,
+                zIndex: 'var(--z-hud-focus)' 
+            }}
+            variants={unfoldVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
         >
-            <div className="config-header" onPointerDown={(e) => dragControls.start(e)}>
+            <div className="hud-header" onPointerDown={(e) => dragControls.start(e)}>
                 <div className="header-drag-zone">
-                    <span className="config-title">ATLANTIS SYSTEM — NEURAL SYNC</span>
+                    <span className="hud-title">ATLANTIS SYSTEM — NEURAL SYNC</span>
                 </div>
-                <button className="config-close-btn" onClick={onClose}>[X]</button>
+                <button className="hud-close-btn" onClick={onClose}>[X]</button>
             </div>
 
             <div className="config-body">
@@ -378,18 +462,37 @@ const LLMConfigWindow = ({ onClose, x, y }) => {
                                                         <HUDSwitch
                                                             enabled={prov.enabled}
                                                             onChange={(val) => {
+                                                                // INSTANT FEEDBACK
                                                                 setConfig({
                                                                     ...config,
                                                                     providers: { ...config.providers, [pid]: { ...prov, enabled: val } }
                                                                 });
+
+                                                                // BACKGROUND VALIDATION (Non-blocking)
+                                                                if (val && pid === 'ollama') {
+                                                                    pingOllama(prov.base_url);
+                                                                }
+
                                                                 // Reset validation status when disabling
                                                                 if (!val) {
                                                                     setValidation(prev => ({ ...prev, [pid]: null }));
+                                                                    if (pid === 'ollama') setOllamaReachability('idle');
                                                                 }
-                                                                // Sync request to reflect strictly validated status
-                                                                const willBeActive = val && validation[pid]?.status === 'valid';
-                                                                const otherValid = Object.entries(config.providers).some(([id, p]) => id !== pid && p.enabled && validation[id]?.status === 'valid');
-                                                                const nextStatus = (willBeActive || otherValid) ? 'ONLINE' : 'OFFLINE';
+
+                                                                // Sync request based on unified Sovereign Trust logic
+                                                                const othersValid = Object.entries(config.providers).some(([id, p]) => {
+                                                                    if (id === pid) return false;
+                                                                    if (!p.enabled) return false;
+                                                                    if (validation[id]) return validation[id].status === 'valid';
+                                                                    if (id === 'ollama') return ollamaReachability === 'reachable';
+                                                                    return p.api_key && p.api_key.length > 8;
+                                                                });
+
+                                                                const willBeActive = val && (
+                                                                    pid === 'ollama' ? ollamaReachability === 'reachable' : 
+                                                                    (prov.api_key && prov.api_key.length > 8)
+                                                                );
+                                                                const nextStatus = (willBeActive || othersValid) ? 'ONLINE' : 'OFFLINE';
                                                                 window.dispatchEvent(new CustomEvent('ORION_SYNC_REQ', { detail: { status: nextStatus } }));
                                                             }}
                                                         />
@@ -411,14 +514,40 @@ const LLMConfigWindow = ({ onClose, x, y }) => {
                                                                         });
                                                                     }}
                                                                 />
-                                                                <button
-                                                                    className={`test-btn ${validation[pid]?.status || ''}`}
-                                                                    onClick={() => handleTest(pid)}
-                                                                >
-                                                                    {validation[pid]?.status === 'testing' ? '...' : 'VALIDATE'}
-                                                                </button>
+                                                                {pid !== 'ollama' && (
+                                                                    <button
+                                                                        className={`test-btn ${validation[pid]?.status || ''} ${validation[pid]?.status === 'testing' ? 'is-loading' : ''}`}
+                                                                        onClick={() => handleTest(pid)}
+                                                                    >
+                                                                        {validation[pid]?.status === 'testing' ? (
+                                                                            <svg className="spinner-detect" viewBox="0 0 50 50">
+                                                                                <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
+                                                                            </svg>
+                                                                        ) : 'VALIDATE'}
+                                                                    </button>
+                                                                )}
                                                             </div>
-                                                            {/* Inline messages removed as per Captain's directive — logs now in Terminal */}
+                                                            {pid === 'ollama' && (
+                                                                <div className="llama-connectivity">
+                                                                    <div className={`reachability-led ${ollamaReachability}`} />
+                                                                    <span className="tiny-label">
+                                                                        {ollamaReachability === 'reachable' ? 'SYNC OK' : 
+                                                                         ollamaReachability === 'unreachable' ? 'LINK FAILED' : 
+                                                                         ollamaReachability === 'checking' ? 'ESTABLISHING...' : 'READY'}
+                                                                    </span>
+                                                                    <button 
+                                                                        className="mount-server-btn" 
+                                                                        onClick={() => pingOllama(prov.base_url)}
+                                                                        disabled={ollamaReachability === 'checking'}
+                                                                    >
+                                                                        {ollamaReachability === 'checking' ? (
+                                                                            <svg className="spinner-detect" viewBox="0 0 50 50">
+                                                                                <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
+                                                                            </svg>
+                                                                        ) : '⏻ MOUNT SERVER'}
+                                                                    </button>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
@@ -512,7 +641,7 @@ const LLMConfigWindow = ({ onClose, x, y }) => {
                     </div>
                 )}
             </div>
-            <div className="config-resize-handle" onMouseDown={startResizing} />
+            <div className="hud-resize-handle config-resize-handle" onMouseDown={startResizing} />
         </motion.div>
     );
 };

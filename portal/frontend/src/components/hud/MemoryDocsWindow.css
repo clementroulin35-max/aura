@@ -1,0 +1,59 @@
+.docs-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.docs-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.doc-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background: var(--hud-surface-dark);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.doc-card:hover {
+  background: var(--hud-surface-light);
+  border-color: var(--neon-yellow);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.doc-icon {
+  font-size: 20px;
+  opacity: 0.6;
+}
+
+.doc-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.doc-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--grey-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.doc-type {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--slate-mid);
+  letter-spacing: 0.1em;
+}

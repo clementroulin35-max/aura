@@ -1,0 +1,79 @@
+.archives-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.archive-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.archive-card {
+  padding: 20px;
+  background: var(--hud-surface-dark);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.archive-card:hover {
+  border-color: rgba(255, 217, 0, 0.3);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+}
+
+.archive-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.archive-id {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--neon-yellow);
+  opacity: 0.8;
+}
+
+.archive-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--slate-mid);
+}
+
+.archive-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--grey-light);
+  letter-spacing: 0.05em;
+}
+
+.archive-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 5px;
+}
+
+.expand-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 217, 0, 0.2);
+  color: var(--neon-yellow);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.1em;
+}
+
+.expand-btn:hover {
+  background: var(--neon-yellow);
+  color: #000;
+  box-shadow: 0 0 10px var(--neon-yellow);
+}

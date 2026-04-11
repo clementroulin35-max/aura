@@ -1,16 +1,23 @@
 import './styles/index.css';
 import './styles/App.css';
-import { useState, useEffect, useRef } from 'react';
-import { motion, useMotionValue } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { useMotionValue } from 'framer-motion';
 import { VIEWS } from './lib/constants.js';
-import Header from './components/layout/Header.jsx';
-import Footer from './components/layout/Footer.jsx';
+import Header from './components/layouts/Header.jsx';
+import Footer from './components/layouts/Footer.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
-import SupervisorPage from './pages/SupervisorPage.jsx';
-import MemoryPage from './pages/MemoryPage.jsx';
-import HyperspaceJump from './components/shared/HyperspaceJump.jsx';
+import CreditsPage from './pages/CreditsPage.jsx';
+import HyperspaceJump from './components/effects/HyperspaceJump.jsx';
+
+// HUD Components
 import HologramTerminal from './components/hud/HologramTerminal.jsx';
 import LLMConfigWindow from './components/hud/LLMConfigWindow.jsx';
+import TeamsWindow from './components/hud/TeamsWindow.jsx';
+import MonitoringWindow from './components/hud/MonitoringWindow.jsx';
+import MemoryDocsWindow from './components/hud/MemoryDocsWindow.jsx';
+import MemoryRapportHUD from './components/hud/MemoryRapportHUD.jsx';
+
+import { useSystemStatus } from './hooks/useSystemStatus.js';
 
 // Discover all background images dynamically
 const bgModules = import.meta.glob('./assets/backgrounds/*.{jpg,png,jpeg,webp}', { eager: true });
@@ -20,7 +27,7 @@ function ChromaFilters() {
   return (
     <svg className="svg-filters" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <filter id="chroma-key-green" color-interpolation-filters="sRGB">
+        <filter id="chroma-key-green" colorInterpolationFilters="sRGB">
           <feColorMatrix type="matrix" values="
             1  0  0  0  0
             0  1  0  0  0
@@ -28,13 +35,16 @@ function ChromaFilters() {
            -1  2 -1  0  0" result="mask" />
           <feComposite in="SourceGraphic" in2="mask" operator="out" />
         </filter>
-        <filter id="chroma-key-blue" color-interpolation-filters="sRGB">
+        <filter id="chroma-key-blue" colorInterpolationFilters="sRGB">
           <feColorMatrix type="matrix" values="
-            1  0  0  0  0
-            0  1  0  0  0
-            0  0  1  0  0
-           -1 -1  2  0  0" result="mask" />
-          <feComposite in="SourceGraphic" in2="mask" operator="out" />
+            1 0 0 0 0
+            0 1 0 0 0
+            0 0 1 0 0
+            -1.2 -1.2 2.4 0 -0.1" result="mask" />
+          <feComponentTransfer in="mask" result="better-mask">
+            <feFuncA type="linear" slope="12" intercept="-6" />
+          </feComponentTransfer>
+          <feComposite in="SourceGraphic" in2="better-mask" operator="out" />
         </filter>
       </defs>
     </svg>
@@ -43,63 +53,58 @@ function ChromaFilters() {
 
 const PAGES = {
   [VIEWS.DASHBOARD]: DashboardPage,
-  [VIEWS.SUPERVISOR]: SupervisorPage,
-  [VIEWS.MEMORY]: MemoryPage,
+  [VIEWS.INFO]: CreditsPage,
 };
 
 export default function App() {
   const [view, setView] = useState(VIEWS.DASHBOARD);
-  const [ui, setUi] = useState({ chatOpen: false, settingsOpen: false, executing: false });
+  const [logHistory, setLogHistory] = useState([]);
+  
+  // HUD State — Windows are manually opened
+  const [ui, setUi] = useState({
+    chatOpen: false,
+    settingsOpen: false,
+    teamsOpen: false,
+    monitorOpen: false,
+    docsOpen: false,
+    archivesOpen: false,
+    executing: false,
+    orionMuted: false
+  });
 
+  // Window Positions (Persistent across views)
   const xTerminal = useMotionValue(35);
-  const yTerminal = useMotionValue(85);
+  const yTerminal = useMotionValue(100);
   const xSettings = useMotionValue(window.innerWidth - 1055);
-  const ySettings = useMotionValue(85);
+  const ySettings = useMotionValue(100);
+  const xTeams = useMotionValue(100);
+  const yTeams = useMotionValue(145);
+  const xMonitor = useMotionValue(window.innerWidth - 350);
+  const yMonitor = useMotionValue(145);
+  const xDocs = useMotionValue(200);
+  const yDocs = useMotionValue(190);
+  const xArchives = useMotionValue(window.innerWidth - 500);
+  const yArchives = useMotionValue(190);
 
-  // Hyperspace Jump State Management
   const [bgIndex, setBgIndex] = useState(0);
   const [isJumping, setIsJumping] = useState(false);
-  const [jumpPhase, setJumpPhase] = useState('idle'); // idle | departure | arrival
-  const [systemStatus, setSystemStatus] = useState('OFFLINE');
-
-  // Audit Neural Sync Status
-  const auditNeuralSync = async (event = null) => {
-    // Optimistic override from events (e.g. HUD Validation Success)
-    if (event?.detail?.status) {
-      setSystemStatus(event.detail.status);
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/v1/llm/config');
-      const data = await res.json();
-      const config = data.config || data; // Handle both direct and wrapped formats
-
-      const hasStrictPath = Object.entries(config.providers || {}).some(([pid, p]) => {
-        if (!p.enabled) return false;
-        // On initial load, we trust paths that look valid (prefix/length check)
-        if (pid === 'ollama') return !!p.base_url;
-        return p.api_key && p.api_key.length > 8;
-      });
-
-      setSystemStatus(hasStrictPath ? 'ONLINE' : 'OFFLINE');
-    } catch (e) {
-      setSystemStatus('OFFLINE');
-    }
-  };
-
-  useEffect(() => {
-    auditNeuralSync();
-    window.addEventListener('ORION_SYNC_REQ', auditNeuralSync);
-    return () => window.removeEventListener('ORION_SYNC_REQ', auditNeuralSync);
-  }, []); // Only on mount, events handle the rest
+  const [jumpPhase, setJumpPhase] = useState('idle');
+  
+  const { status: systemStatus, config: systemConfig, ollamaReachability, allModels } = useSystemStatus();
 
   const handlePropClick = (panel) => {
     setUi(prev => ({
       ...prev,
+      [panel + 'Open']: !prev[panel + 'Open'],
       chatOpen: panel === 'chat' ? !prev.chatOpen : prev.chatOpen,
       settingsOpen: panel === 'settings' ? !prev.settingsOpen : prev.settingsOpen,
+      orionMuted: panel === 'mute' ? !prev.orionMuted : prev.orionMuted,
     }));
+  };
+
+  // Improved Generic HUD Toggle
+  const toggleHUD = (key) => {
+    setUi(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleExecute = async () => {
@@ -113,23 +118,25 @@ export default function App() {
     }
   };
 
-  /**
-   * Cinematic Jump Trigger
-   * Coordinates the L0 animations (in App.css) with precisely timed state swaps.
-   */
+  useEffect(() => {
+    const handleLog = (e) => {
+      setLogHistory(prev => [...prev, {
+        ...e.detail,
+        time: new Date().toLocaleTimeString()
+      }]);
+    };
+    window.addEventListener('ORION_LOG', handleLog);
+    return () => window.removeEventListener('ORION_LOG', handleLog);
+  }, []);
+
   const initiateJump = (index) => {
     if (index === bgIndex || isJumping) return;
-
     setIsJumping(true);
     setJumpPhase('departure');
-
-    // 1. Departure peak: Switch the background source under the tunnel/flash
     setTimeout(() => {
       setBgIndex(index);
       setJumpPhase('arrival');
     }, 800);
-
-    // 2. Cleanup: End jump sequence
     setTimeout(() => {
       setIsJumping(false);
       setJumpPhase('idle');
@@ -143,60 +150,63 @@ export default function App() {
     <div className={`app-shell state-${jumpPhase} ${isJumping ? 'is-jumping' : ''}`}>
       <ChromaFilters />
 
-      {/* L0 — THE VISTA (Main background layer) */}
       <div
         className={`l0-vista phase-${jumpPhase}`}
         style={{ backgroundImage: `url(${currentBgSrc})` }}
         aria-hidden="true"
       />
 
-      {/* THE CINEMATIC JUMP OVERLAY (Framer Motion) - Nested between L0 and L1 */}
       <HyperspaceJump isJumping={isJumping} />
 
       <Header
         currentView={view}
         onNavigate={setView}
-        onSettingsClick={() => handlePropClick("settings")}
+        onSettingsClick={() => toggleHUD("settingsOpen")}
+        onToggleHUD={toggleHUD} // Pass generic toggle to header
         status={systemStatus}
+        ui={ui}
       />
 
-      {/* GLOBAL HUD LAYER — Windows persist state across views */}
-      <div
-        className="l3-hud-layer global-hud"
-        style={{ top: '0', height: '100vh', pointerEvents: 'none' }}
-      >
-        {/* Terminal: Only shown on Dashboard when toggled */}
-        <div style={{ display: (view === VIEWS.DASHBOARD && ui.chatOpen) ? 'block' : 'none' }}>
-          <HologramTerminal
-            onClose={() => handlePropClick("chat")}
-            x={xTerminal}
-            y={yTerminal}
-            dragConstraints={{ top: 0, left: 0, right: window.innerWidth, bottom: window.innerHeight }}
+      {/* Global Desktop HUD Layer — Reversed Order (Terminal on Top) */}
+      <div className="l3-hud-layer global-hud" style={{ top: '0', height: '100vh', pointerEvents: 'none' }}>
+        {/* Memory Windows (Background) */}
+        {ui.archivesOpen && <MemoryRapportHUD onClose={() => toggleHUD("archivesOpen")} x={xArchives} y={yArchives} />}
+        {ui.docsOpen && <MemoryDocsWindow onClose={() => toggleHUD("docsOpen")} x={xDocs} y={yDocs} />}
+        
+        {/* Supervisor Windows */}
+        {ui.monitorOpen && <MonitoringWindow onClose={() => toggleHUD("monitorOpen")} x={xMonitor} y={yMonitor} status={systemStatus} />}
+        {ui.teamsOpen && <TeamsWindow onClose={() => toggleHUD("teamsOpen")} x={xTeams} y={yTeams} />}
+        
+        {/* Core Windows (Foreground) */}
+        {ui.settingsOpen && (
+          <LLMConfigWindow 
+            onClose={() => toggleHUD("settingsOpen")} 
+            x={xSettings} 
+            y={ySettings} 
+            initialConfig={systemConfig}
+            initialReachability={ollamaReachability}
+            initialModels={allModels}
           />
-        </div>
-
-        {/* Settings: Only shown on Dashboard when toggled */}
-        <div style={{ display: (view === VIEWS.DASHBOARD && ui.settingsOpen) ? 'block' : 'none' }}>
-          <LLMConfigWindow
-            onClose={() => handlePropClick("settings")}
-            x={xSettings}
-            y={ySettings}
-            dragConstraints={{ top: 0, left: 0, right: window.innerWidth, bottom: window.innerHeight }}
+        )}
+        {ui.chatOpen && (
+          <HologramTerminal 
+            onClose={() => toggleHUD("chatOpen")} 
+            x={xTerminal} 
+            y={yTerminal} 
+            initialLogs={logHistory}
           />
-        </div>
+        )}
       </div>
 
-      <PageComponent
-        ui={ui}
-        onPropClick={handlePropClick}
-        onExecute={handleExecute}
-      />
+      <PageComponent ui={ui} onPropClick={handlePropClick} onExecute={handleExecute} />
 
       <Footer
         backgrounds={BACKGROUNDS}
         activeIndex={bgIndex}
         onSelect={initiateJump}
         isJumping={isJumping}
+        ui={ui}
+        onMuteToggle={() => handlePropClick("mute")}
       />
     </div>
   );
