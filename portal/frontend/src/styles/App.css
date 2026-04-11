@@ -39,17 +39,17 @@
     filter: brightness(2) blur(10px);
   }
 
-  15% {
-    transform: scale(1);
+  17% {
+    transform: scale(0.9);
     filter: brightness(1.1) blur(0);
   }
 
-  25% {
+  36% {
     transform: scale(0.8);
     filter: brightness(1.1) blur(0);
   }
 
-  70% {
+  75% {
     transform: scale(1.3);
     filter: brightness(1);
   }

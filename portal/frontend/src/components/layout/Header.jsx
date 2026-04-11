@@ -1,7 +1,7 @@
 import './Header.css';
 import { VIEWS } from '../../lib/constants.js';
 
-export default function Header({ currentView, onNavigate, onSettingsClick }) {
+export default function Header({ currentView, onNavigate, onSettingsClick, status = 'OFFLINE' }) {
   const navItems = [
     { id: VIEWS.DASHBOARD, label: 'Dashboard' },
     { id: VIEWS.SUPERVISOR, label: 'Superviseur' },
@@ -32,9 +32,9 @@ export default function Header({ currentView, onNavigate, onSettingsClick }) {
 
       {/* System Status - Atlantis High-Density logic */}
       <div className="nexus-status">
-        <div className="status-indicator">
+        <div className={`status-indicator ${status.toLowerCase()}`}>
           <span className="status-dot" />
-          <span className="status-label">ONLINE</span>
+          <span className="status-label">{status}</span>
         </div>
         <button 
           className="settings-gear-btn" 

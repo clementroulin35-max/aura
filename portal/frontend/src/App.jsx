@@ -53,13 +53,46 @@ export default function App() {
 
   const xTerminal = useMotionValue(50);
   const yTerminal = useMotionValue(100);
-  const xSettings = useMotionValue(window.innerWidth - 850);
+  const xSettings = useMotionValue(window.innerWidth - 1070);
   const ySettings = useMotionValue(100);
 
   // Hyperspace Jump State Management
   const [bgIndex, setBgIndex] = useState(0);
   const [isJumping, setIsJumping] = useState(false);
   const [jumpPhase, setJumpPhase] = useState('idle'); // idle | departure | arrival
+  const [systemStatus, setSystemStatus] = useState('OFFLINE');
+
+  // Audit Neural Sync Status
+  const auditNeuralSync = async (event = null) => {
+    // Optimistic override from events (e.g. HUD Validation Success)
+    if (event?.detail?.status) {
+      setSystemStatus(event.detail.status);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/v1/llm/config');
+      const data = await res.json();
+      const config = data.config || data; // Handle both direct and wrapped formats
+
+      const hasStrictPath = Object.entries(config.providers || {}).some(([pid, p]) => {
+        if (!p.enabled) return false;
+        // On initial load, we trust paths that look valid (prefix/length check)
+        if (pid === 'ollama') return !!p.base_url;
+        return p.api_key && p.api_key.length > 8;
+      });
+      
+      setSystemStatus(hasStrictPath ? 'ONLINE' : 'OFFLINE');
+    } catch (e) {
+      setSystemStatus('OFFLINE');
+    }
+  };
+
+  useEffect(() => {
+    auditNeuralSync();
+    window.addEventListener('ORION_SYNC_REQ', auditNeuralSync);
+    return () => window.removeEventListener('ORION_SYNC_REQ', auditNeuralSync);
+  }, []); // Only on mount, events handle the rest
 
   const handlePropClick = (panel) => {
     setUi(prev => ({
@@ -124,6 +157,7 @@ export default function App() {
         currentView={view}
         onNavigate={setView}
         onSettingsClick={() => handlePropClick("settings")}
+        status={systemStatus}
       />
 
       {/* GLOBAL HUD LAYER — Windows persist state across views */}

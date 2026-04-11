@@ -142,6 +142,21 @@
   border-radius: var(--radius-full);
   border: 1px solid rgba(0, 255, 0, 0.1);
   backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+.status-indicator.offline {
+  background: rgba(255, 0, 0, 0.1);
+  border-color: rgba(255, 0, 0, 0.2);
+}
+
+.status-indicator.offline .status-dot {
+  background: #ff3333;
+  box-shadow: 0 0 8px #ff3333;
+}
+
+.status-indicator.offline .status-label {
+  color: #ff8888;
 }
 
 .settings-gear-btn {

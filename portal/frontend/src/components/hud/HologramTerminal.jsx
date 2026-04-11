@@ -17,6 +17,22 @@ const HologramTerminal = ({ onClose, x, y }) => {
     const [dimensions, setDimensions] = useState({ width: 720, height: 430 });
     const dragControls = useDragControls();
 
+    // Event Listener for External Logs (LLM Config, etc.)
+    useEffect(() => {
+        const handleExternalLog = (event) => {
+            const { role, content } = event.detail || {};
+            if (content) {
+                setMessages(prev => [...prev, {
+                    role: role || 'system',
+                    content,
+                    time: new Date().toLocaleTimeString()
+                }]);
+            }
+        };
+        window.addEventListener('ORION_LOG', handleExternalLog);
+        return () => window.removeEventListener('ORION_LOG', handleExternalLog);
+    }, []);
+
     // Auto-scroll logic
     useEffect(() => {
         if (screenRef.current) {
@@ -60,8 +76,8 @@ const HologramTerminal = ({ onClose, x, y }) => {
         const startY = mouseDownEvent.clientY;
 
         const onMouseMove = (mouseMoveEvent) => {
-            const newWidth = Math.max(400, startWidth + (mouseMoveEvent.clientX - startX));
-            const newHeight = Math.max(400, startHeight + (mouseMoveEvent.clientY - startY));
+            const newWidth = Math.max(500, startWidth + (mouseMoveEvent.clientX - startX));
+            const newHeight = Math.max(300, startHeight + (mouseMoveEvent.clientY - startY));
             setDimensions({ width: newWidth, height: newHeight });
         };
 
