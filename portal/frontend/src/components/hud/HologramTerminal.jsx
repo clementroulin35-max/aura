@@ -76,8 +76,8 @@ const HologramTerminal = ({ onClose, x, y }) => {
         const startY = mouseDownEvent.clientY;
 
         const onMouseMove = (mouseMoveEvent) => {
-            const newWidth = Math.max(500, startWidth + (mouseMoveEvent.clientX - startX));
-            const newHeight = Math.max(300, startHeight + (mouseMoveEvent.clientY - startY));
+            const newWidth = Math.max(610, startWidth + (mouseMoveEvent.clientX - startX));
+            const newHeight = Math.max(200, startHeight + (mouseMoveEvent.clientY - startY));
             setDimensions({ width: newWidth, height: newHeight });
         };
 

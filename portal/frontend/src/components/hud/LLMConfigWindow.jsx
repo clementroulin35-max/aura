@@ -279,8 +279,8 @@ const LLMConfigWindow = ({ onClose, x, y }) => {
 
         const onMouseMove = (mouseMoveEvent) => {
             setDimensions({
-                width: Math.max(640, startWidth + (mouseMoveEvent.clientX - startX)),
-                height: Math.max(510, startHeight + (mouseMoveEvent.clientY - startY))
+                width: Math.max(635, startWidth + (mouseMoveEvent.clientX - startX)),
+                height: Math.max(445, startHeight + (mouseMoveEvent.clientY - startY))
             });
         };
 

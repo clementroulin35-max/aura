@@ -51,10 +51,10 @@ export default function App() {
   const [view, setView] = useState(VIEWS.DASHBOARD);
   const [ui, setUi] = useState({ chatOpen: false, settingsOpen: false, executing: false });
 
-  const xTerminal = useMotionValue(50);
-  const yTerminal = useMotionValue(100);
-  const xSettings = useMotionValue(window.innerWidth - 1070);
-  const ySettings = useMotionValue(100);
+  const xTerminal = useMotionValue(35);
+  const yTerminal = useMotionValue(85);
+  const xSettings = useMotionValue(window.innerWidth - 1055);
+  const ySettings = useMotionValue(85);
 
   // Hyperspace Jump State Management
   const [bgIndex, setBgIndex] = useState(0);
@@ -81,7 +81,7 @@ export default function App() {
         if (pid === 'ollama') return !!p.base_url;
         return p.api_key && p.api_key.length > 8;
       });
-      
+
       setSystemStatus(hasStrictPath ? 'ONLINE' : 'OFFLINE');
     } catch (e) {
       setSystemStatus('OFFLINE');
