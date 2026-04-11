@@ -3,18 +3,18 @@ import { motion, useDragControls } from 'framer-motion';
 import './HologramTerminal.css';
 import { API_BASE } from '../../lib/constants.js';
 
-const HologramTerminal = ({ onClose }) => {
+const HologramTerminal = ({ onClose, x, y }) => {
     // Chat State
     const [messages, setMessages] = useState([
         { role: 'system', content: '▸ Console GSS connectée au Nexus.' },
-        { role: 'system', content: '▸ Mode ISO-PROD actif. Systèmes cockpit stables.' },
+        { role: 'system', content: '▸ Orion actif. Systèmes cockpit stables.' },
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const screenRef = useRef(null);
 
     // Window Interaction State
-    const [dimensions, setDimensions] = useState({ width: 500, height: 600 });
+    const [dimensions, setDimensions] = useState({ width: 720, height: 430 });
     const dragControls = useDragControls();
 
     // Auto-scroll logic
@@ -39,10 +39,10 @@ const HologramTerminal = ({ onClose }) => {
                 body: JSON.stringify({ message: text }),
             });
             const data = await res.json();
-            setMessages(prev => [...prev, { 
-                role: 'orion', 
-                content: data.response || '...', 
-                time: new Date().toLocaleTimeString() 
+            setMessages(prev => [...prev, {
+                role: 'orion',
+                content: data.response || '...',
+                time: new Date().toLocaleTimeString()
             }]);
         } catch (e) {
             setMessages(prev => [...prev, { role: 'system', content: 'Signal perdu. Erreur de routage.' }]);
@@ -75,20 +75,22 @@ const HologramTerminal = ({ onClose }) => {
     };
 
     return (
-        <motion.div 
+        <motion.div
             className="hologram-container"
             drag
             dragControls={dragControls}
             dragListener={false} // Only drag via header
             dragMomentum={false}
-            dragConstraints={{ left: -1000, right: 1000, top: -1000, bottom: 1000 }} // Flexible bounds
-            style={{ width: dimensions.width, height: dimensions.height }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            dragConstraints={{ top: 64, left: 0, right: window.innerWidth - dimensions.width, bottom: window.innerHeight - 120 }}
+            dragElastic={0}
+            style={{ width: dimensions.width, height: dimensions.height, x, y }}
+            layout="position"
+            initial={false}
+            animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
         >
             {/* Draggable Header */}
-            <div 
+            <div
                 className="hologram-header"
                 onPointerDown={(e) => dragControls.start(e)}
                 style={{ cursor: 'grab' }}
@@ -118,7 +120,7 @@ const HologramTerminal = ({ onClose }) => {
                     {loading && (
                         <div className="msg orion">
                             <span className="prefix">⋄</span>
-                            <span className="typing"><span/><span/><span/></span>
+                            <span className="typing"><span /><span /><span /></span>
                         </div>
                     )}
                 </div>
@@ -134,9 +136,9 @@ const HologramTerminal = ({ onClose }) => {
                     placeholder="Saisissez une commande..."
                     autoFocus
                 />
-                <button 
-                    className="hologram-send-btn" 
-                    onClick={handleSend} 
+                <button
+                    className="hologram-send-btn"
+                    onClick={handleSend}
                     disabled={loading || !input.trim()}
                 >
                     EXEC
@@ -144,8 +146,8 @@ const HologramTerminal = ({ onClose }) => {
             </div>
 
             {/* Resize Handle */}
-            <div 
-                className="hologram-resize-handle" 
+            <div
+                className="hologram-resize-handle"
                 onMouseDown={startResizing}
             />
         </motion.div>

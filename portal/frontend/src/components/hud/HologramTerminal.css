@@ -16,7 +16,7 @@
     -webkit-backdrop-filter: blur(20px);
     /* Dimensions are controlled by React state */
     min-width: 400px;
-    min-height: 400px;
+    min-height: 350px;
 }
 
 /* Scanlines Effect */

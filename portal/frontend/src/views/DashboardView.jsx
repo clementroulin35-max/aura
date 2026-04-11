@@ -1,4 +1,3 @@
-import HologramTerminal from "./HologramTerminal/HologramTerminal";
 import "./DashboardView.css";
 
 /* DashboardView — L3 HUD layer for Dashboard page */
@@ -7,11 +6,10 @@ import "./DashboardView.css";
 export default function DashboardView({ isChatOpen, onToggleChat }) {
   return (
     <div className="view-dashboard">
-      {isChatOpen && (
-        <div className="dashboard-terminal-wrapper">
-          <HologramTerminal onClose={onToggleChat} />
-        </div>
-      )}
+       {/* 
+           HologramTerminal was moved to App.jsx global HUD layer 
+           to persist position and content between page switches.
+       */}
     </div>
   );
 }

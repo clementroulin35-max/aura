@@ -1,13 +1,16 @@
 import './styles/index.css';
 import './styles/App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useMotionValue } from 'framer-motion';
 import { VIEWS } from './lib/constants.js';
 import Header from './components/layout/Header.jsx';
 import Footer from './components/layout/Footer.jsx';
-import DashboardPage  from './pages/DashboardPage.jsx';
+import DashboardPage from './pages/DashboardPage.jsx';
 import SupervisorPage from './pages/SupervisorPage.jsx';
-import MemoryPage     from './pages/MemoryPage.jsx';
+import MemoryPage from './pages/MemoryPage.jsx';
 import HyperspaceJump from './components/shared/HyperspaceJump.jsx';
+import HologramTerminal from './components/hud/HologramTerminal.jsx';
+import LLMConfigWindow from './components/hud/LLMConfigWindow.jsx';
 
 // Discover all background images dynamically
 const bgModules = import.meta.glob('./assets/backgrounds/*.{jpg,png,jpeg,webp}', { eager: true });
@@ -39,25 +42,30 @@ function ChromaFilters() {
 }
 
 const PAGES = {
-  [VIEWS.DASHBOARD]:  DashboardPage,
+  [VIEWS.DASHBOARD]: DashboardPage,
   [VIEWS.SUPERVISOR]: SupervisorPage,
-  [VIEWS.MEMORY]:     MemoryPage,
+  [VIEWS.MEMORY]: MemoryPage,
 };
 
 export default function App() {
   const [view, setView] = useState(VIEWS.DASHBOARD);
-  const [ui, setUi]     = useState({ chatOpen: false, settingsOpen: false, executing: false });
-  
+  const [ui, setUi] = useState({ chatOpen: false, settingsOpen: false, executing: false });
+
+  const xTerminal = useMotionValue(50);
+  const yTerminal = useMotionValue(100);
+  const xSettings = useMotionValue(window.innerWidth - 850);
+  const ySettings = useMotionValue(100);
+
   // Hyperspace Jump State Management
-  const [bgIndex, setBgIndex]       = useState(0);
-  const [isJumping, setIsJumping]   = useState(false);
-  const [jumpPhase, setJumpPhase]   = useState('idle'); // idle | departure | arrival
+  const [bgIndex, setBgIndex] = useState(0);
+  const [isJumping, setIsJumping] = useState(false);
+  const [jumpPhase, setJumpPhase] = useState('idle'); // idle | departure | arrival
 
   const handlePropClick = (panel) => {
     setUi(prev => ({
       ...prev,
-      chatOpen: panel === 'chat' ? !prev.chatOpen : false,
-      settingsOpen: panel === 'settings' ? !prev.settingsOpen : false,
+      chatOpen: panel === 'chat' ? !prev.chatOpen : prev.chatOpen,
+      settingsOpen: panel === 'settings' ? !prev.settingsOpen : prev.settingsOpen,
     }));
   };
 
@@ -81,18 +89,18 @@ export default function App() {
 
     setIsJumping(true);
     setJumpPhase('departure');
-    
+
     // 1. Departure peak: Switch the background source under the tunnel/flash
     setTimeout(() => {
-        setBgIndex(index);
-        setJumpPhase('arrival');
+      setBgIndex(index);
+      setJumpPhase('arrival');
     }, 800);
 
     // 2. Cleanup: End jump sequence
     setTimeout(() => {
-        setIsJumping(false);
-        setJumpPhase('idle');
-    }, 2000); 
+      setIsJumping(false);
+      setJumpPhase('idle');
+    }, 2000);
   };
 
   const PageComponent = PAGES[view] || DashboardPage;
@@ -112,7 +120,37 @@ export default function App() {
       {/* THE CINEMATIC JUMP OVERLAY (Framer Motion) - Nested between L0 and L1 */}
       <HyperspaceJump isJumping={isJumping} />
 
-      <Header currentView={view} onNavigate={setView} />
+      <Header
+        currentView={view}
+        onNavigate={setView}
+        onSettingsClick={() => handlePropClick("settings")}
+      />
+
+      {/* GLOBAL HUD LAYER — Windows persist state across views */}
+      <div
+        className="l3-hud-layer global-hud"
+        style={{ top: '0', height: '100vh', pointerEvents: 'none' }}
+      >
+        {/* Terminal: Only shown on Dashboard when toggled */}
+        <div style={{ display: (view === VIEWS.DASHBOARD && ui.chatOpen) ? 'block' : 'none' }}>
+          <HologramTerminal
+            onClose={() => handlePropClick("chat")}
+            x={xTerminal}
+            y={yTerminal}
+            dragConstraints={{ top: 0, left: 0, right: window.innerWidth, bottom: window.innerHeight }}
+          />
+        </div>
+
+        {/* Settings: Only shown on Dashboard when toggled */}
+        <div style={{ display: (view === VIEWS.DASHBOARD && ui.settingsOpen) ? 'block' : 'none' }}>
+          <LLMConfigWindow
+            onClose={() => handlePropClick("settings")}
+            x={xSettings}
+            y={ySettings}
+            dragConstraints={{ top: 0, left: 0, right: window.innerWidth, bottom: window.innerHeight }}
+          />
+        </div>
+      </div>
 
       <PageComponent
         ui={ui}
@@ -120,10 +158,10 @@ export default function App() {
         onExecute={handleExecute}
       />
 
-      <Footer 
-        backgrounds={BACKGROUNDS} 
-        activeIndex={bgIndex} 
-        onSelect={initiateJump} 
+      <Footer
+        backgrounds={BACKGROUNDS}
+        activeIndex={bgIndex}
+        onSelect={initiateJump}
         isJumping={isJumping}
       />
     </div>
