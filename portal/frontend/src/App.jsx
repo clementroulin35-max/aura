@@ -33,8 +33,11 @@ function ChromaFilters() {
             1  0  0  0  0
             0  1  0  0  0
             0  0  1  0  0
-           -1  2 -1  0  0" result="mask" />
-          <feComposite in="SourceGraphic" in2="mask" operator="out" />
+            -1  2 -1  0 -0.1" result="mask" />
+          <feComponentTransfer in="mask" result="refined-mask">
+            <feFuncA type="linear" slope="15" intercept="-7" />
+          </feComponentTransfer>
+          <feComposite in="SourceGraphic" in2="refined-mask" operator="out" />
         </filter>
         <filter id="chroma-key-blue" colorInterpolationFilters="sRGB">
           <feColorMatrix type="matrix" values="
@@ -76,16 +79,16 @@ export default function App() {
   // Window Positions (Persistent across views)
   const xTerminal = useMotionValue(35);
   const yTerminal = useMotionValue(100);
-  const xSettings = useMotionValue(window.innerWidth - 1055);
+  const xSettings = useMotionValue(window.innerWidth - 1045);
   const ySettings = useMotionValue(100);
   const xTeams = useMotionValue(35);
-  const yTeams = useMotionValue(610);
+  const yTeams = useMotionValue(570);
   const xMonitor = useMotionValue(window.innerWidth - 1365);
   const yMonitor = useMotionValue(100);
   const xDocs = useMotionValue(835);
-  const yDocs = useMotionValue(610);
+  const yDocs = useMotionValue(570);
   const xArchives = useMotionValue(370);
-  const yArchives = useMotionValue(610);
+  const yArchives = useMotionValue(570);
 
   const [bgIndex, setBgIndex] = useState(0);
   const [isJumping, setIsJumping] = useState(false);

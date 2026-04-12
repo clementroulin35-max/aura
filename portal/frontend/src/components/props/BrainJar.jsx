@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import vegaJar from "../../assets/props/l2_vega_jar.png";
-import vegaBrainV2 from "../../assets/props/l2_vega_brain_v2.png";
+import vegaBrainV2 from "../../assets/props/l2_vega_brain.png";
 import "./props.css";
 import "./BrainJar.css";
 
@@ -82,11 +82,13 @@ export default function BrainJar({ onClick, orion }) {
           {/* Layer 1: Liquid Mask */}
           <motion.div
             className="layer-liquid"
-            style={{ backgroundColor: currentLiquidColor }}
+            style={{
+              background: `linear-gradient(to bottom, transparent, ${currentLiquidColor})`
+            }}
             animate={{
-              height: ["45%", "50%", "45%"],
-              borderRadius: ["20% 20% 0 0", "30% 30% 0 0", "20% 20% 0 0"],
-              filter: `blur(10px) brightness(${0.7 + activity * 0.4})`
+              height: ["90%", "92%", "90%"], /* Submerge Core (V5.9) */
+              borderRadius: ["1% 1% 0 0", "2% 2% 0 0", "1% 1% 0 0"], /* Flat Surface (V6.1) */
+              filter: `blur(8px) brightness(${0.5 + activity * 0.3}) saturate(1.2)`
             }}
             transition={{
               duration: 3 / (1 + activity),
@@ -104,7 +106,7 @@ export default function BrainJar({ onClick, orion }) {
               animate={{
                 y: -100,
                 opacity: [0, 0.4, 0],
-                x: (i * 10) - 20 + Math.sin(i + Date.now()/1000) * 8
+                x: (i * 10) - 20 + Math.sin(i + Date.now() / 1000) * 8
               }}
               transition={{
                 duration: 2 / (0.6 + Math.random() + activity),

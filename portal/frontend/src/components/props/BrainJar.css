@@ -52,10 +52,14 @@
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: var(--prop-brain-liquid-h) !important; /* V5.4 Calibration: 78% */
+  height: var(--prop-brain-liquid-h, 92%) !important;
   z-index: 2;
   pointer-events: none;
+  opacity: 0.75; /* Fluid Translucency (V5.9) */
+  backdrop-filter: blur(12px) saturate(1.4); /* Refractive Neural Fluid */
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
   transition: background-color 0.8s ease;
+  /* Surface definition via highlights, no hard border-top (V6.4) */
 }
 
 .layer-brain-core {

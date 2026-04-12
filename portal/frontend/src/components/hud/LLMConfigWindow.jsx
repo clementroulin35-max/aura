@@ -70,7 +70,7 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
     const [chatTier, setChatTier] = useState('ALU');
     const [supervisorTier, setSupervisorTier] = useState('GOLD');
 
-    const [dimensions, setDimensions] = useState({ width: 1020, height: 705 });
+    const [dimensions, setDimensions] = useState({ width: 1015, height: 530 });
     const [ollamaReachability, setOllamaReachability] = useState(initialReachability || 'idle');
     const dragControls = useDragControls();
 
@@ -98,10 +98,10 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
                     const providersRes = await fetch(`${API_BASE}/v1/llm/providers`);
                     const providers = await providersRes.json();
 
-                    const modelPromises = providers.map(p => 
+                    const modelPromises = providers.map(p =>
                         fetch(`${API_BASE}/v1/llm/models/${p.id}`).then(res => res.json().then(data => ({ id: p.id, data })))
                     );
-                    
+
                     const results = await Promise.all(modelPromises);
                     const modelMap = {};
                     results.forEach(r => { modelMap[r.id] = r.data; });
@@ -121,10 +121,10 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
     const pingOllama = async (url) => {
         if (!url) return;
         setOllamaReachability('checking');
-        
+
         // Log start of attempt
-        window.dispatchEvent(new CustomEvent('ORION_LOG', { 
-            detail: { message: `[SYS] Tentative de connexion au serveur Llama: ${url}...`, type: 'info' } 
+        window.dispatchEvent(new CustomEvent('ORION_LOG', {
+            detail: { message: `[SYS] Tentative de connexion au serveur Llama: ${url}...`, type: 'info' }
         }));
 
         try {
@@ -136,7 +136,7 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
             const data = await res.json();
             const reachable = data.success;
             setOllamaReachability(reachable ? 'reachable' : 'unreachable');
-            
+
             // Dispatch global status update based on result
             // This ensures the Header turns Green ONLY on success
             const othersValid = Object.entries(config.providers).some(([id, p]) => {
@@ -147,19 +147,19 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
             const nextStatus = (reachable || othersValid) ? 'ONLINE' : 'OFFLINE';
             window.dispatchEvent(new CustomEvent('ORION_SYNC_REQ', { detail: { status: nextStatus } }));
 
-            window.dispatchEvent(new CustomEvent('ORION_LOG', { 
-                detail: { 
-                    content: reachable ? `[SUCCESS] Serveur Llama détecté et opérationnel!` : `[ERROR] Échec de connexion Llama à ${url}.`, 
-                    type: reachable ? 'success' : 'error' 
-                } 
+            window.dispatchEvent(new CustomEvent('ORION_LOG', {
+                detail: {
+                    content: reachable ? `[SUCCESS] Serveur Llama détecté et opérationnel!` : `[ERROR] Échec de connexion Llama à ${url}.`,
+                    type: reachable ? 'success' : 'error'
+                }
             }));
 
             return reachable;
         } catch (e) {
             setOllamaReachability('unreachable');
             window.dispatchEvent(new CustomEvent('ORION_SYNC_REQ', { detail: { status: 'OFFLINE' } }));
-            window.dispatchEvent(new CustomEvent('ORION_LOG', { 
-                detail: { content: `[ERROR] Serveur Llama hors ligne ou URL invalide.`, type: 'error' } 
+            window.dispatchEvent(new CustomEvent('ORION_LOG', {
+                detail: { content: `[ERROR] Serveur Llama hors ligne ou URL invalide.`, type: 'error' }
             }));
             return false;
         }
@@ -374,11 +374,11 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
 
     const unfoldVariants = {
         hidden: { opacity: 0, filter: 'blur(20px)', scale: 0.95 },
-        visible: { 
-            opacity: 1, 
-            filter: 'blur(0px)', 
+        visible: {
+            opacity: 1,
+            filter: 'blur(0px)',
             scale: 1,
-            transition: { 
+            transition: {
                 type: "spring",
                 stiffness: 100,
                 damping: 20,
@@ -396,12 +396,12 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
             dragMomentum={false}
             dragConstraints={{ top: 64, left: 0, right: window.innerWidth - dimensions.width, bottom: window.innerHeight - 120 }}
             dragElastic={0}
-            style={{ 
-                width: dimensions.width, 
-                height: dimensions.height, 
-                x, 
+            style={{
+                width: dimensions.width,
+                height: dimensions.height,
+                x,
                 y,
-                zIndex: 'var(--z-hud-focus)' 
+                zIndex: 'var(--z-hud-focus)'
             }}
             variants={unfoldVariants}
             initial="hidden"
@@ -432,6 +432,20 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
                                 className={`sidebar-btn ${activeSection === 'ROLES' ? 'active' : ''}`}
                                 onClick={() => setActiveSection('ROLES')}
                             >CORE ROLES</button>
+
+                            {config && !config.error && (
+                                <div className="config-actions sidebar-actions">
+                                    <button
+                                        className={`apply-btn-premium ${saveStatus === 'success' ? 'success' : ''}`}
+                                        onClick={handleSave}
+                                        disabled={saveStatus !== 'idle'}
+                                    >
+                                        {saveStatus === 'saving' ? "SYNC" :
+                                            saveStatus === 'success' ? "OK ✓" :
+                                                "SAVE & APPLY"}
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Main Content Area */}
@@ -489,8 +503,8 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
                                                                 });
 
                                                                 const willBeActive = val && (
-                                                                    pid === 'ollama' ? ollamaReachability === 'reachable' : 
-                                                                    (prov.api_key && prov.api_key.length > 8)
+                                                                    pid === 'ollama' ? ollamaReachability === 'reachable' :
+                                                                        (prov.api_key && prov.api_key.length > 8)
                                                                 );
                                                                 const nextStatus = (willBeActive || othersValid) ? 'ONLINE' : 'OFFLINE';
                                                                 window.dispatchEvent(new CustomEvent('ORION_SYNC_REQ', { detail: { status: nextStatus } }));
@@ -531,12 +545,12 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
                                                                 <div className="llama-connectivity">
                                                                     <div className={`reachability-led ${ollamaReachability}`} />
                                                                     <span className="tiny-label">
-                                                                        {ollamaReachability === 'reachable' ? 'SYNC OK' : 
-                                                                         ollamaReachability === 'unreachable' ? 'LINK FAILED' : 
-                                                                         ollamaReachability === 'checking' ? 'ESTABLISHING...' : 'READY'}
+                                                                        {ollamaReachability === 'reachable' ? 'SYNC OK' :
+                                                                            ollamaReachability === 'unreachable' ? 'LINK FAILED' :
+                                                                                ollamaReachability === 'checking' ? 'ESTABLISHING...' : 'READY'}
                                                                     </span>
-                                                                    <button 
-                                                                        className="mount-server-btn" 
+                                                                    <button
+                                                                        className="mount-server-btn"
                                                                         onClick={() => pingOllama(prov.base_url)}
                                                                         disabled={ollamaReachability === 'checking'}
                                                                     >
@@ -623,17 +637,6 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
                                             </div>
                                         </div>
 
-                                        <div className="config-actions">
-                                            <button
-                                                className={`apply-btn-premium ${saveStatus === 'success' ? 'success' : ''}`}
-                                                onClick={handleSave}
-                                                disabled={saveStatus !== 'idle'}
-                                            >
-                                                {saveStatus === 'saving' ? "SYNCING..." :
-                                                    saveStatus === 'success' ? "NEURAL PATHS ALIGNED ✓" :
-                                                        "SAVE & APPLY CONFIGURATION"}
-                                            </button>
-                                        </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>

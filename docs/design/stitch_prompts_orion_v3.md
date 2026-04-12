@@ -1,4 +1,4 @@
-﻿# 🎨 Orion V3 — Stitch Generation Prompts
+# 🎨 Orion V3 — Stitch Generation Prompts
 > Tous les prompts envoyés à Stitch MCP pour la génération des assets du portail.  
 > Référence visuelle : `docs/design/ORION_V3_VIBE.md`  
 > Version : 22.0.0
@@ -124,22 +124,24 @@ Disney-Pixar feature-film quality. Square composition. 8K
 
 ---
 
-## 🧠 L2-VEGA — The Brain Jar (Prop)
+### 🏺 Jar (Vessel of Vega) — Chroma Blue
 
-**Asset ID** : `l2_vega`  
-**Type** : Image (Illustration 3D, transparent-ready)  
-**Ratio** : Carré (1:1)  
-**Fond** : Pure Blue `#0000ff` exact
+**Asset ID** : `l2_vega_jar`
+**Status** : Finalized for Generation 
+```text
+A high-fidelity 3D render of a retro-futuristic sci-fi laboratory containment jar, scientific vessel. Industrial aeronautical design, heavy matte cream-colored ceramic and metal base with small analog pressure gauges, copper pipes, and a heavy industrial lid. The glass cylinder is thick and perfectly clear, facing straight forward. Minimalist design, high-quality Pixar-style 3D prop. Lighting is warm and cinematic, coming from the top-left, matching a spaceship cockpit. NO liquid inside, NO brain inside. Background is a solid, flat, uniform Chroma Key Blue #0000FF. Orthographic front view, centered, isolated prop.
+```
 
+---
+
+### 🧠 Brain (Neural Core Alpha) — Chroma Green
+
+**Asset ID** : `l2_vega_brain`  
+**Status** : Finalized for Generation 
+```text
+A stylized 3D render of a human brain, neural processor. Style is matte Pixar character prop, resembling the texture of the Orion companion, soft subsurface scattering but NO glossy outside reflections. Muted pastel lavender and violet colors with soft glowing internal neural paths. Fine glowing cyan filaments (neural connectors) hang beneath the center of the brain, gathered together as if severed. Facing 3/4 front view (slightly angled) to show depth, but centered. Perfectly matte surface, avoid neon-plastic highlights. High-quality render, clean silhouette. Background is a solid, flat, uniform Chroma Key Green #00FF00. Isolated prop, floating, cinematic soft lighting from top-left.
 ```
-A glass cylinder jar containing a human brain floating in bioluminescent liquid.
-Jar has a steel base and lid, thick borosilicate glass walls.
-The brain glows softly with cyan/violet internal light, small bubbles rising around it.
-BACKGROUND: Pure Blue `#0000ff` exact — no gradients, no shadows on background.
-Object centered with 10% margin. Viewed straight-on or very slight 3/4 angle.
-Flat studio lighting — NO cast shadows, NO ground shadow, NO reflections on background.
-Hyper-detailed, Disney-Pixar/Blender render quality. Square composition. 8K
-```
+
 
 ---
 
@@ -218,5 +220,4 @@ Calm, readable, library-like atmosphere. Generous padding. Elegant typography.
 
 ---
 
-*Prompts approuvés par l'Architecte — Ne pas exécuter sans validation.*  
-*Status : AWAITING APPROVAL*
+*Status : SESSION_CALIBRATED*

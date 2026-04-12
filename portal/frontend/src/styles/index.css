@@ -3,7 +3,7 @@
    Source of truth: docs/design/ORION_V3_VIBE.md
    ═══════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Luckiest+Guy&family=Bangers&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Handlee&display=swap');
 
 /* ── Reset ────────────────────────────────────────────── */
 *,
@@ -46,15 +46,18 @@ body {
   --glass-blur: blur(16px);
 
   /* HUD Specific Surfaces — Premium Dark */
-  --hud-panel-bg: rgba(10, 15, 20, 0.68); /* Lighter than before, but richer */
+  --hud-panel-bg: rgba(10, 15, 20, 0.68);
+  /* Lighter than before, but richer */
   --hud-header-bg: rgba(0, 0, 0, 0.5);
   --hud-border-glow: 1px solid rgba(129, 127, 113, 0.08);
-  --hud-glass-blur: blur(24px); /* Increased blur for more 'Solid Hologram' feel */
-  
+  --hud-glass-blur: blur(24px);
+  /* Increased blur for more 'Solid Hologram' feel */
+
   /* Advanced Layering */
   --z-hud-base: 30;
-  --z-hud-focus: 35; /* Priority window layer */
-  
+  --z-hud-focus: 35;
+  /* Priority window layer */
+
   --hud-z-frame: 5;
   --hud-z-header: 10;
   --hud-z-handle: 20;
@@ -73,7 +76,7 @@ body {
   --font-ui: 'Space Grotesk', sans-serif;
   --font-body: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-cartoon: 'Luckiest Guy', cursive;
+  --font-cartoon: 'Handlee', cursive; /* Refined Handlee BD Style (V6.5) */
 
   /* Spacing */
   --space-xs: 4px;
@@ -105,14 +108,16 @@ body {
 
   /* Diegetic Prop Positioning */
   --prop-ledge-bottom: 75px;
-  --prop-orion-bottom: 75px; /* Aligned with ledge */
+  --prop-orion-bottom: 75px;
+  /* Aligned with ledge */
   /* Sits lower on the foreground table */
-  --prop-brain-bottom: 140px;
+  --prop-brain-bottom: 180px;
+  /* Reduced by 20px (V6.2) */
   /* Sits higher on the console ledge */
-  --prop-orion-width: 160px;
-  --prop-orion-left: 80px;
-  --prop-brain-width: 380px;
-  --prop-brain-right: 120px;
+  --prop-orion-width: 180px;
+  --prop-orion-left: 100px;
+  --prop-brain-width: 330px;
+  --prop-brain-right: 100px;
 
   /* HUD Geometry */
   --terminal-min-w: 400px;
@@ -126,12 +131,17 @@ body {
   --purple-glow: #bc13fe;
 
   /* Diegetic Expert Tuning — Props V5.4 */
-  --prop-brain-clip-w: 240px;
-  --prop-brain-clip-h: 300px; /* Increased for high-liquid */
-  --prop-brain-core-y: 10px;  /* Higher anchor */
+  --prop-brain-clip-w: 225px;
+  /* Precision fit (V6.1) */
+  --prop-brain-clip-h: 300px;
+  /* Increased for high-liquid */
+  --prop-brain-core-y: 85px;
+  /* Lowered into liquid (V5.9) */
   --prop-brain-core-scale: 1.7;
-  --prop-brain-liquid-h: 78%; /* 3/4 level */
-  --prop-brain-glow-radius: 65%; /* Concentrated aura */
+  --prop-brain-liquid-h: 92%;
+  /* Almost full (V5.9) */
+  --prop-brain-glow-radius: 50%;
+  /* Concentrated aura */
 }
 
 /* ── Base ─────────────────────────────────────────────── */

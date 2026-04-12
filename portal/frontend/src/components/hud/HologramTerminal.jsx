@@ -21,16 +21,16 @@ const HologramTerminal = ({ onClose, x, y, initialLogs = [] }) => {
     const screenRef = useRef(null);
 
     // Window Interaction State
-    const [dimensions, setDimensions] = useState({ width: 720, height: 430 });
+    const [dimensions, setDimensions] = useState({ width: 785, height: 450 });
     const dragControls = useDragControls();
 
     const unfoldVariants = {
         hidden: { opacity: 0, filter: 'blur(20px)', scale: 0.95 },
-        visible: { 
-            opacity: 1, 
-            filter: 'blur(0px)', 
+        visible: {
+            opacity: 1,
+            filter: 'blur(0px)',
             scale: 1,
-            transition: { 
+            transition: {
                 type: "spring",
                 stiffness: 100,
                 damping: 20,
@@ -123,12 +123,12 @@ const HologramTerminal = ({ onClose, x, y, initialLogs = [] }) => {
             dragMomentum={false}
             dragConstraints={{ top: 64, left: 0, right: window.innerWidth - dimensions.width, bottom: window.innerHeight - 120 }}
             dragElastic={0}
-            style={{ 
-                width: dimensions.width, 
-                height: dimensions.height, 
-                x, 
+            style={{
+                width: dimensions.width,
+                height: dimensions.height,
+                x,
                 y,
-                zIndex: 'var(--z-hud-base)' 
+                zIndex: 'var(--z-hud-base)'
             }}
             variants={unfoldVariants}
             initial="hidden"

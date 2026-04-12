@@ -36,16 +36,16 @@
   min-width: 180px;
   max-width: 260px;
   background: #ffffff !important; /* Forced Static White */
-  border: 4px solid #000000 !important; /* Forced Heavy Black */
-  padding: 14px 20px;
+  border: 2px solid #000000 !important; /* Thinner border (V6.5) */
+  padding: 12px 18px;
   color: #000000 !important; /* Forced Static Black */
   font-family: var(--font-cartoon);
-  font-size: 1.25rem;
-  letter-spacing: 0.2px;
+  font-size: 1.15rem; /* Balanced for Handlee (V6.5) */
+  letter-spacing: 0.1px;
   line-height: 1.1;
   text-transform: none; /* Allow natural Pixar-style casing */
   z-index: 5; /* Relative to L2 layer parent */
-  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.8);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4); /* Thinner relief (V6.5) */
   pointer-events: none;
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -54,24 +54,24 @@
 .bubble-speech::after {
   content: '';
   position: absolute;
-  bottom: -15px;
+  bottom: -12px;
   left: 15px;
   width: 0;
   height: 0;
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-  border-top: 14px solid #000000 !important; /* Standardized Black */
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 12px solid #000000 !important; /* Standardized Black */
 }
 
 .bubble-speech::before {
   content: '';
   position: absolute;
-  bottom: -8px;
-  left: 17px;
+  bottom: -9px;
+  left: 16.5px;
   width: 0;
   height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
+  border-left: 8.5px solid transparent;
+  border-right: 8.5px solid transparent;
   border-top: 10px solid #ffffff !important; /* Standardized White */
   z-index: 1;
 }
@@ -94,8 +94,8 @@
 .puff-2 { width: 8px; height: 8px; bottom: -12px; left: -10px; }
 
 /* --- Bubble Variants --- */
-.bubble-speech { border-radius: 12px; }
-.bubble-thought { border-radius: 30px; font-style: italic; }
+.bubble-speech { border-radius: 25px; } /* Rounder (V6.5) */
+.bubble-thought { border-radius: 35px; font-style: italic; }
 
 /* 
    MOOD OVERRIDES: REMOVED V5.4
