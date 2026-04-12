@@ -28,15 +28,15 @@ export function useOrionIntelligence(isJumping, ui) {
     setMessage(next.text);
     setDialogueType(next.type);
     setShowBubble(true);
-
-    // Calculate duration: min 4s, + 50ms per character
-    const duration = Math.max(4000, next.text.length * 60);
+    
+    // Snappy Pacing (V6.6): Fixed 2.5s for better UI responsiveness
+    const duration = 2500;
 
     await new Promise(resolve => setTimeout(resolve, duration));
     
     setShowBubble(false);
-    // Short gap between messages
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Short gap between messages (V6.6)
+    await new Promise(resolve => setTimeout(resolve, 300));
     
     isProcessing.current = false;
     processQueue();
@@ -48,6 +48,12 @@ export function useOrionIntelligence(isJumping, ui) {
 
     // Check for duplicates in queue
     if (queue.current.some(d => d.text === dialogue.text)) return;
+
+    // Buffer Management (V6.6): Prevent clumping. Max 3 pending messages.
+    // If the queue is overwhelmed, discard the oldest to prioritize new info.
+    if (queue.current.length >= 3) {
+      queue.current.shift();
+    }
 
     queue.current.push(dialogue);
     processQueue();

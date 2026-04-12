@@ -42,10 +42,17 @@
   font-family: var(--font-cartoon);
   font-size: 1.15rem; /* Balanced for Handlee (V6.5) */
   letter-spacing: 0.1px;
-  line-height: 1.1;
+  line-height: 1.25; /* Slightly increased for readability (V6.6) */
   text-transform: none; /* Allow natural Pixar-style casing */
   z-index: 5; /* Relative to L2 layer parent */
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4); /* Thinner relief (V6.5) */
+  
+  /* 🏗️ Volume & Centering (V6.6) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 85px; /* Forced 3-line volume */
   pointer-events: none;
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -95,7 +102,7 @@
 
 /* --- Bubble Variants --- */
 .bubble-speech { border-radius: 25px; } /* Rounder (V6.5) */
-.bubble-thought { border-radius: 35px; font-style: italic; }
+.bubble-thought { border-radius: 35px; font-style: italic; min-height: 95px; } /* Slightly taller for thoughts */
 
 /* 
    MOOD OVERRIDES: REMOVED V5.4
