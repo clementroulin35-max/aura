@@ -17,59 +17,78 @@ export default function HyperspaceJump({ isJumping }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* 1. TUNNEL: Streaks + Radial Gradient */}
+          {/* 0. DIÈGETIC NOISE / GRAIN (Constant during jump) */}
+          <div className="jump-grain-layer" />
+
+          {/* 1. CINEMATIC VIGNETTE (Tightens during tension) */}
+          <motion.div
+            className="jump-vignette-layer"
+            initial={{ opacity: 0, scale: 1.2 }}
+            animate={{
+              opacity: [0, 0.4, 0.6, 0.2, 0],
+              scale: [1.2, 1, 0.8, 1, 1.2]
+            }}
+            transition={{
+              duration: 4.4,
+              times: [0, 0.08, 0.34, 0.72, 1],
+              ease: "easeInOut"
+            }}
+          />
+
+          {/* 2. THE TUNNEL (Streaks + Radial Flow) — Active during Phase 3 (1.5s - 3.2s) */}
           <motion.div
             className="jump-tunnel-container"
             initial={{ opacity: 0, scale: 0.1 }}
             animate={{
-              opacity: [0, 1, 1, 0.5, 0], // Added fade-out
-              scale: 1.5
+              opacity: [0, 0, 1, 1, 0],
+              scale: [0.1, 0.3, 1.5, 2, 2.5]
             }}
-            transition={{ duration: 1.5, delay: 0.75, times: [0, 0.75] }}
+            transition={{
+              duration: 4.4,
+              times: [0, 0.3, 0.38, 0.7, 0.9],
+              ease: "easeIn"
+            }}
           >
             <div className="jump-radial-glow" />
             <motion.div
               className="jump-streaks"
               style={{ backgroundImage: `url(${streaksImg})` }}
-              animate={{ scale: [1, 2.5], opacity: [0, 1, 0.6] }}
-              transition={{ duration: 0.4, repeat: 3, ease: "linear" }}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
             />
           </motion.div>
 
-          {/* 2. FLASH: Central blinding light */}
+          {/* 3. THE FLASH & BLACKOUT (Impact at 1.5s) — High Priority Layer */}
           <motion.div
-            className="jump-flash"
-            initial={{ scale: 0, opacity: 0 }}
+            className="jump-flash-impact"
+            initial={{ opacity: 0 }}
             animate={{
-              scale: [0, 5, 15],
-              opacity: [0, 0.7, 0.7, 0] // Flash must disappear
+              opacity: [0, 0, 1, 0, 1, 0], // Flash -> Blackout -> Flash -> Dissipate
+              backgroundColor: ["#fff", "#fff", "#fff", "#000", "#fff", "#fff"]
             }}
             transition={{
-              duration: 1.5,
-              delay: 0.2,
-              times: [0, 0.6, 0.8, 1],
-              ease: "easeIn"
+              duration: 4.4,
+              times: [0, 0.33, 0.34, 0.35, 0.36, 0.45], // Sharper timings
+              ease: "linear"
             }}
           />
 
-          {/* 3. SHATTER REVEAL: Only on the white flash layer */}
+          {/* 4. THE SHATTER REVEAL (Shockwave) — Softened to avoid Polygon visibility */}
           <motion.div
             className="jump-shatter-layer"
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0, scale: 0.5 }}
             animate={{
-              opacity: [0, 1, 1, 0], // Appears during flash, then shatters
-              scale: [1, 1, 1.8],
-              filter: ["blur(0px)", "blur(0px)", "blur(20px)"]
+              opacity: [0, 0, 0.8, 0],
+              scale: [0.5, 0.8, 1.8, 3.5]
             }}
             transition={{
-              duration: 1.5,
-              delay: 0.5,
-              times: [0, 0.1, 0.4, 0.6],
+              duration: 4.4,
+              times: [0, 0.33, 0.35, 0.55],
               ease: "easeOut"
             }}
           />
 
-          {/* Fixed center point */}
+          {/* Center Point Reticle (Subtle) */}
           <div className="jump-reticle" />
         </motion.div>
       )}

@@ -149,15 +149,27 @@ export default function App() {
   const initiateJump = (index) => {
     if (index === bgIndex || isJumping) return;
     setIsJumping(true);
-    setJumpPhase('departure');
+    
+    // Phase 0: Anticipation (0s - 0.3s)
+    setJumpPhase('anticipation');
+
+    // Phase 1: Departure/Tension (0.3s - 1.5s)
+    setTimeout(() => {
+      setJumpPhase('departure');
+    }, 300);
+
+    // Phase 2: The Breach (Impact at 1.5s)
     setTimeout(() => {
       setBgIndex(index);
-      setJumpPhase('arrival');
-    }, 800);
+      setJumpPhase('arrival'); // Re-using arrival for the transition into tunnel/void
+    }, 1500);
+
+    // Phase 3: Tunnel/Void (Starts shortly after impact)
+    // Phase 4: Arrival/Recovery (End of sequence)
     setTimeout(() => {
       setIsJumping(false);
       setJumpPhase('idle');
-    }, 2000);
+    }, 4400); // 4.4s total cinematic flow
   };
 
   const PageComponent = PAGES[view] || DashboardPage;

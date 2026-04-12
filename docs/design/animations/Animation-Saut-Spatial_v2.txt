@@ -1,0 +1,194 @@
+🚀 HOOK : useWarpJump()
+
+👉 Tu déclenches → tout s’enchaîne parfaitement
+
+import { useAnimation } from "framer-motion";
+
+export function useWarpJump() {
+  const controls = useAnimation();
+
+  const startWarp = async () => {
+    // -------------------------
+    // PHASE 0 — ANTICIPATION (0 → 0.3s)
+    // -------------------------
+    await controls.start({
+      scale: [1, 1.02, 0.98, 1],
+      transition: { duration: 0.3 }
+    });
+
+    // -------------------------
+    // PHASE 1 — TENSION (0.3 → 1.5s)
+    // -------------------------
+    controls.start({
+      scale: 0.85,
+      rotate: [0, 0.3, -0.3, 0],
+      filter: "brightness(1.4) contrast(1.2)",
+      transition: {
+        duration: 1.2,
+        ease: "easeIn"
+      }
+    });
+
+    // SHAKE parallèle (non bloquant)
+    controls.start({
+      x: [0, -2, 2, -3, 3, 0],
+      y: [0, 1, -1, 2, -2, 0],
+      transition: {
+        duration: 0.6,
+        repeat: 2
+      }
+    });
+
+    // -------------------------
+    // PHASE 2 — IMPACT (1.5 → 1.8s)
+    // -------------------------
+    await controls.start({
+      scale: 1.3,
+      filter: "brightness(3)",
+      transition: { duration: 0.15 }
+    });
+
+    // micro blackout frame
+    await controls.start({
+      opacity: [1, 0, 1],
+      transition: { duration: 0.05 }
+    });
+
+    // -------------------------
+    // PHASE 3 — TUNNEL (1.8 → 3.2s)
+    // -------------------------
+    controls.start({
+      scale: 0.6,
+      filter: "brightness(0.7) blur(4px)",
+      transition: {
+        duration: 1.4,
+        ease: "easeInOut"
+      }
+    });
+
+    // rotation inertielle
+    controls.start({
+      rotate: [0, 0.5, -0.5, 0],
+      transition: {
+        duration: 1.4
+      }
+    });
+
+    // -------------------------
+    // PHASE 4 — ARRIVÉE (3.2 → 4.5s)
+    // -------------------------
+    await controls.start({
+      scale: [1.6, 0.95, 1.05, 1],
+      filter: [
+        "brightness(1.5) contrast(1.3)",
+        "brightness(1) contrast(1)"
+      ],
+      transition: {
+        duration: 1.3,
+        ease: "easeOut"
+      }
+    });
+  };
+
+  return { controls, startWarp };
+}
+⚛️ UTILISATION
+import { motion } from "framer-motion";
+import { useWarpJump } from "./useWarpJump";
+
+export default function Cockpit() {
+  const { controls, startWarp } = useWarpJump();
+
+  return (
+    <>
+      <motion.div
+        className="scene"
+        animate={controls}
+      />
+
+      <button onClick={startWarp}>
+        🚀 Jump
+      </button>
+    </>
+  );
+}
+🌌 LAYERS VISUELS (TRÈS IMPORTANT)
+
+👉 ajoute ces layers pour compléter la timeline
+
+💥 FLASH
+<motion.div
+  className="flash"
+  initial={{ opacity: 0 }}
+  animate={controls}
+/>
+.flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  pointer-events: none;
+}
+
+👉 synchronisé avec Phase 2 via opacity
+
+🌫️ FOG / VIGNETTE
+<motion.div
+  className="vignette"
+  animate={controls}
+/>
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle,
+    transparent 40%,
+    rgba(0,0,0,0.6));
+}
+🌠 STREAKS (illusion vitesse)
+.streaks {
+  position: absolute;
+  inset: 0;
+  background: url("/streaks.png") center/cover;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+
+anime opacity + scale pendant Phase 3
+
+⚡ MICRO-EFFETS À AJOUTER (faciles)
+🎞️ Grain
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background: url("/noise.png");
+}
+🌈 Aberration (arrival)
+filter: contrast(1.2) saturate(1.2);
+
+ou RGB split fake via text-shadow/duplicate layer
+
+🎯 TIMING FINAL (clean)
+phase	durée	effet clé
+anticipation	0.3s	micro recoil
+tension	1.2s	zoom + shake
+impact	0.2s	flash
+tunnel	1.4s	blur + streaks
+arrivée	1.3s	bounce
+
+👉 total ≈ 4.4s parfait
+
+🧠 BONUS (ULTRA PRO)
+
+👉 tu peux synchroniser Orion :
+
+setTimeout(() => orion("jump_start"), 300);
+setTimeout(() => orion("impact"), 1500);
+setTimeout(() => orion("arrival"), 3200);
+💥 CONCLUSION
+
+Tu as maintenant :
+
+✔ une timeline propre
+✔ séquencée comme un film
+✔ facilement tweakable
+✔ GPU friendly

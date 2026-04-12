@@ -25,6 +25,16 @@ export default function BrainJar({ onClick, orion }) {
 
   const currentLiquidColor = MOOD_COLORS[mood] || MOOD_COLORS.happy;
 
+  // 🫧 V6.17: Stabilize bubble properties to prevent re-randomization on every render
+  const bubbleData = React.useMemo(() => {
+    return [...Array(15)].map((_, i) => ({
+      x: (Math.random() * 200) - 100,
+      size: 3 + Math.random() * 4,
+      duration: 3 + Math.random() * 3,
+      delay: Math.random() * 5
+    }));
+  }, []);
+
   // 🎧 Sync with ORION_LOG activity or Orion speaking
   useEffect(() => {
     if (showBubble) setActivity(0.8);
@@ -74,16 +84,34 @@ export default function BrainJar({ onClick, orion }) {
       <div className="vega-composition-container">
         {/* Diegetic Clipping Boundary (Limits the liquid to the jar's interior) */}
         <div className="inner-jar-clip">
-          {/* Layer 1: Liquid Mask */}
+          {/* Layer 3: Pixar Brain Core (V2 Green Chroma) — Backmost (V6.15) */}
+          <motion.img
+            src={vegaBrainV2}
+            className="layer-brain-core prop-img"
+            alt="Vega Core"
+            animate={{
+              y: [-2, 2, -2],
+              scale: [1.6, 1.7 + activity * 0.1, 1.6],
+              opacity: [0.9, 1, 0.9],
+              filter: `url(#chroma-key-green) brightness(${0.8 + activity * 0.3})`
+            }}
+            transition={{
+              duration: 2.5 / (1 + activity),
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+
+          {/* Layer 1: Liquid Mask — Midground Refraction (V6.15) */}
           <motion.div
             className="layer-liquid"
             style={{
               background: `linear-gradient(to bottom, transparent, ${currentLiquidColor})`
             }}
             animate={{
-              height: ["90%", "92%", "90%"], /* Submerge Core (V5.9) */
-              borderRadius: ["1% 1% 0 0", "2% 2% 0 0", "1% 1% 0 0"], /* Flat Surface (V6.1) */
-              filter: `blur(8px) brightness(${0.5 + activity * 0.3}) saturate(1.2)`
+              height: ["90%", "92%", "90%"],
+              borderRadius: ["1% 1% 0 0", "2% 2% 0 0", "1% 1% 0 0"],
+              brightness: [0.5 + activity * 0.3, 0.7 + activity * 0.3, 0.5 + activity * 0.3]
             }}
             transition={{
               duration: 3 / (1 + activity),
@@ -92,44 +120,30 @@ export default function BrainJar({ onClick, orion }) {
             }}
           />
 
-          {/* Layer 2: Bubbles */}
-          {[...Array(5)].map((_, i) => (
+          {/* Layer 2: Bubbles — Absolute Foreground detail (15 total) (V6.17 Optimized) */}
+          {bubbleData.map((b, i) => (
             <motion.div
               key={i}
               className="layer-bubble"
-              initial={{ y: 50, x: (i * 10) - 20, opacity: 0 }}
+              initial={{
+                y: 380,
+                x: b.x,
+                opacity: 0,
+                width: b.size,
+                height: b.size
+              }}
               animate={{
-                y: -100,
-                opacity: [0, 0.4, 0],
-                x: (i * 10) - 20 + Math.sin(i + Date.now() / 1000) * 8
+                y: -420,
+                opacity: [0, 1, 0]
               }}
               transition={{
-                duration: 2 / (0.6 + Math.random() + activity),
+                duration: b.duration / (1 + activity),
                 repeat: Infinity,
-                delay: i * 0.4
+                delay: b.delay,
+                ease: "linear"
               }}
             />
           ))}
-
-          {/* Layer 3: Pixar Brain Core (V2 Green Chroma) */}
-          <motion.img
-            src={vegaBrainV2}
-            className="layer-brain-core prop-img"
-            alt="Vega Core"
-            animate={{
-              y: [-2, 2, -2],
-              scale: [1.6, 1.7 + activity * 0.1, 1.6],
-              opacity: [0.9, 1, 0.9]
-            }}
-            style={{
-              filter: 'url(#chroma-key-green)'
-            }}
-            transition={{
-              duration: 2 / (1 + activity),
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
         </div>
 
         {/* Layer 0: Jar Structure (Chroma Blue) - Always on Top */}
@@ -145,7 +159,7 @@ export default function BrainJar({ onClick, orion }) {
           className="layer-pulsar-glow"
           style={{
             '--glow-color': currentLiquidColor,
-            opacity: 0.1 + activity * 0.4,
+            opacity: 0.2 + activity * 0.4,
             transform: `translate(-50%, -50%) scale(${1.0 + activity * 0.2})`
           }}
         />

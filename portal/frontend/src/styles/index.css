@@ -112,12 +112,12 @@ body {
   --prop-orion-bottom: 75px;
   /* Aligned with ledge */
   /* Sits lower on the foreground table */
-  --prop-brain-bottom: 121px;
+  --prop-brain-bottom: 109px;
   /* Reduced by 20px (V6.2) */
   /* Sits higher on the console ledge */
   --prop-orion-width: 180px;
   --prop-orion-left: 100px;
-  --prop-brain-width: 410px;
+  --prop-brain-width: 390px;
   --prop-brain-right: 65px;
 
   /* HUD Geometry */
@@ -132,17 +132,17 @@ body {
   --purple-glow: #bc13fe;
 
   /* Diegetic Expert Tuning — Props V5.4 */
-  --prop-brain-clip-w: 250px;
+  --prop-brain-clip-w: 255px;
   /* Precision fit (V6.1) */
-  --prop-brain-clip-h: 375px;
+  --prop-brain-clip-h: 385px;
   /* Increased for high-liquid */
-  --prop-brain-core-y: 100px;
+  --prop-brain-core-y: 120px;
   /* Lowered into liquid (V5.9) */
   --prop-brain-core-scale: 1.7;
-  --prop-brain-liquid-h: 95%;
   /* Almost full (V5.9) */
   --prop-brain-glow-radius: 50%;
   /* Concentrated aura */
+  --prop-brain-liquid-h: 90%;
 }
 
 /* ── Base ─────────────────────────────────────────────── */
