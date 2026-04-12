@@ -23,8 +23,8 @@
 }
 
 /* Global Jump Shell: Pure black during transition to hide L0 shrunken borders */
-.app-shell.is-jumping {
-  background: black !important;
+div.app-shell.is-jumping {
+  background: black;
 }
 
 /* Phase: Anticipation (0s - 0.3s) — Micro recoil */

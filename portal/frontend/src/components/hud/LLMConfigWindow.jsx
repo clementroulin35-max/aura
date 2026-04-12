@@ -37,6 +37,7 @@ const TierSelector = ({ activeTier, onChange }) => {
                         key={tier.id}
                         className={`tier-item ${activeTier === tier.id ? 'active' : ''}`}
                         onClick={() => onChange(tier.id)}
+                        data-tier={tier.id}
                         style={{ '--tier-color': tier.color }}
                     >
                         <span className="tier-icon">{tier.icon}</span>

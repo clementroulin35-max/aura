@@ -3,7 +3,7 @@
    ═══════════════════════════════════════════════════════ */
 
 .prop-wrap {
-  position: absolute !important; /* Force absolute despite any inherits */
+  position: absolute; /* Force absolute despite any inherits */
   bottom: var(--prop-ledge-bottom); /* Aligned via global tokens */
   cursor: pointer;
   pointer-events: auto;

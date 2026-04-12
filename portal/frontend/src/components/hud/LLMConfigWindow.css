@@ -3,23 +3,7 @@
     padding: 0;
 }
 
-/* Custom Sleek Scrollbar — Kept inside for specificity */
-.llm-config-container *::-webkit-scrollbar {
-    width: 4px;
-}
 
-.llm-config-container *::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.llm-config-container *::-webkit-scrollbar-thumb {
-    background: rgba(255, 217, 0, 0.2);
-    border-radius: 10px;
-}
-
-.llm-config-container *::-webkit-scrollbar-thumb:hover {
-    background: var(--neon-yellow);
-}
 
 .config-body {
     flex: 1;
@@ -355,22 +339,22 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
-.tier-item.active[style*="ALU"] {
+.tier-item.active[data-tier="ALU"] {
     text-shadow: 0 0 10px rgba(200, 200, 200, 0.3);
 }
 
-.tier-item.active[style*="GOLD"] {
+.tier-item.active[data-tier="GOLD"] {
     text-shadow: 0 0 10px rgba(255, 217, 0, 0.3);
 }
 
-.tier-item.active[style*="DIAMANT"] {
-    background: rgba(255, 255, 255, 0.1) !important;
-    color: #ffffff !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
+.tier-item.active[data-tier="DIAMANT"] {
+    background: var(--action-white-mid);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.3);
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
-.tier-item[style*="DIAMANT"] span {
+.tier-item[data-tier="DIAMANT"] span {
     color: #ccc;
 }
 
@@ -470,9 +454,9 @@
     100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
 }
 
-.test-btn.is-loading {
-    background: rgba(0, 210, 255, 0.1) !important;
-    border-color: var(--neon-blue) !important;
+button.test-btn.is-loading {
+    background: var(--action-blue-mid);
+    border-color: var(--neon-blue);
     pointer-events: none;
 }
 

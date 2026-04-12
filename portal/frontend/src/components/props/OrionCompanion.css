@@ -35,10 +35,10 @@
   transform: translateX(-50%);
   min-width: 180px;
   max-width: 260px;
-  background: #ffffff !important; /* Forced Static White */
-  border: 2px solid #000000 !important; /* Thinner border (V6.5) */
+  background: #ffffff; /* Forced Static White */
+  border: 2px solid #000000; /* Thinner border (V6.5) */
   padding: 12px 18px;
-  color: #000000 !important; /* Forced Static Black */
+  color: #000000; /* Forced Static Black */
   font-family: var(--font-cartoon);
   font-size: 1.15rem; /* Balanced for Handlee (V6.5) */
   letter-spacing: 0.1px;
@@ -67,7 +67,7 @@
   height: 0;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-top: 12px solid #000000 !important; /* Standardized Black */
+  border-top: 12px solid #000000; /* Standardized Black */
 }
 
 .bubble-speech::before {
@@ -79,7 +79,7 @@
   height: 0;
   border-left: 8.5px solid transparent;
   border-right: 8.5px solid transparent;
-  border-top: 10px solid #ffffff !important; /* Standardized White */
+  border-top: 10px solid #ffffff; /* Standardized White */
   z-index: 1;
 }
 

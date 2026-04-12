@@ -21,127 +21,135 @@ body {
   overflow: hidden;
 }
 
+/* ── Global Scrollbar (Replaces specific overrides) ───── */
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 217, 0, 0.2);
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-yellow);
+}
+
 /* ── Design Tokens ────────────────────────────────────── */
 :root {
-  /* Chroma Keys */
+  /* 1. Core Palette */
   --chroma-green: #00ff00;
   --chroma-blue: #0000ff;
-
-  /* Core Palette — Aetheris HUD */
   --grey-light: #ebeae4;
+  --cool-slate: #2c3e50;
+  --slate-mid: #636e72;
+  --slate-light: #b2bec3;
+
+  /* 2. Narrative Matrix Moods & Neons */
   --neon-yellow: #ffd900;
   --neon-blue: #00d2ff;
   --neon-orange: #803605;
   --neon-orange-glow: rgba(255, 140, 46, 0.74);
   --neon-orange-border: rgba(206, 122, 12, 0.849);
-  --cool-slate: #2c3e50;
-  --slate-mid: #636e72;
-  --slate-light: #b2bec3;
+  --cyan-glow: #00f3ff;
+  --amber-glow: #ffbf00;
+  --purple-glow: #bc13fe;
+  --error-red: #ff3030;
 
-  /* Surfaces — Glass */
+  /* 3. Status */
+  --status-ok: #00b894;
+  --status-warn: #fdcb6e;
+  --status-error: #d63031;
+  --status-success: #00ff64;
+
+  /* 4. Surfaces & Glass (Transparents & Backgrounds) */
   --surface-glass: rgba(248, 249, 250, 0.55);
   --surface-glass-high: rgba(248, 249, 250, 0.80);
   --surface-glass-low: rgba(248, 249, 250, 0.30);
   --glass-border: rgba(255, 255, 255, 0.15);
   --glass-blur: blur(16px);
-
-  /* HUD Specific Surfaces — Premium Dark */
+  
+  /* HUD Specific Surfaces */
   --hud-panel-bg: rgba(10, 15, 20, 0.68);
-  /* Lighter than before, but richer */
   --hud-header-bg: rgba(0, 0, 0, 0.5);
   --hud-border-glow: 1px solid rgba(129, 127, 113, 0.08);
   --hud-glass-blur: blur(24px);
-  /* Increased blur for more 'Solid Hologram' feel */
-
-  /* Advanced Layering */
-  --z-hud-base: 30;
-  --z-hud-focus: 35;
-  /* Priority window layer */
-
-  --hud-z-frame: 5;
-  --hud-z-header: 10;
-  --hud-z-handle: 20;
-
   --hud-surface-dark: rgba(0, 0, 0, 0.55);
   --hud-surface-light: rgba(255, 255, 255, 0.08);
+  
+  /* Translucent Action Surfaces (Replaces hardcodes) */
+  --action-white-dim: rgba(255, 255, 255, 0.02);
+  --action-white-low: rgba(255, 255, 255, 0.05);
+  --action-white-mid: rgba(255, 255, 255, 0.1);
+  --action-yellow-dim: rgba(255, 217, 0, 0.05);
+  --action-yellow-low: rgba(255, 217, 0, 0.1);
+  --action-yellow-mid: rgba(255, 217, 0, 0.2);
+  --action-blue-low: rgba(0, 210, 255, 0.05);
+  --action-blue-mid: rgba(0, 210, 255, 0.1);
+  --action-green-low: rgba(0, 255, 100, 0.1);
+  --action-red-low: rgba(255, 50, 50, 0.1);
 
-  /* Status */
-  --status-ok: #00b894;
-  --status-warn: #fdcb6e;
-  --status-error: #d63031;
-
-  /* Typography */
+  /* 5. Typography */
   --font-brand: 'Cinzel', serif;
   --font-title: 'Cinzel Decorative', serif;
   --font-ui: 'Space Grotesk', sans-serif;
   --font-body: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --font-cartoon: 'Handlee', cursive;
-  /* Refined Handlee BD Style (V6.5) */
 
-  /* Spacing */
+  /* 6. Spacing */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
   --space-lg: 24px;
   --space-xl: 40px;
 
-  /* Radii */
+  /* 7. Radii */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 16px;
   --radius-full: 9999px;
 
-  /* Transitions */
+  /* 8. Transitions */
   --transition-fast: 0.15s ease;
   --transition-base: 0.3s ease;
   --transition-slow: 0.5s ease;
 
-  /* Z-index layers */
+  /* 9. Z-index layers */
   --z-l0-vista: 0;
   --z-l1-chassis: 10;
+  --hud-z-frame: 5;
+  --hud-z-header: 10;
+  --hud-z-handle: 20;
   --z-l2-props: 20;
+  --z-hud-base: 30;
   --z-l3-hud: 30;
+  --z-hud-focus: 35;
   --z-overlay: 40;
   --z-header: 50;
   --z-modal: 60;
   --z-index-footer: 100;
 
-  /* Diegetic Prop Positioning */
-  --prop-ledge-bottom: 75px;
-  --prop-orion-bottom: 75px;
-  /* Aligned with ledge */
-  /* Sits lower on the foreground table */
-  --prop-brain-bottom: 109px;
-  /* Reduced by 20px (V6.2) */
-  /* Sits higher on the console ledge */
-  --prop-orion-width: 180px;
-  --prop-orion-left: 100px;
-  --prop-brain-width: 390px;
-  --prop-brain-right: 65px;
-
-  /* HUD Geometry */
+  /* 10. Geometry & Positions */
   --terminal-min-w: 400px;
   --terminal-min-h: 350px;
   --config-sidebar-w: 220px;
-
-  /* Narrative Matrix Moods */
-  --cyan-glow: #00f3ff;
-  --amber-glow: #ffbf00;
-  --error-red: #ff3030;
-  --purple-glow: #bc13fe;
-
-  /* Diegetic Expert Tuning — Props V5.4 */
+  --prop-ledge-bottom: 75px;
+  --prop-orion-bottom: 75px;
+  --prop-orion-width: 180px;
+  --prop-orion-left: 100px;
+  --prop-brain-bottom: 109px;
+  --prop-brain-width: 390px;
+  --prop-brain-right: 65px;
   --prop-brain-clip-w: 255px;
-  /* Precision fit (V6.1) */
   --prop-brain-clip-h: 385px;
-  /* Increased for high-liquid */
   --prop-brain-core-y: 120px;
-  /* Lowered into liquid (V5.9) */
   --prop-brain-core-scale: 1.7;
-  /* Almost full (V5.9) */
   --prop-brain-glow-radius: 50%;
-  /* Concentrated aura */
   --prop-brain-liquid-h: 90%;
 }
 

@@ -2,9 +2,9 @@
    ORION V5.4 — BrainJar (Vega) Master Calibration
    ═══════════════════════════════════════════════════════ */
 
-.brain-jar-wrap {
+#root .brain-jar-wrap {
   right: var(--prop-brain-right);
-  bottom: var(--prop-brain-bottom) !important;
+  bottom: var(--prop-brain-bottom);
   width: var(--prop-brain-width);
   cursor: pointer;
   transition: transform 0.3s ease;
@@ -88,7 +88,7 @@
 
 .layer-brain-core {
   position: absolute;
-  width: 32% !important;
+  width: 32%;
   /* Fixed scale for better immersion */
   z-index: 1;
   /* Behind liquid (V6.15) */
