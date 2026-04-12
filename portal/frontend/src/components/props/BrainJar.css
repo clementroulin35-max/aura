@@ -27,14 +27,16 @@
 /* ── Precision Containment (Derived from Global Tokens) ── */
 .inner-jar-clip {
   position: absolute;
-  bottom: 0px; 
+  bottom: 0px;
   left: 50%;
   transform: translateX(-50%);
   width: var(--prop-brain-clip-w);
-  height: var(--prop-brain-clip-h); /* V5.4: 300px for high-liquid coverage */
-  border-radius: 50% 50% 40px 40px; 
+  height: var(--prop-brain-clip-h);
+  /* V5.4: 300px for high-liquid coverage */
+  border-radius: 15% 15% 40px 40px;
   overflow: hidden;
-  z-index: 5; /* Relative to jar container */
+  z-index: 5;
+  /* Relative to jar container */
   display: flex;
   justify-content: center;
   pointer-events: none;
@@ -52,11 +54,13 @@
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: var(--prop-brain-liquid-h, 92%) !important;
+  height: var(--prop-brain-liquid-h, 95%);
   z-index: 2;
   pointer-events: none;
-  opacity: 0.75; /* Fluid Translucency (V5.9) */
-  backdrop-filter: blur(12px) saturate(1.4); /* Refractive Neural Fluid */
+  opacity: 0.75;
+  /* Fluid Translucency (V5.9) */
+  backdrop-filter: blur(12px) saturate(1.4);
+  /* Refractive Neural Fluid */
   -webkit-backdrop-filter: blur(12px) saturate(1.4);
   transition: background-color 0.8s ease;
   /* Surface definition via highlights, no hard border-top (V6.4) */
@@ -64,9 +68,10 @@
 
 .layer-brain-core {
   position: absolute;
-  width: 38%;
+  width: 33%;
   z-index: 3;
-  margin-top: var(--prop-brain-core-y); /* V5.4 Calibration: 10px */
+  margin-top: var(--prop-brain-core-y);
+  /* V5.4 Calibration: 10px */
 }
 
 .layer-bubble {
@@ -84,7 +89,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: var(--prop-brain-glow-radius); /* V5.4 Calibration: 65% radius */
+  width: var(--prop-brain-glow-radius);
+  /* V5.4 Calibration: 65% radius */
   height: var(--prop-brain-glow-radius);
   z-index: 1;
   pointer-events: none;
@@ -113,7 +119,8 @@
   gap: 8px;
   backdrop-filter: var(--glass-blur);
   transition: border-color 0.4s ease, color 0.4s ease;
-  z-index: 15; /* Above jar frame */
+  z-index: 15;
+  /* Above jar frame */
 }
 
 .jar-status-dot {
@@ -130,10 +137,32 @@
 }
 
 /* ── Mood Synchrony ── */
-.brain-jar-wrap.mood-error .jar-status-dot { background: var(--error-red); box-shadow: 0 0 12px var(--error-red); }
-.brain-jar-wrap.mood-travel .jar-status-dot { background: var(--purple-glow); box-shadow: 0 0 12px var(--purple-glow); }
-.brain-jar-wrap.mood-alert .jar-status-dot { background: var(--amber-glow); box-shadow: 0 0 12px var(--amber-glow); }
+.brain-jar-wrap.mood-error .jar-status-dot {
+  background: var(--error-red);
+  box-shadow: 0 0 12px var(--error-red);
+}
 
-.brain-jar-wrap.mood-error .jar-label { border-color: rgba(255, 50, 50, 0.3); color: #ff8e8e; }
-.brain-jar-wrap.mood-travel .jar-label { border-color: rgba(188, 19, 254, 0.3); color: #e7b5ff; }
-.brain-jar-wrap.mood-alert .jar-label { border-color: rgba(254, 191, 0, 0.3); color: var(--amber-glow); }
+.brain-jar-wrap.mood-travel .jar-status-dot {
+  background: var(--purple-glow);
+  box-shadow: 0 0 12px var(--purple-glow);
+}
+
+.brain-jar-wrap.mood-alert .jar-status-dot {
+  background: var(--amber-glow);
+  box-shadow: 0 0 12px var(--amber-glow);
+}
+
+.brain-jar-wrap.mood-error .jar-label {
+  border-color: rgba(255, 50, 50, 0.3);
+  color: #ff8e8e;
+}
+
+.brain-jar-wrap.mood-travel .jar-label {
+  border-color: rgba(188, 19, 254, 0.3);
+  color: #e7b5ff;
+}
+
+.brain-jar-wrap.mood-alert .jar-label {
+  border-color: rgba(254, 191, 0, 0.3);
+  color: var(--amber-glow);
+}

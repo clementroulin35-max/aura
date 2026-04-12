@@ -47,21 +47,15 @@ Wide cinematic 16:9 composition, horizon at 30% from top. 8K
 **Technique** : Grande fenêtre centrale remplie de Pure Green `#00ff00`
 
 ```
-Interior view of a retro-futuristic spaceship cockpit, cinematographic 3D render, warm and luminous atmosphere.
-Style reference: a lived-in, cozy but high-tech control room. Walls and ceiling with aluminum structural ribs. 
-Ceiling: rectangular fluorescent light panels providing soft overhead light.
-Console: a long horizontal instrument panel crossing the full width of the room, at waist height. 
-The console has retro analog gauges, light-backlit switches, small CRT-style monitors showing radar/data, physical buttons. 
-Realistic lived-in details: scattered papers, tools, a ceramic mug.
-Left side of console: an EMPTY flat surface spot (no character placed here — props will be composited separately).
-Right side: a EMPTY pedestal area near a shelf wall (no jar placed here).
-Center console: a square EMPTY (no character placed here — props emergency button will be composited separately) sitting on the console surface.
-Back wall (right side): shelves with technical binders, books, folders, documents. A vintage-style monitor on a swivel arm.
-CRITICAL — Very large and high panoramic front window: MUST be filled with a perfectly flat, solid, uniform #00ff00 pure green. No ocean. No sky. Just flat #00ff00. This is a chroma key zone.
-Two smaller side windows (left): also filled with flat solid #00ff00 green.
-Lighting: warm natural light from sides, soft ceiling panels, subtle light glow from instrument buttons. No harsh shadows.
-Cinematic 16:9 ultra-wide interior perspective shot from a standing position at eye-level, looking forward.
-Disney-Pixar/ILM quality 3D render. No human characters. 8K
+Interior ultra-wide cinematic view of a high-tech spaceship observation deck, Disney-Pixar 3D style. 
+THE FRAME: A massive, centered panoramic front window occupies the upper 70% of the screen, with heavy structural pillars on the far left and far right sides (NO windows at the extreme edges of the screen). 
+CRITICAL: The entire window area MUST be filled with a perfectly flat, solid, uniform Pure Green #00FF00 (Chroma Key). 
+SIDE WALLS: Robust industrial bulkheads on the left and right, filled with detail: small technical monitors, wiring bundles, storage lockers, and aeronautical racks.
+FOREGROUND: A wide, solid curved control desk made of matte-finish cream-colored composite and aluminum spans the bottom 30% of the image. 
+LEFT CONSOLE AREA: A clean workspace with a glowing holographic blueprint pad and a flat ceramic shelf (Orion's spot).
+RIGHT CONSOLE AREA: A laboratory-grade extension with copper cooling pipes, small glass test tubes in racks, and a heavy circular pedestal (Vega Jar's spot).
+ATMOSPHERE: Warm, volumetric lighting, rich 'matte' Pixar textures, lived-in clutter. 
+Quality: ILM/Disney-Pixar feature film render, 8K resolution, 16:9 ratio.
 ```
 
 ---
@@ -124,22 +118,20 @@ Disney-Pixar feature-film quality. Square composition. 8K
 
 ---
 
-### 🏺 Jar (Vessel of Vega) — Chroma Blue
-
-**Asset ID** : `l2_vega_jar`
+### 🏺 Jar (Vessel of Vega V4) — Chroma Blue
+**Asset ID** : `l2_vega_jar_v4`
 **Status** : Finalized for Generation 
 ```text
-A high-fidelity 3D render of a retro-futuristic sci-fi laboratory containment jar, scientific vessel. Industrial aeronautical design, heavy matte cream-colored ceramic and metal base with small analog pressure gauges, copper pipes, and a heavy industrial lid. The glass cylinder is thick and perfectly clear, facing straight forward. Minimalist design, high-quality Pixar-style 3D prop. Lighting is warm and cinematic, coming from the top-left, matching a spaceship cockpit. NO liquid inside, NO brain inside. Background is a solid, flat, uniform Chroma Key Blue #0000FF. Orthographic front view, centered, isolated prop.
+A high-fidelity 3D render of a retro-futuristic laboratory containment jar, Pixar-style 3D prop. Industrial cream-colored matte ceramic base. The glass cylinder is perfectly neutral, crystal clear, with NO internal lighting, NO yellow tint, and NO liquid. Minimalist and transparent-looking glass for easier compositing. Background is a solid, flat, uniform Chroma Key Blue #0000FF. Orthographic front view, isolated prop.
 ```
 
 ---
 
-### 🧠 Brain (Neural Core Alpha) — Chroma Green
-
-**Asset ID** : `l2_vega_brain`  
+### 🧠 Brain (Neural Core Magenta V4) — Chroma Green
+**Asset ID** : `l2_vega_brain_v4`  
 **Status** : Finalized for Generation 
 ```text
-A stylized 3D render of a human brain, neural processor. Style is matte Pixar character prop, resembling the texture of the Orion companion, soft subsurface scattering but NO glossy outside reflections. Muted pastel lavender and violet colors with soft glowing internal neural paths. Fine glowing cyan filaments (neural connectors) hang beneath the center of the brain, gathered together as if severed. Facing 3/4 front view (slightly angled) to show depth, but centered. Perfectly matte surface, avoid neon-plastic highlights. High-quality render, clean silhouette. Background is a solid, flat, uniform Chroma Key Green #00FF00. Isolated prop, floating, cinematic soft lighting from top-left.
+A vibrant 3D render of a human brain, neural processor. Style is matte Pixar character prop. INTENSE VIBRANT MAGENTA AND HOT-PINK colors with bright glowing internal neural paths. Soft subsurface scattering. Fine glowing cyan filaments (neural connectors) hang beneath the brain. This brain must pop with high-saturation color to remain visible behind glass. Background is a solid, flat, uniform Chroma Key Green #00FF00. Isolated prop, floating.
 ```
 
 

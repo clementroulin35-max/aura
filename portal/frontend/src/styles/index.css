@@ -76,7 +76,8 @@ body {
   --font-ui: 'Space Grotesk', sans-serif;
   --font-body: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-cartoon: 'Handlee', cursive; /* Refined Handlee BD Style (V6.5) */
+  --font-cartoon: 'Handlee', cursive;
+  /* Refined Handlee BD Style (V6.5) */
 
   /* Spacing */
   --space-xs: 4px;
@@ -111,13 +112,13 @@ body {
   --prop-orion-bottom: 75px;
   /* Aligned with ledge */
   /* Sits lower on the foreground table */
-  --prop-brain-bottom: 180px;
+  --prop-brain-bottom: 121px;
   /* Reduced by 20px (V6.2) */
   /* Sits higher on the console ledge */
   --prop-orion-width: 180px;
   --prop-orion-left: 100px;
-  --prop-brain-width: 330px;
-  --prop-brain-right: 100px;
+  --prop-brain-width: 410px;
+  --prop-brain-right: 65px;
 
   /* HUD Geometry */
   --terminal-min-w: 400px;
@@ -131,14 +132,14 @@ body {
   --purple-glow: #bc13fe;
 
   /* Diegetic Expert Tuning — Props V5.4 */
-  --prop-brain-clip-w: 225px;
+  --prop-brain-clip-w: 250px;
   /* Precision fit (V6.1) */
-  --prop-brain-clip-h: 300px;
+  --prop-brain-clip-h: 375px;
   /* Increased for high-liquid */
-  --prop-brain-core-y: 85px;
+  --prop-brain-core-y: 100px;
   /* Lowered into liquid (V5.9) */
   --prop-brain-core-scale: 1.7;
-  --prop-brain-liquid-h: 92%;
+  --prop-brain-liquid-h: 95%;
   /* Almost full (V5.9) */
   --prop-brain-glow-radius: 50%;
   /* Concentrated aura */

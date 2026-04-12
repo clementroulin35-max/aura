@@ -71,11 +71,6 @@ export default function BrainJar({ onClick, orion }) {
 
   return (
     <div className={`brain-jar-wrap prop-wrap mood-${mood}`} onClick={handleJarClick}>
-      <div className="jar-label">
-        <span className={`jar-status-dot ${activity > 0.1 ? 'active' : ''}`} />
-        NEURAL_PROCESSOR_VEGA
-      </div>
-
       <div className="vega-composition-container">
         {/* Diegetic Clipping Boundary (Limits the liquid to the jar's interior) */}
         <div className="inner-jar-clip">

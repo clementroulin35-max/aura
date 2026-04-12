@@ -29,15 +29,27 @@ function ChromaFilters() {
     <svg className="svg-filters" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <filter id="chroma-key-green" colorInterpolationFilters="sRGB">
-          <feColorMatrix type="matrix" values="
-            1  0  0  0  0
-            0  1  0  0  0
-            0  0  1  0  0
-            -1  2 -1  0 -0.1" result="mask" />
-          <feComponentTransfer in="mask" result="refined-mask">
-            <feFuncA type="linear" slope="15" intercept="-7" />
+          {/* 1. Detection (Stable Matrix) */}
+          <feColorMatrix in="SourceGraphic" type="matrix" values="
+            0 0 0 0 0
+            0 0 0 0 0
+            0 0 0 0 0
+            -1 2 -1 0 -0.1" result="mask" />
+          
+          {/* 2. Sharp Threshold -> Binary-ish Mask */}
+          <feComponentTransfer in="mask" result="final-mask">
+            <feFuncA type="linear" slope="30" intercept="-15" />
           </feComponentTransfer>
-          <feComposite in="SourceGraphic" in2="refined-mask" operator="out" />
+
+          {/* 3. Spill Suppression: Turn green reflections into neutral grey */}
+          <feColorMatrix in="SourceGraphic" type="matrix" values="
+            1 0 0 0 0
+            0.3 0.4 0.3 0 0
+            0 0 1 0 0
+            0 0 0 1 0" result="spill-removed" />
+
+          {/* 4. Composite: Cut the final sharpened hole out of the cleaned Source */}
+          <feComposite in="spill-removed" in2="final-mask" operator="out" />
         </filter>
         <filter id="chroma-key-blue" colorInterpolationFilters="sRGB">
           <feColorMatrix type="matrix" values="
