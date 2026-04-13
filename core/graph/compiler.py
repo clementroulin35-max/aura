@@ -8,8 +8,9 @@ import logging
 
 from langgraph.graph import START, StateGraph
 
+from core.graph.mission_io import persist_mission_results, save_mission_results
 from core.graph.nodes import dynamic_node_factory, route_conditional, supervisor_node
-from core.graph.persistence import SKILLS, forge_skill, load_skills, persist_mission_results
+from core.graph.persistence import SKILLS, forge_skill, load_skills
 from core.graph.state import GSSState
 from core.infra.event_bus import event_bus
 
@@ -76,23 +77,23 @@ async def execute_mission(mission_data: dict) -> dict:
     persist_mission_results(mission_data.get("project_id"), final_state.get("team_history", []))
 
     # 2. Save physical files to Workspace
-    from core.graph.persistence import save_mission_results
     results = final_state.get("results", [])
-    save_mission_results(
-        mission_data.get("id"), 
-        mission_data.get("project_id"), 
-        results
-    )
+    save_mission_results(mission_data.get("id"), mission_data.get("project_id"), results)
 
     # 3. Emit Completion Signal for HUD
     event_bus.emit(
-        "GRAPH", "MISSION_COMPLETED", "OK", 
-        json.dumps({
-            "mission_id": initial_state["mission_id"],
-            "project_id": mission_data.get("project_id"),
-            "results": results,
-            "teams_visited": final_state.get("team_history", [])
-        }, ensure_ascii=False)
+        "GRAPH",
+        "MISSION_COMPLETED",
+        "OK",
+        json.dumps(
+            {
+                "mission_id": initial_state["mission_id"],
+                "project_id": mission_data.get("project_id"),
+                "results": results,
+                "teams_visited": final_state.get("team_history", []),
+            },
+            ensure_ascii=False,
+        ),
     )
 
     return {

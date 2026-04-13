@@ -8,7 +8,6 @@ Evolutive hooks:
 - Middleware pipeline: self._middlewares list for event transformation
 """
 
-import contextlib
 import json
 import logging
 import queue
@@ -31,17 +30,19 @@ class EventBus:
         # Dedicated queues to avoid competition between file write and broadcast
         self._persist_queue: queue.Queue[dict | None] = queue.Queue(maxsize=max_queue_size)
         self._broadcast_queue: queue.Queue[dict | None] = queue.Queue(maxsize=max_queue_size)
-        
+
         self._ws_connections: set[Any] = set()
         self._middlewares: list[Any] = []
         self._start_writer()
 
     def _start_writer(self) -> None:
         """Background thread for file persistence."""
+
         def writer() -> None:
             while True:
                 item = self._persist_queue.get()
-                if item is None: break
+                if item is None:
+                    break
                 try:
                     with open(self.log_path, "a", encoding="utf-8") as f:
                         f.write(json.dumps(item, ensure_ascii=False) + "\n")
@@ -79,15 +80,17 @@ class EventBus:
         Must be launched in the main FastAPI event loop.
         """
         import asyncio
+
         loop = asyncio.get_event_loop()
         logger.info("EventBus broadcaster started on main loop.")
-        
+
         while True:
             try:
                 # Thread-safe pull from sync queue without blocking the loop
                 item = await loop.run_in_executor(None, self._broadcast_queue.get)
-                if item is None: break
-                
+                if item is None:
+                    break
+
                 if self._ws_connections:
                     # Broadcast to all registered WebSockets
                     for ws in list(self._ws_connections):
@@ -95,7 +98,7 @@ class EventBus:
                             await ws.send_json(item)
                         except Exception:
                             self._ws_connections.discard(ws)
-                
+
                 self._broadcast_queue.task_done()
             except asyncio.CancelledError:
                 break
@@ -104,8 +107,9 @@ class EventBus:
                 await asyncio.sleep(0.1)
 
     def shutdown(self) -> None:
-        """Graceful shutdown: send sentinel to writer thread."""
-        self._queue.put(None)
+        """Graceful shutdown: send sentinel to worker threads."""
+        self._persist_queue.put(None)
+        self._broadcast_queue.put(None)
 
     def _rotate(self) -> None:
         """Keep last 2000 lines when file exceeds size limit."""

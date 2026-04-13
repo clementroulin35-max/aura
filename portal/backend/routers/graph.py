@@ -8,7 +8,7 @@ from typing import List
 
 import logging
 from core.graph.compiler import execute_mission
-from core.graph.persistence import initialize_mission_environment
+from core.graph.mission_io import initialize_mission_environment
 
 logger = logging.getLogger(__name__)
 
