@@ -67,9 +67,6 @@ def initialize_mission_environment(mission_data: dict):
 
     # 1. Directory Setup
     try:
-        archive_dir = (ROOT / "brain" / "missions" / mission_id / "deliverables").resolve()
-        archive_dir.mkdir(parents=True, exist_ok=True)
-
         prj_folder_name = project_id.replace("PRJ-", "")
         project_dir = (ROOT / "projects" / prj_folder_name / mission_id).resolve()
         project_dir.mkdir(parents=True, exist_ok=True)
