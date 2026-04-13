@@ -1,8 +1,8 @@
 {
-  "project_id": "PRJ-NEW11H-17",
+  "project_id": "PRJ-DHDSH-26",
   "id": "M_ARCHIVE_NARRATIVE_V1",
   "title": "ARCHIVE NARRATIVE — PORTAIL DES ÉPOPÉES",
-  "context": "Création d'un portail narratif immersif (blog JSX) fusionnant l'esthétique 'Rick & Morty' avec les mythes celtiques. Le système centralisera des récits Markdown, des vignettes BD, des vidéos et un agenda annuel interactif.",
+  "context": "Création d'un portail narratif immersif (blog JSX) fusionnant l'esthétique 'Morty' avec les mythes celtiques. Le système centralisera des récits Markdown, des vignettes BD, des vidéos et un agenda annuel interactif.",
   "objectives": [
     "Déployer un layout 'Offset Masonry' réactif pour le contenu narratif, avec décalage vertical irrégulier des blocs, tout en assurant une navigation (Dashboard/Header) fixe et symétrique.",
     "Intégrer Framer Motion pour des animations spécifiques (décollage fusée, PNJ en boucle).",

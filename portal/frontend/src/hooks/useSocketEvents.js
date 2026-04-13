@@ -28,9 +28,9 @@ export function useSocketEvents() {
             if (data.event === "HEARTBEAT") return; // Ignore ping
             
             if (data.actor) {
-              msgContent = `[${data.actor}] ${data.event}: ${data.message || ''}`;
+              msgContent = `[${data.actor}] ${data.event}: ${data.message || data.context || ''}`;
             } else {
-              msgContent = data.message || JSON.stringify(data);
+              msgContent = data.message || data.context || JSON.stringify(data);
             }
 
             let type = 'info';
@@ -45,6 +45,13 @@ export function useSocketEvents() {
             // Special Case: Mission Completion — Trigger feedback loop
             if (data.actor === "COMPILER" && data.event === "MissionEnd") {
               window.dispatchEvent(new CustomEvent('MISSION_COMPLETED', {
+                detail: data
+              }));
+            }
+
+            // Sync Case: Environment Ready — Trigger Project Refresh
+            if (data.actor === "PERSISTENCE" && data.event === "EnvironmentReady") {
+              window.dispatchEvent(new CustomEvent('PROJECTS_SYNC', {
                 detail: data
               }));
             }

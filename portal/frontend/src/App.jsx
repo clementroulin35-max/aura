@@ -265,11 +265,21 @@ export default function App() {
       }
     };
 
+    const handleProjectSync = () => {
+      console.log("[HUD] Projects sync requested by backend");
+      fetch('/api/v1/resources/projects')
+        .then(res => res.json())
+        .then(data => setProjects(data.projects || []))
+        .catch(err => console.error("Projects sync error", err));
+    };
+
     window.addEventListener('ORION_LOG', handleLog);
     window.addEventListener('MISSION_COMPLETED', handleMissionComplete);
+    window.addEventListener('PROJECTS_SYNC', handleProjectSync);
     return () => {
       window.removeEventListener('ORION_LOG', handleLog);
       window.removeEventListener('MISSION_COMPLETED', handleMissionComplete);
+      window.removeEventListener('PROJECTS_SYNC', handleProjectSync);
     };
   }, []);
 
