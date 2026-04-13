@@ -1,7 +1,7 @@
 import './Header.css';
 import { VIEWS } from '../../lib/constants.js';
 
-export default function Header({ currentView, onNavigate, onToggleHUD, status = 'OFFLINE', ui, hideHudControls }) {
+export default function Header({ currentView, onNavigate, onToggleHUD, status = 'OFFLINE', ui, hasActiveDocument, hideHudControls }) {
   return (
     <header className="nexus-header">
       {/* Brand */}
@@ -40,6 +40,18 @@ export default function Header({ currentView, onNavigate, onToggleHUD, status = 
 
           {/* Global Apps Launch — All HUD Triggers Always Visible */}
           <div className="nexus-apps-launch">
+            {hasActiveDocument && (
+              <button
+                className={`app-btn active-doc-btn ${ui?.archivesOpen ? 'active' : ''}`}
+                onClick={() => onToggleHUD("archivesOpen")}
+                title="Rapport Actif"
+              >
+                <div className="btn-pulse" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </button>
+            )}
             <button
               className={`app-btn ${ui?.chatOpen ? 'active' : ''}`}
               onClick={() => onToggleHUD("chatOpen")}
@@ -87,16 +99,7 @@ export default function Header({ currentView, onNavigate, onToggleHUD, status = 
                 <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11903 19.0078 7.01C19.0078 7.90097 18.7122 8.76608 18.1676 9.46768C17.623 10.1693 16.8604 10.6697 16 10.89" />
               </svg>
             </button>
-            <button
-              className={`app-btn ${ui?.archivesOpen ? 'active' : ''}`}
-              onClick={() => onToggleHUD("archivesOpen")}
-              title="Archives"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M21 8V21H3V8M1 3H23V8H1V3Z" />
-                <path d="M10 12H14" strokeLinecap="round" />
-              </svg>
-            </button>
+
             <button
               className={`app-btn ${ui?.docsOpen ? 'active' : ''}`}
               onClick={() => onToggleHUD("docsOpen")}

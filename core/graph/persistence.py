@@ -112,10 +112,28 @@ def initialize_mission_environment(mission_data: dict):
     if not mission_id or not project_id:
         return
 
+    mission_id = mission_data.get("id")
+    if not mission_id:
+        return
+
+    event_bus.emit("PERSISTENCE", "SetupBegin", "OK", f"Starting setup for {mission_id}")
+
     # 1. Directory Setup
-    deliverables_dir = ROOT / "brain" / "missions" / mission_id / "deliverables"
-    deliverables_dir.mkdir(parents=True, exist_ok=True)
-    event_bus.emit("PERSISTENCE", "DirectorySetup", "OK", f"Ready: {mission_id}")
+    try:
+        # Archive path (Internal)
+        archive_dir = (ROOT / "brain" / "missions" / mission_id / "deliverables").resolve()
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Project path (Visible to user)
+        # We strip the PRJ- prefix if present for cleaner folder names
+        prj_folder_name = project_id.replace("PRJ-", "")
+        project_dir = (ROOT / "projects" / prj_folder_name / mission_id).resolve()
+        project_dir.mkdir(parents=True, exist_ok=True)
+
+        event_bus.emit("PERSISTENCE", "DirectorySetup", "OK", f"Workspace: projects/{prj_folder_name}/{mission_id}")
+    except Exception as e:
+        event_bus.emit("PERSISTENCE", "DirectorySetup", "ERROR", f"Failed to create workspace: {str(e)}")
+        return
 
     # 2. projects.json Setup
     projects_file = ROOT / "brain" / "projects.json"
@@ -146,23 +164,41 @@ def initialize_mission_environment(mission_data: dict):
                 }
 
                 if not existing_team:
+                    team_specs = {}
+                    for agent in selected_agents:
+                        agent_skill = SKILLS.get(agent, {})
+                        agent_specs = {
+                            **specs,
+                            "role": agent_skill.get("role", "Specialist"),
+                            "responsibilities": agent_skill.get("responsibilities", []),
+                            "constraints": list(set((specs.get("constraints") or []) + (agent_skill.get("constraints") or []))),
+                            "output_format": agent_skill.get("output_format", "Markdown")
+                        }
+                        team_specs[agent] = agent_specs
+
                     p["teams"].append(
                         {
                             "id": mission_team_id,
                             "name": "Mission Squad",
                             "agents": selected_agents,
-                            "specs": {agent: specs for agent in selected_agents},
+                            "specs": team_specs,
                         }
                     )
                 else:
-                    # Don't overwrite constitution (agents list) if it exists,
-                    # but ensure new agents are added and ALL specs are updated.
-                    existing_team["agents"] = list(set(existing_team["agents"] + selected_agents))
+                    existing_team["agents"] = list(set(existing_team.get("agents", []) + selected_agents))
                     if "specs" not in existing_team:
                         existing_team["specs"] = {}
 
                     for agent in selected_agents:
-                        existing_team["specs"][agent] = specs
+                        agent_skill = SKILLS.get(agent, {})
+                        agent_specs = {
+                            **specs,
+                            "role": agent_skill.get("role", "Specialist"),
+                            "responsibilities": agent_skill.get("responsibilities", []),
+                            "constraints": list(set((specs.get("constraints") or []) + (agent_skill.get("constraints") or []))),
+                            "output_format": agent_skill.get("output_format", "Markdown")
+                        }
+                        existing_team["specs"][agent] = agent_specs
 
                 updated = True
                 break
@@ -173,3 +209,34 @@ def initialize_mission_environment(mission_data: dict):
 
     except Exception as e:
         logger.error(f"Failed to initialize mission environment: {e}")
+
+
+def save_mission_results(mission_id: str, project_id: str, results: list[dict]):
+    """Saves each result entry as a file in both archival and project workspaces."""
+    if not mission_id or not results:
+        return
+
+    prj_folder_name = project_id.replace("PRJ-", "") if project_id else "EXTRACTED"
+    
+    # Paths
+    archive_dir = (ROOT / "brain" / "missions" / mission_id / "deliverables").resolve()
+    project_dir = (ROOT / "projects" / prj_folder_name / mission_id).resolve()
+    
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    project_dir.mkdir(parents=True, exist_ok=True)
+
+    for res in results:
+        filename = res.get("filename", "output.md")
+        content = res.get("content", "")
+        
+        # Save to both
+        for d in [archive_dir, project_dir]:
+            try:
+                (d / filename).write_text(content, encoding="utf-8")
+            except Exception as e:
+                logger.error(f"Failed to save result {filename} to {d}: {e}")
+
+    event_bus.emit(
+        "PERSISTENCE", "MissionResultsSaved", "OK", 
+        f"Saved {len(results)} files to projects/{prj_folder_name}/{mission_id}"
+    )

@@ -132,3 +132,66 @@ async def upload_background(file: UploadFile = File(...)):
         return {"success": True, "url": f"/backgrounds/{file.filename}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# --- NEW: DELIVERABLE DISCOVERY & READING ---
+
+@router.get("/v1/resources/project_deliverables/{project_id}")
+async def get_project_deliverables(project_id: str):
+    """Scan the project directory and return a grouped list of Markdown files."""
+    # Robust folder resolution
+    prj_id_clean = project_id.upper()
+    if prj_id_clean.startswith("PRJ-"):
+        prj_folder_name = prj_id_clean.replace("PRJ-", "")
+    else:
+        prj_folder_name = prj_id_clean
+
+    project_root = ROOT / "projects" / prj_folder_name
+    
+    if not project_root.exists():
+        return {"deliverables": {}}
+        
+    deliverables = {}
+    try:
+        # 1. Mission Subdirectories Discovery
+        for mission_dir in project_root.iterdir():
+            if mission_dir.is_dir():
+                mission_id = mission_dir.name
+                files = [f.name for f in mission_dir.glob("*.md")]
+                if files:
+                    deliverables[mission_id] = files
+        
+        # 2. Root Project Deliverables Discovery (Unbound documents)
+        root_files = [f.name for f in project_root.glob("*.md")]
+        if root_files:
+            deliverables["ROOT"] = root_files
+    except Exception as e:
+        logger.error(f"Error scanning deliverables for {project_id}: {e}")
+        
+    return {"deliverables": deliverables}
+
+@router.get("/v1/resources/read_project_file")
+async def read_project_file(filename: str, project_id: str = None, mission_id: str = None):
+    """Read content of a mission deliverable or a technical document in root."""
+    try:
+        if project_id and mission_id:
+            # Deliverable case
+            prj_folder_name = project_id.upper().replace("PRJ-", "")
+            if mission_id == "ROOT":
+                file_path = ROOT / "projects" / prj_folder_name / filename
+            else:
+                file_path = ROOT / "projects" / prj_folder_name / mission_id / filename
+        else:
+            # Technical doc case (root or docs folder)
+            file_path = ROOT / filename
+            if not file_path.exists():
+                file_path = ROOT / "docs" / filename
+                
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail=f"File {filename} not found")
+            
+        return {"content": file_path.read_text(encoding="utf-8"), "filename": filename}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error reading file {filename}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

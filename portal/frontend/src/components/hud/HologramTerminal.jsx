@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useDragControls, AnimatePresence } from 'framer-motion';
+import { motion, useDragControls, AnimatePresence, useMotionValue } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import './hud.css';
@@ -32,19 +32,17 @@ const AutoExpandingTextarea = ({ value, onChange, onKeyDown, placeholder, disabl
     );
 };
 
-const HologramTerminal = ({ 
-    onClose, x, y, initialLogs = [], 
-    chatMessages = [], setChatMessages, 
+const HologramTerminal = ({
+    onClose, x, y, width, height, dragConstraints, initialLogs = [],
+    chatMessages = [], setChatMessages,
     onMissionDraft,
-    isFocused, onFocus 
+    isFocused, onFocus
 }) => {
     const [chatInput, setChatInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('chat'); // 'chat' or 'logs'
     const screenRef = useRef(null);
 
-    // Window Interaction State
-    const [dimensions, setDimensions] = useState({ width: 785, height: 450 });
     const dragControls = useDragControls();
 
     const unfoldVariants = {
@@ -62,6 +60,7 @@ const HologramTerminal = ({
         }
     };
 
+    // Auto-scroll logic — handles both tabs and content updates
     useEffect(() => {
         if (screenRef.current) {
             screenRef.current.scrollTop = screenRef.current.scrollHeight;
@@ -105,24 +104,41 @@ const HologramTerminal = ({
         }
     };
 
-    const startResizing = (mouseDownEvent) => {
-        mouseDownEvent.preventDefault();
-        const startWidth = dimensions.width;
-        const startHeight = dimensions.height;
-        const startX = mouseDownEvent.clientX;
-        const startY = mouseDownEvent.clientY;
-
+    // Resizing Logic
+    const handleResizeRight = (mouseDownEvent) => {
+        mouseDownEvent.preventDefault(); mouseDownEvent.stopPropagation();
+        const startWidth = width.get(); const startHeight = height.get();
+        const startX = mouseDownEvent.clientX; const startY = mouseDownEvent.clientY;
         const onMouseMove = (mouseMoveEvent) => {
-            const newWidth = Math.max(610, startWidth + (mouseMoveEvent.clientX - startX));
-            const newHeight = Math.max(200, startHeight + (mouseMoveEvent.clientY - startY));
-            setDimensions({ width: newWidth, height: newHeight });
+            width.set(Math.max(610, startWidth + (mouseMoveEvent.clientX - startX)));
+            height.set(Math.max(200, startHeight + (mouseMoveEvent.clientY - startY)));
         };
-
         const onMouseUp = () => {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
         };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    };
 
+    const handleResizeLeft = (mouseDownEvent) => {
+        mouseDownEvent.preventDefault(); mouseDownEvent.stopPropagation();
+        const startWidth = width.get(); const startHeight = height.get();
+        const startX = mouseDownEvent.clientX; const startY = mouseDownEvent.clientY;
+        const startXPos = x.get();
+        const onMouseMove = (mouseMoveEvent) => {
+            const deltaX = mouseMoveEvent.clientX - startX;
+            const newWidth = Math.max(610, startWidth - deltaX);
+            const actualDeltaX = startWidth - newWidth;
+            
+            width.set(newWidth);
+            height.set(Math.max(200, startHeight + (mouseMoveEvent.clientY - startY)));
+            x.set(startXPos + actualDeltaX);
+        };
+        const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
     };
@@ -149,12 +165,12 @@ const HologramTerminal = ({
             onPointerDownCapture={onFocus}
             drag
             dragControls={dragControls}
-            dragListener={false}
+            dragListener={false} // Only drag via header
             dragMomentum={false}
-            dragConstraints={{ top: 70, left: 10, right: window.innerWidth - dimensions.width - 10, bottom: window.innerHeight - dimensions.height - 110 }}
+            dragConstraints={dragConstraints}
             style={{
-                width: dimensions.width,
-                height: dimensions.height,
+                width,
+                height,
                 x,
                 y,
                 zIndex: isFocused ? 'var(--z-hud-top)' : 'var(--z-hud-base)'
@@ -164,6 +180,7 @@ const HologramTerminal = ({
             animate="visible"
             exit="hidden"
         >
+            {/* Draggable Header */}
             <div
                 className="hud-header"
                 onPointerDown={(e) => dragControls.start(e)}
@@ -177,16 +194,17 @@ const HologramTerminal = ({
                     </div>
                 </div>
                 {onClose && (
-                    <button className="hud-close-btn hologram-close-btn" onClick={onClose}>[X]</button>
+                    <button className="hud-close-btn hologram-close-btn" onClick={onClose}>X</button>
                 )}
             </div>
 
+            {/* Chat/Logs Content */}
             <div className="hologram-screen" ref={screenRef}>
                 <div className="chat-stream">
                     <AnimatePresence initial={false}>
                         {activeTab === 'chat' && chatMessages.filter(m => m.role !== 'system').map((msg, i) => (
-                            <motion.div 
-                                key={i} 
+                            <motion.div
+                                key={i}
                                 className={`msg ${msg.role} ${msg.type || ''}`}
                                 initial={{ opacity: 0, x: -10, y: 10 }}
                                 animate={{ opacity: 1, x: 0, y: 0 }}
@@ -197,7 +215,7 @@ const HologramTerminal = ({
                                 </span>
                                 <div className={`msg-content ${msg.role === 'orion' ? 'orion-card' : ''}`}>
                                     {msg.role === 'orion' || msg.role === 'assistant' ? (
-                                        <ReactMarkdown 
+                                        <ReactMarkdown
                                             remarkPlugins={[remarkGfm]}
                                             components={MarkdownComponents}
                                         >
@@ -229,6 +247,7 @@ const HologramTerminal = ({
                 </div>
             </div>
 
+            {/* Input Row */}
             <div className="hologram-input">
                 <AutoExpandingTextarea
                     value={chatInput}
@@ -251,10 +270,9 @@ const HologramTerminal = ({
                 </button>
             </div>
 
-            <div
-                className="hud-resize-handle hologram-resize-handle"
-                onMouseDown={startResizing}
-            />
+            {/* Resize Handles */}
+            <div className="hud-resize-handle hologram-resize-handle" onMouseDown={handleResizeRight} />
+            <div className="hud-resize-handle-left hologram-resize-handle-left" onMouseDown={handleResizeLeft} />
         </motion.div>
     );
 };

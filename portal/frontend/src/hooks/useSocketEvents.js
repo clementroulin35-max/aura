@@ -1,7 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function useSocketEvents() {
+  const closingRef = useRef(false);
+
   useEffect(() => {
+    closingRef.current = false;
     let ws;
     let reconnectTimeout;
 
@@ -39,11 +42,33 @@ export function useSocketEvents() {
             if (data.status === 'ERROR') type = 'error';
 
             window.dispatchEvent(new CustomEvent('ORION_LOG', {
-              detail: { content: msgContent, type }
+              detail: { 
+                content: msgContent, 
+                type,
+                actor: data.actor,
+                event: data.event,
+                data: data 
+              }
             }));
 
+            // Cascade Case: Agent Started Task
+            if (data.actor.startsWith("NODE:") && data.event === "TaskStarted") {
+                const agentId = data.actor.replace("NODE:[", "").replace("]", "").toLowerCase();
+                window.dispatchEvent(new CustomEvent('AGENT_ACTIVE', {
+                  detail: { agentId }
+                }));
+            }
+
+            // Cascade Case: Agent Finished Task
+            if (data.actor.startsWith("NODE:") && data.event === "TaskFinished") {
+                const agentId = data.actor.replace("NODE:[", "").replace("]", "").toLowerCase();
+                window.dispatchEvent(new CustomEvent('AGENT_INACTIVE', {
+                  detail: { agentId }
+                }));
+            }
+
             // Special Case: Mission Completion — Trigger feedback loop
-            if (data.actor === "COMPILER" && data.event === "MissionEnd") {
+            if (data.actor === "GRAPH" && data.event === "MISSION_COMPLETED") {
               window.dispatchEvent(new CustomEvent('MISSION_COMPLETED', {
                 detail: data
               }));
@@ -61,7 +86,11 @@ export function useSocketEvents() {
         };
 
         ws.onclose = () => {
-          console.log("[WS] Disconnected, attempting reconnect in 5s...");
+          if (closingRef.current) {
+            console.log("[WS] Connection closed intentionally.");
+            return;
+          }
+          console.log("[WS] Disconnected unexpectedly, attempting reconnect in 5s...");
           reconnectTimeout = setTimeout(connect, 5000);
         };
         
@@ -78,6 +107,7 @@ export function useSocketEvents() {
     connect();
 
     return () => {
+      closingRef.current = true;
       clearTimeout(reconnectTimeout);
       if (ws) ws.close();
     };

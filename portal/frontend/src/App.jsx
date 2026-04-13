@@ -1,6 +1,6 @@
 import './styles/index.css';
 import './styles/App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMotionValue } from 'framer-motion';
 import { VIEWS } from './lib/constants.js';
 import Header from './components/layouts/Header.jsx';
@@ -36,7 +36,7 @@ function ChromaFilters() {
             0 0 0 0 0
             0 0 0 0 0
             -1 2 -1 0 -0.1" result="mask" />
-          
+
           {/* 2. Sharp Threshold -> Binary-ish Mask */}
           <feComponentTransfer in="mask" result="final-mask">
             <feFuncA type="linear" slope="30" intercept="-15" />
@@ -104,20 +104,55 @@ export default function App() {
   // Window Positions (Persistent across views)
   const xTerminal = useMotionValue(35);
   const yTerminal = useMotionValue(100);
-  const xSettings = useMotionValue(window.innerWidth - 1045);
+  const xSettings = useMotionValue(35);
   const ySettings = useMotionValue(100);
   const xProjectTeams = useMotionValue(35);
-  const yProjectTeams = useMotionValue(570);
-  const xHub = useMotionValue(400);
+  const yProjectTeams = useMotionValue(100);
+  const xHub = useMotionValue(35);
   const yHub = useMotionValue(100);
-  const xMonitor = useMotionValue(window.innerWidth - 1365);
+  const xMonitor = useMotionValue(35);
   const yMonitor = useMotionValue(100);
-  const xDocs = useMotionValue(835);
-  const yDocs = useMotionValue(570);
-  const xArchives = useMotionValue(370);
-  const yArchives = useMotionValue(570);
-  const xDraft = useMotionValue(window.innerWidth / 2 - 275);
+  const xDocs = useMotionValue(35);
+  const yDocs = useMotionValue(100);
+  const xArchives = useMotionValue(35);
+  const yArchives = useMotionValue(100);
+  const xDraft = useMotionValue(35);
   const yDraft = useMotionValue(100);
+
+  // Window Dimensions (Persistent)
+  const wTerminal = useMotionValue(700);
+  const hTerminal = useMotionValue(450);
+  const wSettings = useMotionValue(400);
+  const hSettings = useMotionValue(550);
+  const wProjectTeams = useMotionValue(600);
+  const hProjectTeams = useMotionValue(500);
+  const wHub = useMotionValue(650);
+  const hHub = useMotionValue(550);
+  const wMonitor = useMotionValue(350);
+  const hMonitor = useMotionValue(600);
+  const wDocs = useMotionValue(500);
+  const hDocs = useMotionValue(350);
+  const wArchives = useMotionValue(600);
+  const hArchives = useMotionValue(500);
+  const wDraft = useMotionValue(700);
+  const hDraft = useMotionValue(600);
+
+  // Dynamic Viewport Constraints
+  const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
+  useEffect(() => {
+    const handleResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const getDragConstraints = (wValue, hValue) => {
+    return {
+      top: 68,
+      left: 5,
+      right: viewport.width - (wValue?.get() || 100) - 5,
+      bottom: viewport.height - 125 // 125 for footer ledge
+    };
+  };
 
   const [bgIndex, setBgIndex] = useState(0);
   const [forceScroll, setForceScroll] = useState(0); // Counter to trigger scroll
@@ -127,6 +162,9 @@ export default function App() {
   const { status: systemStatus, config: systemConfig, ollamaReachability, allModels } = useSystemStatus();
   const orion = useOrionIntelligence(isJumping, ui);
 
+  const [activeAgentIds, setActiveAgentIds] = useState([]);
+  const [lastMissionDocs, setLastMissionDocs] = useState({}); // Grouped by mission_id
+  const [activeDocument, setActiveDocument] = useState(null);
   const [projects, setProjects] = useState([]);
   useEffect(() => {
     fetch('/api/v1/resources/projects')
@@ -135,20 +173,25 @@ export default function App() {
       .catch(err => console.error("Projects fetch error", err));
   }, []);
 
-  // Load Mission for Active Project
+  // Load Mission & Existing Deliverables for Active Project
   useEffect(() => {
     const activeProject = projects[bgIndex % projects.length];
     if (activeProject) {
+      // 1. Fetch Mission Draft
       fetch(`/api/v1/resources/missions/${activeProject.id}`)
         .then(res => res.json())
         .then(data => {
-            if (data.mission) {
-                setMissionDraft(data.mission);
-            } else {
-                setMissionDraft(null); // Reset or use defaults
-            }
+          setMissionDraft(data.mission || null);
         })
         .catch(err => console.error("Mission load error", err));
+
+      // 2. Fetch Grouped Deliverables
+      fetch(`/api/v1/resources/project_deliverables/${activeProject.id}`)
+        .then(res => res.json())
+        .then(data => {
+          setLastMissionDocs(data.deliverables || {});
+        })
+        .catch(err => console.error("Deliverables load error", err));
     }
   }, [bgIndex, projects]);
 
@@ -163,7 +206,7 @@ export default function App() {
         setProjects(newProjects);
       }
     } catch (e) {
-        console.error("Projects sync error", e);
+      console.error("Projects sync error", e);
     }
   };
 
@@ -181,7 +224,7 @@ export default function App() {
     let willOpen = !ui[key];
     if (panel === 'chat') { key = 'chatOpen'; willOpen = !ui.chatOpen; }
     if (panel === 'settings') { key = 'settingsOpen'; willOpen = !ui.settingsOpen; }
-    
+
     setUi(prev => ({
       ...prev,
       [panel + 'Open']: !prev[panel + 'Open'],
@@ -192,10 +235,42 @@ export default function App() {
     if (willOpen && panel !== 'mute') setActiveWindow(key);
   };
 
-  // Improved Generic HUD Toggle
+  // Improved Generic HUD Toggle (Persistent Position & Dimensions)
   const toggleHUD = (key) => {
     setUi(prev => ({ ...prev, [key]: !prev[key] }));
     if (!ui[key]) setActiveWindow(key);
+  };
+
+  const handleOpenDoc = async (doc) => {
+    // doc: { filename, mission_id, content?, isTechnical? }
+    let targetDoc = { ...doc };
+
+    // If no content, fetch from server
+    if (!targetDoc.content) {
+      try {
+        const url = `/api/v1/resources/read_project_file?filename=${targetDoc.filename}${targetDoc.mission_id ? `&mission_id=${targetDoc.mission_id}` : ''}${activeProject ? `&project_id=${activeProject.id}` : ''}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("File not found");
+        const data = await res.json();
+        targetDoc.content = data.content;
+      } catch (err) {
+        console.error("Open doc error:", err);
+        targetDoc.error = `Le fichier "${doc.filename}" est introuvable.`;
+
+        // Dispatch error to LLM console
+        window.dispatchEvent(new CustomEvent('ORION_LOG', {
+          detail: {
+            content: `[DOCS] Erreur critique: Impossible de lire ${doc.filename}. Le module de données est manquant ou corrompu.`,
+            type: 'error',
+            actor: 'SYSTEM'
+          }
+        }));
+      }
+    }
+
+    setActiveDocument(targetDoc);
+    setUi(prev => ({ ...prev, archivesOpen: true }));
+    setActiveWindow("archivesOpen");
   };
 
   useEffect(() => {
@@ -208,60 +283,101 @@ export default function App() {
 
     const handleMissionComplete = async (e) => {
       const data = e.detail;
-      
-      // Filter out replayed events (Ghost calls fix)
-      // Check data.timestamp (ISO) against sessionStartTime
-      const eventTime = data.timestamp ? Date.parse(data.timestamp) : Date.now();
-      if (eventTime < sessionStartTime) {
-        console.log("[HUD] Ignoring old mission event:", data.event, "time:", new Date(eventTime).toLocaleTimeString());
-        return;
-      }
+      console.log("[HUD] Mission completion event received:", data);
 
-      console.log("[HUD] Mission completed event received", data);
-      
-      let missionResult = { status: "SUCCESS", teams_visited: [], artifacts: [] };
+      let missionId = data.mission_id;
+      let missionProjectId = data.project_id || null;
+      let missionResult = { status: "SUCCESS", teams_visited: [], results: [] };
+
+      // Resilient Context Parsing
       try {
         if (data.context) {
-          const parsed = JSON.parse(data.context);
+          const parsed = typeof data.context === 'string' ? JSON.parse(data.context) : data.context;
           missionResult.teams_visited = parsed.teams_visited || [];
-          missionResult.mission_id = parsed.mission_id;
+          missionResult.results = parsed.results || [];
+          if (parsed.mission_id) missionId = parsed.mission_id;
+          if (parsed.project_id) missionProjectId = parsed.project_id;
+        } else if (data.results) {
+          // Flatten direct results if context is missing but results are present (enriched backend)
+          missionResult.results = data.results || [];
+          missionResult.teams_visited = data.teams_visited || [];
         }
       } catch (err) {
         console.warn("[HUD] Could not parse mission context JSON", err);
       }
 
-      // 1. Refresh Projects (to show new teams/agents)
-      fetch('/api/v1/resources/projects')
-        .then(res => res.json())
-        .then(data => setProjects(data.projects || []))
-        .catch(err => console.error("Projects refresh error", err));
+      // Filter out replayed events (Ghost calls fix)
+      const eventTime = data.timestamp ? Date.parse(data.timestamp) : Date.now();
+      const isStale = eventTime < sessionStartTime;
 
-      // 2. Request Orion Interpretation
+      if (isStale) {
+        console.log("[HUD] Stale mission event ignored for interpretation, but clearing execution state.");
+        setUi(prev => ({ ...prev, executing: false }));
+        setActiveAgentIds([]);
+        return;
+      }
+
+      const isDuplicate = missionId && lastProcessedMissionId.current === missionId;
+      if (!isDuplicate && missionId) lastProcessedMissionId.current = missionId;
+
       try {
-        const res = await fetch('/api/v1/orion/interpret', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            mission_result: missionResult,
-            original_objective: missionDraft?.context || "Mission non spécifiée"
-          })
-        });
-        
-        if (res.ok) {
-          const result = await res.json();
-          // 3. Inject Orion's summary into chat
+        if (!isDuplicate && !isStale) {
+          // 1. Refresh Projects
+          fetch('/api/v1/resources/projects')
+            .then(res => res.json())
+            .then(data => setProjects(data.projects || []))
+            .catch(err => console.error("Projects refresh error", err));
+
+          // 2. Refresh Deliverables (True Discovery)
+          const targetProjectId = missionProjectId || (activeProject ? activeProject.id : null);
+          if (targetProjectId) {
+            console.log(`[HUD] Refreshing deliverables for ${targetProjectId}...`);
+            fetch(`/api/v1/resources/project_deliverables/${targetProjectId}`)
+              .then(res => res.json())
+              .then(data => {
+                setLastMissionDocs(data.deliverables || {});
+              })
+              .catch(err => console.error("Deliverables sync error", err));
+          }
+
+          // 3. Request Orion Interpretation
+          const res = await fetch('/api/v1/orion/interpret', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              mission_result: missionResult,
+              mission_id: missionId,
+              original_objective: (missionDraft && missionDraft.context) ? missionDraft.context : "Mission non spécifiée"
+            })
+          });
+
+          if (res.ok) {
+            const result = await res.json();
+            setChatMessages(prev => [...prev, {
+              role: 'assistant',
+              content: result.summary,
+              mood: result.mood || 'neutral',
+              bubble: result.bubble,
+              type: 'orion'
+            }]);
+          } else {
+            throw new Error("Interpretation service unavailable");
+          }
+        }
+      } catch (err) {
+        if (!isDuplicate && !isStale) {
+          console.warn("[ORION] Fallback interpretation active", err);
           setChatMessages(prev => [...prev, {
             role: 'assistant',
-            content: result.summary,
-            mood: result.mood || 'neutral',
-            bubble: result.bubble,
+            content: "▸ Analyse de mission terminée. Les livrables sont disponibles dans l'onglet DOCUMENTS de la Forge.",
+            mood: 'neutral',
             type: 'orion'
           }]);
         }
-      } catch (err) {
-        console.error("Interpretation error", err);
       } finally {
+        // ALWAYS clear executing state on MISSION_COMPLETED
         setUi(prev => ({ ...prev, executing: false }));
+        setActiveAgentIds([]);
       }
     };
 
@@ -273,19 +389,52 @@ export default function App() {
         .catch(err => console.error("Projects sync error", err));
     };
 
-    window.addEventListener('ORION_LOG', handleLog);
-    window.addEventListener('MISSION_COMPLETED', handleMissionComplete);
-    window.addEventListener('PROJECTS_SYNC', handleProjectSync);
-    return () => {
-      window.removeEventListener('ORION_LOG', handleLog);
-      window.removeEventListener('MISSION_COMPLETED', handleMissionComplete);
-      window.removeEventListener('PROJECTS_SYNC', handleProjectSync);
+    const handleAgentActive = (e) => {
+      const { agentId } = e.detail;
+      // Cascade mode: only the current one pulses
+      setActiveAgentIds([agentId]);
     };
-  }, []);
+
+    const handleAgentInactive = (e) => {
+      const { agentId } = e.detail;
+      setActiveAgentIds(prev => prev.filter(id => id !== agentId));
+    };
+
+    // Fallback: Scan logs for completion keywords if socket event is missed
+    const checkCompletionKeywords = () => {
+      if (!ui.executing) return;
+      const lastLogs = logHistory.slice(-5);
+      const hasCompleted = lastLogs.some(l =>
+        (l.content && (l.content.includes("verdict: COMPLETED") || l.content.includes("MISSION TERMINEE"))) ||
+        (l.event === "MISSION_COMPLETED")
+      );
+      if (hasCompleted) {
+        console.log("[HUD] Completion detected via log scanning fallback.");
+        setUi(prev => ({ ...prev, executing: false }));
+        setActiveAgentIds([]);
+      }
+    };
+    checkCompletionKeywords();
+
+    window.addEventListener('MISSION_COMPLETED', handleMissionComplete);
+    window.addEventListener('ORION_MISSION_COMPLETE', handleMissionComplete);
+    window.addEventListener('ORION_LOG', handleLog);
+    window.addEventListener('PROJECTS_SYNC', handleProjectSync);
+    window.addEventListener('AGENT_ACTIVE', handleAgentActive);
+    window.addEventListener('AGENT_INACTIVE', handleAgentInactive);
+    return () => {
+      window.removeEventListener('MISSION_COMPLETED', handleMissionComplete);
+      window.removeEventListener('ORION_MISSION_COMPLETE', handleMissionComplete);
+      window.removeEventListener('ORION_LOG', handleLog);
+      window.removeEventListener('PROJECTS_SYNC', handleProjectSync);
+      window.removeEventListener('AGENT_ACTIVE', handleAgentActive);
+      window.removeEventListener('AGENT_INACTIVE', handleAgentInactive);
+    };
+  }, [logHistory, ui.executing, sessionStartTime]); // Added dependencies for fallback
 
   const initiateJump = (index) => {
     if (index === bgIndex || isJumping) return;
-    
+
     // Bypass jump cinematic completely on Project Landing Page
     if (view === VIEWS.PROJECTS) {
       setBgIndex(index);
@@ -294,7 +443,7 @@ export default function App() {
     }
 
     setIsJumping(true);
-    
+
     // Phase 0: Anticipation (0s - 0.3s)
     setJumpPhase('anticipation');
 
@@ -317,8 +466,8 @@ export default function App() {
     }, 4400); // 4.4s total cinematic flow
   };
 
-  const BACKGROUNDS = projects.length > 0 
-    ? projects.map(p => p.image || '/backgrounds/l0_vista.jpg') 
+  const BACKGROUNDS = projects.length > 0
+    ? projects.map(p => p.image || '/backgrounds/l0_vista.jpg')
     : ['/backgrounds/l0_vista.jpg'];
 
   const PageComponent = PAGES[view] || DashboardPage;
@@ -339,61 +488,119 @@ export default function App() {
         currentView={view}
         onNavigate={setView}
         onSettingsClick={() => toggleHUD("settingsOpen")}
-        onToggleHUD={toggleHUD} // Pass generic toggle to header
+        onToggleHUD={toggleHUD}
         status={systemStatus}
         ui={ui}
+        hasActiveDocument={!!activeDocument}
         hideHudControls={view === VIEWS.PROJECTS}
       />
 
       {/* Global Desktop HUD Layer — Reversed Order (Terminal on Top) */}
       <div className="l3-hud-layer global-hud" style={{ top: '0', height: '100vh', pointerEvents: 'none', display: view === VIEWS.PROJECTS ? 'none' : 'block' }}>
-        {/* Memory Windows (Background) */}
-        {ui.archivesOpen && <MemoryRapportHUD onClose={() => toggleHUD("archivesOpen")} x={xArchives} y={yArchives} isFocused={activeWindow === "archivesOpen"} onFocus={() => setActiveWindow("archivesOpen")} />}
-        {ui.docsOpen && <MemoryDocsWindow onClose={() => toggleHUD("docsOpen")} x={xDocs} y={yDocs} isFocused={activeWindow === "docsOpen"} onFocus={() => setActiveWindow("docsOpen")} />}
+        {/* Memory Windows (Background) - Refactored as Reader */}
+        {activeDocument && ui.archivesOpen && (
+          <MemoryRapportHUD
+            doc={activeDocument}
+            onClose={() => {
+              setUi(prev => ({ ...prev, archivesOpen: false }));
+              setActiveDocument(null);
+            }}
+            x={xArchives} y={yArchives}
+            width={wArchives} height={hArchives}
+            dragConstraints={getDragConstraints(wArchives, hArchives)}
+            isFocused={activeWindow === "archivesOpen"}
+            onFocus={() => setActiveWindow("archivesOpen")}
+          />
+        )}
+        {ui.docsOpen && (
+          <MemoryDocsWindow
+            onClose={() => toggleHUD("docsOpen")}
+            x={xDocs} y={yDocs}
+            width={wDocs} height={hDocs}
+            dragConstraints={getDragConstraints(wDocs, hDocs)}
+            isFocused={activeWindow === "docsOpen"}
+            onFocus={() => setActiveWindow("docsOpen")}
+            onOpenDoc={handleOpenDoc}
+          />
+        )}
 
         {/* Execution Engine Window */}
         {ui.missionDraftOpen && (
-           <MissionForgeHUD 
-             onClose={() => toggleHUD("missionDraftOpen")} 
-             x={xDraft} 
-             y={yDraft} 
-             mission={missionDraft || { 
-               title: "NOUVELLE MISSION", 
-               context: "Définissez le contexte...", 
-               objectives: ["Objectif 1"], 
-               constraints: ["Contrainte 1"],
-               selected_skills: []
-             }} 
-             setMissionDraft={setMissionDraft}
-             onExecuteStart={() => setUi(prev => ({...prev, executing: true}))}
-             onExecuteEnd={() => setUi(prev => ({...prev, executing: false}))}
-             isFocused={activeWindow === "missionDraftOpen"} 
-             onFocus={() => setActiveWindow("missionDraftOpen")} 
-             activeProject={activeProject}
-           />
+          <MissionForgeHUD
+            onClose={() => toggleHUD("missionDraftOpen")}
+            x={xDraft} y={yDraft}
+            width={wDraft} height={hDraft}
+            dragConstraints={getDragConstraints(wDraft, hDraft)}
+            mission={missionDraft || {
+              title: "NOUVELLE MISSION",
+              context: "Définissez le contexte...",
+              objectives: ["Objectif 1"],
+              constraints: ["Contrainte 1"],
+              selected_skills: []
+            }}
+            setMissionDraft={setMissionDraft}
+            onExecuteStart={() => setUi(prev => ({ ...prev, executing: true }))}
+            onExecuteEnd={() => { }}
+            executing={ui.executing}
+            results={lastMissionDocs}
+            onOpenDoc={handleOpenDoc}
+            isFocused={activeWindow === "missionDraftOpen"}
+            onFocus={() => setActiveWindow("missionDraftOpen")}
+            activeProject={activeProject}
+          />
         )}
 
         {/* Supervisor Windows */}
         {ui.monitorOpen && (
-          <MonitoringWindow 
-            onClose={() => toggleHUD("monitorOpen")} 
-            x={xMonitor} y={yMonitor} 
-            status={systemStatus} 
+          <MonitoringWindow
+            onClose={() => toggleHUD("monitorOpen")}
+            x={xMonitor} y={yMonitor}
+            width={wMonitor} height={hMonitor}
+            dragConstraints={getDragConstraints(wMonitor, hMonitor)}
+            status={systemStatus}
             isExecuting={ui.executing}
-            isFocused={activeWindow === "monitorOpen"} 
-            onFocus={() => setActiveWindow("monitorOpen")} 
-            activeProject={activeProject} 
+            activeProject={activeProject}
+            activeAgentIds={activeAgentIds}
+            isFocused={activeWindow === "monitorOpen"}
+            onFocus={() => setActiveWindow("monitorOpen")}
           />
         )}
-        {ui.projectTeamsOpen && <ProjectTeamsWindow onClose={() => toggleHUD("projectTeamsOpen")} x={xProjectTeams} y={yProjectTeams} isFocused={activeWindow === "projectTeamsOpen"} onFocus={() => setActiveWindow("projectTeamsOpen")} projects={projects} activeProject={activeProject} onProjectsUpdate={handleUpdateProjects} onOpenHub={(teamId) => { setUi(prev => ({...prev, hubOpen: true, hubTargetTeamId: teamId})); setActiveWindow("hubOpen"); }} />}
-        {ui.hubOpen && <AgentsHubWindow onClose={() => toggleHUD("hubOpen")} x={xHub} y={yHub} isFocused={activeWindow === "hubOpen"} onFocus={() => setActiveWindow("hubOpen")} projects={projects} activeProject={activeProject} onProjectsUpdate={handleUpdateProjects} targetTeamId={ui.hubTargetTeamId} />}
+        {ui.projectTeamsOpen && (
+          <ProjectTeamsWindow
+            onClose={() => toggleHUD("projectTeamsOpen")}
+            x={xProjectTeams} y={yProjectTeams}
+            width={wProjectTeams} height={hProjectTeams}
+            dragConstraints={getDragConstraints(wProjectTeams, hProjectTeams)}
+            isFocused={activeWindow === "projectTeamsOpen"}
+            onFocus={() => setActiveWindow("projectTeamsOpen")}
+            projects={projects}
+            activeProject={activeProject}
+            onProjectsUpdate={handleUpdateProjects}
+            onOpenHub={(teamId) => { setUi(prev => ({ ...prev, hubOpen: true, hubTargetTeamId: teamId })); setActiveWindow("hubOpen"); }}
+          />
+        )}
+        {ui.hubOpen && (
+          <AgentsHubWindow
+            onClose={() => toggleHUD("hubOpen")}
+            x={xHub} y={yHub}
+            width={wHub} height={hHub}
+            dragConstraints={getDragConstraints(wHub, hHub)}
+            isFocused={activeWindow === "hubOpen"}
+            onFocus={() => setActiveWindow("hubOpen")}
+            projects={projects}
+            activeProject={activeProject}
+            onProjectsUpdate={handleUpdateProjects}
+            targetTeamId={ui.hubTargetTeamId}
+          />
+        )}
 
         {/* Core Windows (Foreground) */}
         {ui.settingsOpen && (
           <LLMConfigWindow
             onClose={() => toggleHUD("settingsOpen")}
-            x={xSettings}
-            y={ySettings}
+            x={xSettings} y={ySettings}
+            width={wSettings} height={hSettings}
+            dragConstraints={getDragConstraints(wSettings, hSettings)}
             initialConfig={systemConfig}
             initialReachability={ollamaReachability}
             initialModels={allModels}
@@ -405,8 +612,9 @@ export default function App() {
         {ui.chatOpen && (
           <HologramTerminal
             onClose={() => toggleHUD("chatOpen")}
-            x={xTerminal}
-            y={yTerminal}
+            x={xTerminal} y={yTerminal}
+            width={wTerminal} height={hTerminal}
+            dragConstraints={getDragConstraints(wTerminal, hTerminal)}
             initialLogs={logHistory}
             chatMessages={chatMessages}
             setChatMessages={setChatMessages}

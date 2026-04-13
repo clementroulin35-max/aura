@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, useDragControls, AnimatePresence } from 'framer-motion';
+import { motion, useDragControls, AnimatePresence, useMotionValue } from 'framer-motion';
 import './hud.css';
 import './LLMConfigWindow.css';
 import { API_BASE } from '../../lib/constants.js';
@@ -59,21 +59,26 @@ const TierSelector = ({ activeTier, onChange }) => {
 
 // --- Main Window ---
 
-const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, initialModels, isFocused, onFocus }) => {
+export default function LLMConfigWindow({ onClose, x, y, width, height, dragConstraints, initialConfig, initialReachability, initialModels, isFocused, onFocus }) {
     const [config, setConfig] = useState(initialConfig || null);
     const [allModels, setAllModels] = useState(initialModels || {});
     const [saving, setSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | success
     const [activeSection, setActiveSection] = useState('PROVIDERS');
     const [validation, setValidation] = useState({}); // { pid: { status, msg } }
+    const [ollamaReachability, setOllamaReachability] = useState(initialReachability || 'idle');
+    const dragControls = useDragControls();
+
+    const isNeuralSyncActive = useMemo(() => {
+        const ollamaActive = ollamaReachability === 'reachable';
+        const othersActive = Object.values(config?.providers || {}).some(p => p.enabled && p.api_key?.length > 8);
+        return ollamaActive || othersActive;
+    }, [ollamaReachability, config]);
 
     // Tier Selection State
     const [chatTier, setChatTier] = useState('ALU');
     const [supervisorTier, setSupervisorTier] = useState('GOLD');
 
-    const [dimensions, setDimensions] = useState({ width: 1015, height: 530 });
-    const [ollamaReachability, setOllamaReachability] = useState(initialReachability || 'idle');
-    const dragControls = useDragControls();
 
     const KEY_PREFIXES = {
         gemini: 'AIza',
@@ -311,6 +316,44 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
         }
     };
 
+    const handleResizeRight = (mouseDownEvent) => {
+        mouseDownEvent.preventDefault(); mouseDownEvent.stopPropagation();
+        const startWidth = width.get(); const startHeight = height.get();
+        const startX = mouseDownEvent.clientX; const startY = mouseDownEvent.clientY;
+        const onMouseMove = (mouseMoveEvent) => {
+            width.set(Math.max(635, startWidth + (mouseMoveEvent.clientX - startX)));
+            height.set(Math.max(445, startHeight + (mouseMoveEvent.clientY - startY)));
+        };
+        const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    };
+
+    const handleResizeLeft = (mouseDownEvent) => {
+        mouseDownEvent.preventDefault(); mouseDownEvent.stopPropagation();
+        const startWidth = width.get(); const startHeight = height.get();
+        const startX = mouseDownEvent.clientX; const startY = mouseDownEvent.clientY;
+        const startXPos = x.get();
+        const onMouseMove = (mouseMoveEvent) => {
+            const deltaX = mouseMoveEvent.clientX - startX;
+            const newWidth = Math.max(635, startWidth - deltaX);
+            const actualDeltaX = startWidth - newWidth;
+            
+            width.set(newWidth);
+            height.set(Math.max(445, mouseMoveEvent.clientY - startY + startHeight));
+            x.set(startXPos + actualDeltaX);
+        };
+        const onMouseUp = () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    };
+
     const handleSave = async () => {
         if (!config || config.error) return;
         setSaveStatus('saving');
@@ -331,47 +374,6 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
             setSaveStatus('idle');
         }
     };
-
-    const startResizing = (mouseDownEvent) => {
-        mouseDownEvent.preventDefault();
-        const startWidth = dimensions.width;
-        const startHeight = dimensions.height;
-        const startX = mouseDownEvent.clientX;
-        const startY = mouseDownEvent.clientY;
-
-        const onMouseMove = (mouseMoveEvent) => {
-            setDimensions({
-                width: Math.max(635, startWidth + (mouseMoveEvent.clientX - startX)),
-                height: Math.max(445, startHeight + (mouseMoveEvent.clientY - startY))
-            });
-        };
-
-        const onMouseUp = () => {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-        };
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-    };
-
-    const isNeuralSyncActive = useMemo(() => {
-        if (!config || !config.providers) return false;
-        return Object.entries(config.providers).some(([pid, p]) => {
-            if (!p.enabled) return false;
-
-            // SPECIAL CASE: Ollama must be reachable to count as active
-            if (pid === 'ollama') return ollamaReachability === 'reachable';
-
-            // If we have a session validation result, follow it strictly
-            if (validation[pid]) {
-                return validation[pid].status === 'valid';
-            }
-
-            // Fallback for initial boot (Sovereign Trust):
-            // If enabled and has plausible key/URL, consider it ACTIVE until tested otherwise.
-            return p.api_key && p.api_key.length > 8;
-        });
-    }, [config, validation, ollamaReachability]);
 
     const unfoldVariants = {
         hidden: { opacity: 0, filter: 'blur(20px)', scale: 0.95 },
@@ -396,13 +398,14 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
             dragControls={dragControls}
             dragListener={false}
             dragMomentum={false}
-            dragConstraints={{ top: 70, left: 10, right: window.innerWidth - dimensions.width - 10, bottom: window.innerHeight - dimensions.height - 110 }}
+            dragConstraints={dragConstraints}
             style={{
-                width: dimensions.width,
-                height: dimensions.height,
-                x,
-                y,
-                zIndex: isFocused ? 'var(--z-hud-top)' : 'var(--z-hud-focus)'
+                width,
+                height,
+                minWidth: '635px',
+                minHeight: '445px',
+                x, y,
+                zIndex: isFocused ? 'var(--z-hud-top)' : 'var(--z-hud-base)'
             }}
             variants={unfoldVariants}
             initial="hidden"
@@ -413,7 +416,7 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
                 <div className="header-drag-zone">
                     <span className="hud-title">ATLANTIS SYSTEM — NEURAL SYNC</span>
                 </div>
-                <button className="hud-close-btn" onClick={onClose}>[X]</button>
+                <button className="hud-close-btn" onClick={onClose}>X</button>
             </div>
 
             <div className="config-body">
@@ -645,9 +648,8 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
                     </div>
                 )}
             </div>
-            <div className="hud-resize-handle config-resize-handle" onMouseDown={startResizing} />
+            <div className="hud-resize-handle config-resize-handle" onMouseDown={handleResizeRight} />
+            <div className="hud-resize-handle-left" onMouseDown={handleResizeLeft} />
         </motion.div>
     );
-};
-
-export default LLMConfigWindow;
+}

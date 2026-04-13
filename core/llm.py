@@ -52,6 +52,7 @@ def call_llm(
             ],
             max_tokens=tokens,
             temperature=temp,
+            num_retries=3,
         )
         content = response.choices[0].message.content
         source = "local" if "ollama" in resolved else "remote"
@@ -116,6 +117,7 @@ async def acall_llm(
             ],
             max_tokens=tokens,
             temperature=temp,
+            num_retries=3,
         )
         content = response.choices[0].message.content
         source = "local" if "ollama" in resolved else "remote"

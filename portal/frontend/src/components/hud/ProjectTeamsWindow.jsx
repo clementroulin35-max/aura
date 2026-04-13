@@ -1,10 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useDragControls } from 'framer-motion';
+import { motion, useDragControls, useMotionValue } from 'framer-motion';
 import './hud.css';
 
-const ProjectTeamsWindow = ({ onClose, x, y, isFocused, onFocus, projects, activeProject, onProjectsUpdate, onOpenHub }) => {
-  const [dimensions, setDimensions] = useState({ width: 900, height: 650 });
+const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isFocused, onFocus, projects, activeProject, onProjectsUpdate, onOpenHub }) => {
   const dragControls = useDragControls();
+
+  const unfoldVariants = {
+    hidden: { opacity: 0, filter: 'blur(20px)', scale: 0.95 },
+    visible: {
+      opacity: 1, filter: 'blur(0px)', scale: 1,
+      transition: { type: "spring", stiffness: 100, damping: 20, delay: 0.1 }
+    }
+  };
+
+  // --- Functional Resize Logic ---
+  const handleResizeRight = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.pageX; const startY = e.pageY;
+    const startWidth = width.get(); const startHeight = height.get();
+    const onMouseMove = (moveEvent) => {
+      width.set(Math.max(600, startWidth + (moveEvent.pageX - startX)));
+      height.set(Math.max(400, startHeight + (moveEvent.pageY - startY)));
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
+  const handleResizeLeft = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.pageX; const startY = e.pageY;
+    const startWidth = width.get(); const startHeight = height.get();
+    const startXPos = x.get();
+    const onMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.pageX - startX;
+      const newWidth = Math.max(600, startWidth - deltaX);
+      const actualDeltaX = startWidth - newWidth;
+      
+      width.set(newWidth);
+      height.set(Math.max(400, startHeight + (moveEvent.pageY - startY)));
+      x.set(startXPos + actualDeltaX);
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
 
   const [selectedTeamId, setSelectedTeamId] = useState(null);
   const [selectedAgentId, setSelectedAgentId] = useState(null);
@@ -45,7 +91,13 @@ const ProjectTeamsWindow = ({ onClose, x, y, isFocused, onFocus, projects, activ
     if (selectedAgentId && activeProject) {
       const activeTeam = activeProject.teams.find(t => t.agents.includes(selectedAgentId));
       if (activeTeam && activeTeam.specs && activeTeam.specs[selectedAgentId]) {
-         setAgentSpecs(activeTeam.specs[selectedAgentId]);
+         const specs = activeTeam.specs[selectedAgentId];
+         // If specs is an object, format it for the textarea
+         if (typeof specs === 'object' && specs !== null) {
+           setAgentSpecs(JSON.stringify(specs, null, 2));
+         } else {
+           setAgentSpecs(specs);
+         }
       } else {
          setAgentSpecs(`Configuration spécifique de l'agent '${selectedAgentId}' pour le projet '${activeProject.name}'.`);
       }
@@ -157,24 +209,26 @@ const ProjectTeamsWindow = ({ onClose, x, y, isFocused, onFocus, projects, activ
       dragControls={dragControls}
       dragListener={false}
       dragMomentum={false}
-      dragConstraints={{ top: 70, left: 10, right: window.innerWidth - dimensions.width - 10, bottom: window.innerHeight - dimensions.height - 110 }}
+      dragConstraints={dragConstraints}
       style={{
-        width: dimensions.width,
-        height: dimensions.height,
-        minWidth: '500px',
+        width,
+        height,
+        minWidth: '600px',
         minHeight: '400px',
-        x,
-        y,
-        resize: 'both',
+        x, y,
         overflow: 'hidden',
         zIndex: isFocused ? 'var(--z-hud-top)' : 'var(--z-hud-base)',
         display: 'flex',
         flexDirection: 'column'
       }}
+      variants={unfoldVariants}
+      initial="hidden"
+      animate="visible"
+      exit="hidden"
     >
       <div className="hud-header" onPointerDown={(e) => dragControls.start(e)} style={{ fontFamily: 'var(--font-title)', textShadow: 'var(--pixel-shadow)', letterSpacing: '2px' }}>
          <span className="hud-title">PROJECT TEAMS ORCHESTRATION</span>
-         {onClose && <button className="hud-close-btn" onClick={onClose}>[X]</button>}
+         {onClose && <button className="hud-close-btn" onClick={onClose}>X</button>}
       </div>
 
       <div className="hud-content" style={{ flex: 1, overflowY: 'hidden', display: 'flex', flexDirection: 'column', background: 'rgba(0,0,0,0.2)' }}>
@@ -495,6 +549,8 @@ const ProjectTeamsWindow = ({ onClose, x, y, isFocused, onFocus, projects, activ
           </>
         )}
       </div>
+      <div className="hud-resize-handle" onMouseDown={handleResizeRight} />
+      <div className="hud-resize-handle-left" onMouseDown={handleResizeLeft} />
     </motion.div>
   );
 };

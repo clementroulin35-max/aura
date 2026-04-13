@@ -1,1 +1,0 @@
-No Critik findings were provided in the current run. As the Corrector Agent, I require specific findings from the Critik to propose actionable fixes. Please provide the Critik's report for me to proceed.

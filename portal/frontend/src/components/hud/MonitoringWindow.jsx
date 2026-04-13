@@ -1,11 +1,10 @@
-import { motion, useDragControls } from 'framer-motion';
+import { motion, useDragControls, useMotionValue } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import './hud.css';
 import './MonitoringWindow.css';
 
-export default function MonitoringWindow({ onClose, x, y, status = 'OFFLINE', isExecuting, isFocused, onFocus, activeProject }) {
+export default function MonitoringWindow({ onClose, x, y, width, height, dragConstraints, status = 'OFFLINE', isExecuting, isFocused, onFocus, activeProject, activeAgentIds = [] }) {
   const dragControls = useDragControls();
-  const [dimensions, setDimensions] = useState({ width: 350, height: 600 });
 
   const isOnline = status === 'ONLINE';
 
@@ -30,6 +29,45 @@ export default function MonitoringWindow({ onClose, x, y, status = 'OFFLINE', is
   const projectTime = activeProject ? "4h 23m" : "--"; // Still hardcoded time, but scoped to existence
   const statusColor = isOnline ? 'var(--status-success)' : 'var(--status-error)';
 
+  // --- Functional Resize Logic ---
+  const handleResizeRight = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.pageX; const startY = e.pageY;
+    const startWidth = width.get(); const startHeight = height.get();
+    const onMouseMove = (moveEvent) => {
+      width.set(Math.max(300, startWidth + (moveEvent.pageX - startX)));
+      height.set(Math.max(400, startHeight + (moveEvent.pageY - startY)));
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
+  const handleResizeLeft = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.pageX; const startY = e.pageY;
+    const startWidth = width.get(); const startHeight = height.get();
+    const startXPos = x.get();
+    const onMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.pageX - startX;
+      const newWidth = Math.max(300, startWidth - deltaX);
+      const actualDeltaX = startWidth - newWidth;
+      
+      width.set(newWidth);
+      height.set(Math.max(400, startHeight + (moveEvent.pageY - startY)));
+      x.set(startXPos + actualDeltaX);
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
   return (
     <motion.div
       className={`nexus-hud-panel monitoring-window ${isOnline ? 'is-online' : 'is-offline'}`}
@@ -38,10 +76,10 @@ export default function MonitoringWindow({ onClose, x, y, status = 'OFFLINE', is
       dragControls={dragControls}
       dragListener={false}
       dragMomentum={false}
-      dragConstraints={{ top: 70, left: 10, right: window.innerWidth - dimensions.width - 10, bottom: window.innerHeight - dimensions.height - 110 }}
+      dragConstraints={dragConstraints}
       style={{ 
-        width: dimensions.width, 
-        height: dimensions.height, 
+        width, 
+        height, 
         minWidth: '300px',
         minHeight: '400px',
         x, y, 
@@ -54,7 +92,7 @@ export default function MonitoringWindow({ onClose, x, y, status = 'OFFLINE', is
     >
       <div className="hud-header" onPointerDown={(e) => dragControls.start(e)}>
         <span className="hud-title">SYSTEM MONITORING</span>
-        {onClose && <button className="hud-close-btn" onClick={onClose}>[X]</button>}
+        {onClose && <button className="hud-close-btn" onClick={onClose}>X</button>}
       </div>
 
       <div className="hud-content monitoring-content">
@@ -88,8 +126,8 @@ export default function MonitoringWindow({ onClose, x, y, status = 'OFFLINE', is
             </div>
             <div className="metric-row">
                <dt>Execution State</dt>
-               <dd style={{ color: isExecuting ? 'var(--neon-yellow)' : 'var(--text-dim)' }}>
-                 {isExecuting ? 'ACTIVE :: INJECTING' : 'IDLE :: LISTENING'}
+               <dd style={{ color: isExecuting ? 'var(--neon-yellow)' : 'var(--text-dim)', fontWeight: isExecuting ? 'bold' : 'normal' }}>
+                 {isExecuting ? 'ACTIVE :: ORION_FORGE' : 'PASSIVE :: LISTENING'}
                </dd>
             </div>
           </dl>
@@ -106,11 +144,16 @@ export default function MonitoringWindow({ onClose, x, y, status = 'OFFLINE', is
                 <div key={team.id} className="team-summary-block">
                   <div className="team-header-label">[ {team.name.toUpperCase()} ]</div>
                   {team.agents.map(agent => (
-                    <div key={agent} className="agent-monitoring-row">
+                    <div key={agent} className={`agent-monitoring-row ${activeAgentIds.includes(agent.toLowerCase()) ? 'is-active' : ''}`}>
+                      <div className="agent-diode-container">
+                        <div className={`agent-diode ${activeAgentIds.includes(agent.toLowerCase()) ? 'pulsing' : ''}`} />
+                      </div>
                       <span className="agent-id-name">{agent.toUpperCase()}</span>
                       <span className="agent-status-tag">
-                        {isExecuting ? (
-                          <span className="status-blink active">ACTIVE</span>
+                        {activeAgentIds.includes(agent.toLowerCase()) ? (
+                          <span className="status-blink active">WORKING</span>
+                        ) : isExecuting ? (
+                          <span className="status-dim queued">QUEUED</span>
                         ) : (
                           <span className="status-dim">SLEEP</span>
                         )}
@@ -124,7 +167,8 @@ export default function MonitoringWindow({ onClose, x, y, status = 'OFFLINE', is
         </section>
       </div>
 
-      <div className="hud-resize-handle" />
+      <div className="hud-resize-handle" onMouseDown={handleResizeRight} />
+      <div className="hud-resize-handle-left" onMouseDown={handleResizeLeft} />
     </motion.div>
   );
 }

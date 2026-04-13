@@ -44,6 +44,12 @@ def create_app() -> FastAPI:
     application.include_router(orion.router)
     application.include_router(llm_config.router)
     application.include_router(resources.router)
+    
+    @application.on_event("startup")
+    async def startup_event():
+        import asyncio
+        from core.infra.event_bus import event_bus
+        asyncio.create_task(event_bus.start_broadcaster())
 
     @application.get("/", tags=["health"])
     async def root():

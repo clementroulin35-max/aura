@@ -28,34 +28,36 @@ class EventBus:
     def __init__(self, log_path: Path | None = None, max_queue_size: int = 1000) -> None:
         self.log_path = log_path or (ROOT / "logs" / "events.jsonl")
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
-        self._queue: queue.Queue[dict | None] = queue.Queue(maxsize=max_queue_size)
-        self._ws_connections: set[Any] = set()  # Evolutive: WebSocket connections
-        self._middlewares: list[Any] = []  # Evolutive: event transform pipeline
+        # Dedicated queues to avoid competition between file write and broadcast
+        self._persist_queue: queue.Queue[dict | None] = queue.Queue(maxsize=max_queue_size)
+        self._broadcast_queue: queue.Queue[dict | None] = queue.Queue(maxsize=max_queue_size)
+        
+        self._ws_connections: set[Any] = set()
+        self._middlewares: list[Any] = []
         self._start_writer()
 
     def _start_writer(self) -> None:
-        """Start background writer thread."""
-
+        """Background thread for file persistence."""
         def writer() -> None:
             while True:
-                item = self._queue.get()
-                if item is None:
-                    break
+                item = self._persist_queue.get()
+                if item is None: break
                 try:
                     with open(self.log_path, "a", encoding="utf-8") as f:
                         f.write(json.dumps(item, ensure_ascii=False) + "\n")
-                    # Auto-rotation: keep file under 5MB
+                    # Rotation
                     if self.log_path.exists() and self.log_path.stat().st_size > 5 * 1024 * 1024:
                         self._rotate()
                 except Exception as e:
-                    logger.error("EventBus write error: %s", e)
-                self._queue.task_done()
+                    logger.error("EventBus persist error: %s", e)
+                finally:
+                    self._persist_queue.task_done()
 
         t = threading.Thread(target=writer, daemon=True, name="eventbus-writer")
         t.start()
 
     def emit(self, actor: str, event: str, status: str = "OK", context: str = "") -> dict:
-        """Emit an event. Non-blocking (drops on full queue)."""
+        """Emit an event. Thread-safe, non-blocking."""
         payload = {
             "timestamp": datetime.now().isoformat(),
             "actor": actor,
@@ -64,28 +66,42 @@ class EventBus:
             "context": context,
         }
         try:
-            self._queue.put_nowait(payload)
-
-            # Broadcast to WebSockets (Evolutive)
-            if self._ws_connections:
-                import asyncio
-
-                # Helper to send to WS from sync context
-                def broadcast():
-                    for ws in list(self._ws_connections):
-                        with contextlib.suppress(Exception):
-                            # Note: This approach assumes the WS send is accessible
-                            # In FastAPI/Starlette, we need to be careful with event loops.
-                            # For simplicity in V4, we use a try/except pattern.
-                            asyncio.run_coroutine_threadsafe(ws.send_json(payload), asyncio.get_event_loop())
-
-                # We start a small thread or just try to push if possible
-                # But safer to just let the writer handle it or use a separate broadcaster
-                # REVISED: For V4 standard, we'll keep it simple: the writer thread
-                # will handle WS broadcasting to avoid blocking emit().
+            # Push to both queues
+            self._persist_queue.put_nowait(payload)
+            self._broadcast_queue.put_nowait(payload)
         except queue.Full:
-            logger.warning("EventBus queue full. Dropping event: %s/%s", actor, event)
+            logger.warning("EventBus full. Dropping event: %s/%s", actor, event)
         return payload
+
+    async def start_broadcaster(self) -> None:
+        """
+        Async worker to bridge the sync queue to WebSockets.
+        Must be launched in the main FastAPI event loop.
+        """
+        import asyncio
+        loop = asyncio.get_event_loop()
+        logger.info("EventBus broadcaster started on main loop.")
+        
+        while True:
+            try:
+                # Thread-safe pull from sync queue without blocking the loop
+                item = await loop.run_in_executor(None, self._broadcast_queue.get)
+                if item is None: break
+                
+                if self._ws_connections:
+                    # Broadcast to all registered WebSockets
+                    for ws in list(self._ws_connections):
+                        try:
+                            await ws.send_json(item)
+                        except Exception:
+                            self._ws_connections.discard(ws)
+                
+                self._broadcast_queue.task_done()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error("EventBus broadcast error: %s", e)
+                await asyncio.sleep(0.1)
 
     def shutdown(self) -> None:
         """Graceful shutdown: send sentinel to writer thread."""

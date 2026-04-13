@@ -76,10 +76,6 @@
     flex-direction: column;
 }
 
-.config-resize-handle:hover {
-    background: linear-gradient(135deg, transparent 50%, var(--neon-yellow) 50%);
-}
-
 /* Section Header Premium */
 .section-header-premium {
     display: flex;
@@ -128,8 +124,15 @@
 }
 
 @keyframes led-pulse {
-    from { opacity: 0.4; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1.1); }
+    from {
+        opacity: 0.4;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1.1);
+    }
 }
 
 .llama-connectivity {
@@ -445,13 +448,26 @@
 }
 
 @keyframes rotate-spinner {
-    100% { transform: rotate(360deg); }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes dash-spinner {
-    0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
-    50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
-    100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
+    0% {
+        stroke-dasharray: 1, 150;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -35;
+    }
+
+    100% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -124;
+    }
 }
 
 button.test-btn.is-loading {
@@ -698,7 +714,18 @@ button.test-btn.is-loading {
 }
 
 @keyframes success-pulse-premium {
-    0% { transform: scale(1); box-shadow: 0 0 0 rgba(0, 255, 100, 0); }
-    50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 100, 0.4); }
-    100% { transform: scale(1); box-shadow: 0 0 0 rgba(0, 255, 100, 0); }
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(0, 255, 100, 0);
+    }
+
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px rgba(0, 255, 100, 0.4);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(0, 255, 100, 0);
+    }
 }

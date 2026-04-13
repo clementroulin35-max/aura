@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useDragControls } from 'framer-motion';
+import { motion, useDragControls, useMotionValue } from 'framer-motion';
 import './hud.css';
 import { API_BASE } from '../../lib/constants.js';
 
@@ -11,15 +11,57 @@ const unfoldVariants = {
   }
 };
 
-export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraft, onExecuteStart, onExecuteEnd, isFocused, onFocus, activeProject }) {
-  const [dimensions] = useState({ width: 700, height: 600 });
+export default function MissionForgeHUD({ 
+  onClose, x, y, width, height, dragConstraints, mission, setMissionDraft, 
+  onExecuteStart, onExecuteEnd, 
+  executing, results, onOpenDoc,
+  isFocused, onFocus, activeProject 
+}) {
   const [running, setRunning] = useState(false);
   const dragControls = useDragControls();
+
+  // --- Functional Resize Logic ---
+  const handleResizeRight = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.pageX; const startY = e.pageY;
+    const startWidth = width.get(); const startHeight = height.get();
+    const onMouseMove = (moveEvent) => {
+      width.set(Math.max(400, startWidth + (moveEvent.pageX - startX)));
+      height.set(Math.max(300, startHeight + (moveEvent.pageY - startY)));
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
+  const handleResizeLeft = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const startX = e.pageX; const startY = e.pageY;
+    const startWidth = width.get(); const startHeight = height.get();
+    const startXPos = x.get();
+    const onMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.pageX - startX;
+      const newWidth = Math.max(400, startWidth - deltaX);
+      const actualDeltaX = startWidth - newWidth;
+      
+      width.set(newWidth);
+      height.set(Math.max(300, startHeight + (moveEvent.pageY - startY)));
+      x.set(startXPos + actualDeltaX);
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
   
-  const [activeTab, setActiveTab] = useState('editor'); // editor, direct, historic
+  const [activeTab, setActiveTab] = useState('editor'); // editor, results
   const [missionPayload, setMissionPayload] = useState("");
-  const [traceLogs, setTraceLogs] = useState([]);
-  const [historic, setHistoric] = useState([]);
+  const [lastStepLabel, setLastStepLabel] = useState("Initialisation...");
   const [saveStatus, setSaveStatus] = useState(null); // 'saving', 'success', or errorMessage
 
   useEffect(() => {
@@ -35,10 +77,39 @@ export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraf
 
   // RESET SAVE STATUS ON EDIT
   useEffect(() => {
-      if (saveStatus && saveStatus !== 'saving') {
-          setSaveStatus(null);
-      }
+    if (saveStatus && saveStatus !== 'saving') {
+      setSaveStatus(null);
+    }
   }, [missionPayload]);
+
+  // Real-time trace listener for status label
+  useEffect(() => {
+    const handleLog = (e) => {
+      const { actor, content } = e.detail;
+      if (actor) {
+        setLastStepLabel(`${actor}: ${content}`);
+      }
+    };
+
+    const handleComplete = () => {
+      setRunning(false);
+      if (onExecuteEnd) onExecuteEnd();
+    };
+
+    window.addEventListener('ORION_LOG', handleLog);
+    window.addEventListener('MISSION_COMPLETED', handleComplete);
+    return () => {
+      window.removeEventListener('ORION_LOG', handleLog);
+      window.removeEventListener('MISSION_COMPLETED', handleComplete);
+    };
+  }, [onExecuteEnd]);
+
+  // SYNC RUNNING STATE WITH PROP
+  useEffect(() => {
+    if (!executing && running) {
+      setRunning(false);
+    }
+  }, [executing]);
 
   const handleSave = async () => {
     if (!missionPayload || !activeProject) {
@@ -51,6 +122,8 @@ export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraf
         let payload;
         try {
             payload = JSON.parse(cleanedPayload);
+            const sanitized = JSON.stringify(payload, null, 2);
+            setMissionPayload(sanitized);
         } catch (parseErr) {
             throw new Error(`SYNTAXE JSON: ${parseErr.message}`);
         }
@@ -59,7 +132,6 @@ export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraf
             throw new Error("STRUCTURE INVALIDE: Le payload doit être un objet JSON.");
         }
 
-        // Ensure the ID matches for persistence
         payload.project_id = activeProject.id;
 
         const res = await fetch(`${API_BASE}/v1/resources/save_mission`, {
@@ -83,12 +155,8 @@ export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraf
         setTimeout(() => setSaveStatus(null), 3000);
     } catch (e) {
         setSaveStatus('error');
-        // DISPATCH TO CENTRAL LOGS
         window.dispatchEvent(new CustomEvent('ORION_LOG', {
-            detail: { 
-                content: `[FORGE] Erreur de sauvegarde: ${e.message}`, 
-                type: 'error' 
-            }
+            detail: { content: `[FORGE] Erreur de sauvegarde: ${e.message}`, type: 'error' }
         }));
         console.error("Save error:", e);
         setTimeout(() => setSaveStatus(null), 5000);
@@ -96,14 +164,14 @@ export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraf
   };
 
   const handleExecute = async () => {
-    if (!missionPayload || running) return;
+    if (!missionPayload || running || executing) return;
     
-    // IMMEDIATE LOCK
     setRunning(true);
     if (onExecuteStart) onExecuteStart();
     
-    setActiveTab('direct');
-    setTraceLogs([{ time: new Date().toLocaleTimeString(), msg: "LANCEMENT DE L'ORCHESTRATION..." }]);
+    // REDIRECTION TO DOCUMENTS TAB
+    setActiveTab('results');
+    setLastStepLabel("LANCEMENT DE L'ORCHESTRATION...");
     
     try {
       let payload;
@@ -113,29 +181,15 @@ export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraf
           throw new Error(`SYNTAXE JSON: ${parseErr.message}`);
       }
 
-      if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
-          throw new Error("STRUCTURE INVALIDE: Le payload doit être un objet JSON.");
-      }
-
       const res = await fetch(`${API_BASE}/v1/graph/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      
-      setTraceLogs(prev => [...prev, { time: new Date().toLocaleTimeString(), msg: `DISPATCH RÉUSSI: ${JSON.stringify(data.status || data)}` }]);
-      setHistoric(prev => [...prev, { id: Date.now(), payload, result: data }]);
-      
+      // Graph results are handled via WebSocket/Event bus now
     } catch (e) {
       console.error("Failed to run mission", e);
-      setTraceLogs(prev => [...prev, { time: new Date().toLocaleTimeString(), msg: `ERROR: ${e.message}`, error: true }]);
-    } finally {
-      // Small delay before unlocking to avoid UI flicker
-      setTimeout(() => {
-        setRunning(false);
-        if (onExecuteEnd) onExecuteEnd();
-      }, 2000);
+      setRunning(false);
     }
   };
 
@@ -144,23 +198,32 @@ export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraf
         className="nexus-hud-panel"
         onPointerDownCapture={onFocus}
         drag dragControls={dragControls} dragListener={false} dragMomentum={false}
-        dragConstraints={{ top: 70, left: 10, right: window.innerWidth - dimensions.width - 10, bottom: window.innerHeight - dimensions.height - 110 }}
+        dragConstraints={dragConstraints}
         style={{
-          width: dimensions.width, height: dimensions.height, minWidth: '400px', minHeight: '300px',
-          x, y, resize: 'both', overflow: 'hidden',
+          width,
+          height,
+          minWidth: '400px',
+          minHeight: '300px',
+          x,
+          y,
+          overflow: 'hidden',
           zIndex: isFocused ? 'var(--z-hud-top)' : 'var(--z-hud-base)',
-          display: 'flex', flexDirection: 'column'
+          display: 'flex',
+          flexDirection: 'column'
         }}
-        variants={unfoldVariants} initial="hidden" animate="visible" exit="hidden"
+      variants={unfoldVariants}
+      initial="hidden"
+      animate="visible"
+      exit="hidden"
       >
         <div className="hud-header" onPointerDown={(e) => dragControls.start(e)}>
            <span className="hud-title">MISSION FORGE - TACTICAL ORCHESTRATION</span>
-           {onClose && <button className="hud-close-btn" onClick={onClose}>[X]</button>}
+           {onClose && <button className="hud-close-btn" onClick={onClose}>X</button>}
         </div>
 
         {/* PREMIUM TABS */}
         <div style={{ display: 'flex', background: 'rgba(0,0,0,0.5)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          {['editor', 'direct', 'historic'].map(tab => (
+          {['editor', 'results'].map(tab => (
             <button 
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -171,7 +234,7 @@ export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraf
                 textTransform: 'uppercase', fontSize: '10px', letterSpacing: '2px', fontWeight: 'bold'
               }}
             >
-              {tab === 'editor' ? 'EDITEUR DE MISSION' : tab === 'direct' ? 'RESULTAT DIRECT' : 'HISTORIQUE'}
+              {tab === 'editor' ? 'EDITEUR DE MISSION' : 'DOCUMENTS'}
             </button>
           ))}
         </div>
@@ -214,32 +277,32 @@ export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraf
                 return (
                   <motion.button
                     onClick={handleExecute}
-                    disabled={running || isInitPayload || saveStatus === 'saving'}
+                    disabled={running || executing || isInitPayload || saveStatus === 'saving'}
                     style={{
                       position: 'relative', overflow: 'hidden',
-                      background: isInitPayload ? 'rgba(255,255,255,0.05)' : (running ? 'transparent' : 'linear-gradient(90deg, #b30000 0%, #ff3333 100%)'),
+                      background: isInitPayload ? 'rgba(255,255,255,0.05)' : (running || executing ? 'transparent' : 'linear-gradient(90deg, #b30000 0%, #ff3333 100%)'),
                       border: `1px solid ${isInitPayload ? 'rgba(255,255,255,0.2)' : '#ff3333'}`, 
                       color: isInitPayload ? 'var(--text-dim)' : '#fff',
-                      padding: '15px 40px', cursor: (running || isInitPayload || saveStatus === 'saving') ? 'not-allowed' : 'pointer', textTransform: 'uppercase',
+                      padding: '15px 40px', cursor: (running || executing || isInitPayload || saveStatus === 'saving') ? 'not-allowed' : 'pointer', textTransform: 'uppercase',
                       letterSpacing: '5px', fontWeight: 'bold', fontSize: '15px', borderRadius: '4px',
-                      transition: 'all 0.3s ease', opacity: (running || isInitPayload) ? 0.4 : 1,
+                      transition: 'all 0.3s ease', opacity: (running || executing || isInitPayload) ? 0.4 : 1,
                       textShadow: isInitPayload ? 'none' : '0 0 10px rgba(255, 255, 255, 0.8)',
                       boxShadow: isInitPayload ? 'none' : '0 0 20px rgba(255, 51, 51, 0.5)'
                     }}
-                    whileHover={(!isInitPayload && !running) ? { scale: 1.02, boxShadow: '0 0 30px rgba(255, 51, 51, 0.8)' } : {}}
-                    whileTap={(!isInitPayload && !running) ? { scale: 0.98 } : {}}
+                    whileHover={(!isInitPayload && !running && !executing) ? { scale: 1.02, boxShadow: '0 0 30px rgba(255, 51, 51, 0.8)' } : {}}
+                    whileTap={(!isInitPayload && !running && !executing) ? { scale: 0.98 } : {}}
                   >
                     <span style={{ 
                       position: 'relative', zIndex: 1, 
                       fontFamily: 'var(--font-title)', textShadow: 'var(--pixel-shadow)',
                       letterSpacing: '3px', display: 'flex', alignItems: 'center', gap: '10px'
                     }}>
-                      {!running && !isInitPayload && <span>🚀</span>}
-                      {running ? 'FORGE EN COURS...' : (isInitPayload ? 'EN ATTENTE D\'EXTRACTION' : 'ENGAGER LA MISSION')}
-                      {!running && !isInitPayload && <span>🚀</span>}
+                      {!running && !executing && !isInitPayload && <span>🚀</span>}
+                      {(running || executing) ? 'FORGE EN COURS...' : (isInitPayload ? 'EN ATTENTE D\'EXTRACTION' : 'ENGAGER LA MISSION')}
+                      {!running && !executing && !isInitPayload && <span>🚀</span>}
                     </span>
                     
-                    {!isInitPayload && !running && (
+                    {!isInitPayload && !running && !executing && (
                       <motion.div 
                         initial={{ x: '-100%' }} animate={{ x: '200%' }}
                         transition={{ repeat: Infinity, duration: 2, ease: "linear", repeatDelay: 1 }}
@@ -256,45 +319,115 @@ export default function MissionForgeHUD({ onClose, x, y, mission, setMissionDraf
             </div>
           </div>
 
-          {/* TAB: DIRECT TRACE */}
-          <div style={{ display: activeTab === 'direct' ? 'flex' : 'none', flexDirection: 'column', flex: 1, padding: '20px', overflowY: 'auto' }}>
-            {traceLogs.length === 0 ? (
-              <div style={{ color: 'var(--text-dim)', textAlign: 'center', marginTop: '50px' }}>Aucune exécution en cours.</div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {traceLogs.map((log, i) => (
-                  <div key={i} style={{ 
-                    background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '4px', borderLeft: `3px solid ${log.error ? '#ff3366' : 'var(--neon-secondary)'}`,
-                    fontSize: '11px', fontFamily: 'var(--font-mono)', color: log.error ? '#ff3366' : 'var(--text-secondary)'
+          {/* TAB: DOCUMENTS (RESULTS) */}
+          <div style={{ display: activeTab === 'results' ? 'flex' : 'none', flexDirection: 'column', flex: 1, padding: '20px', overflowY: 'auto', position: 'relative' }} className="custom-scrollbar">
+            
+            {(running || executing) && (
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                background: 'rgba(5, 8, 12, 0.92)', zIndex: 10,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                backdropFilter: 'blur(12px)', padding: '40px'
+              }}>
+                <div style={{ position: 'relative', width: '120px', height: '120px', marginBottom: '30px' }}>
+                  {/* Outer Scan Hex */}
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+                    style={{
+                      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                      border: '2px dashed rgba(0, 210, 255, 0.3)',
+                      borderRadius: '30%', filter: 'drop-shadow(0 0 5px rgba(0, 210, 255, 0.2))'
+                    }}
+                  />
+                  {/* Inner Pulsing Core */}
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.1, 1],
+                      opacity: [0.3, 0.7, 0.3]
+                    }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                    style={{
+                      position: 'absolute', top: '20%', left: '20%', right: '20%', bottom: '20%',
+                      background: 'radial-gradient(circle, rgba(0, 210, 255, 0.4) 0%, transparent 70%)',
+                      borderRadius: '50%'
+                    }}
+                  />
+                  {/* Spinning Indicators */}
+                  <motion.div
+                    animate={{ rotate: -360 }}
+                    transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                    style={{
+                      position: 'absolute', top: '10%', left: '10%', right: '10%', bottom: '10%',
+                      borderTop: '3px solid var(--neon-blue)',
+                      borderRight: '1px solid transparent',
+                      borderRadius: '50%', opacity: 0.8
+                    }}
+                  />
+                </div>
+                
+                <div className="loader-text-block" style={{ textAlign: 'center' }}>
+                  <div style={{ 
+                    fontFamily: 'var(--font-title)', fontSize: '14px', color: '#fff', 
+                    letterSpacing: '4px', marginBottom: '8px', textShadow: '0 0 10px rgba(0, 210, 255, 0.5)' 
                   }}>
-                    <div style={{ color: 'var(--text-dim)', marginBottom: '5px' }}>[{log.time}]</div>
-                    <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{log.msg}</pre>
+                    FORGE EN COURS
                   </div>
-                ))}
+                  <div style={{ 
+                    fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--neon-blue)', 
+                    opacity: 0.8, maxWidth: '280px', margin: '0 auto', whiteSpace: 'nowrap', 
+                    overflow: 'hidden', textOverflow: 'ellipsis' 
+                  }}>
+                    {lastStepLabel.toUpperCase()}
+                  </div>
+                </div>
+                
+                <div style={{ position: 'absolute', bottom: '20px', width: '100%', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.2), transparent)' }} />
               </div>
             )}
-          </div>
 
-          {/* TAB: HISTORIC */}
-          <div style={{ display: activeTab === 'historic' ? 'flex' : 'none', flexDirection: 'column', flex: 1, padding: '20px', overflowY: 'auto' }}>
-            {historic.length === 0 ? (
-              <div style={{ color: 'var(--text-dim)', textAlign: 'center', marginTop: '50px' }}>Aucune archive de mission.</div>
+            {!results || Object.keys(results).length === 0 ? (
+              <div style={{ color: 'var(--text-dim)', textAlign: 'center', marginTop: '50px' }}>Aucun document produit pour cette session.</div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {historic.map((h, i) => (
-                  <div key={h.id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '15px', borderRadius: '6px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                      <h4 style={{ margin: 0, fontSize: '11px', color: 'var(--slate-light)' }}>FORGE #{i + 1}</h4>
-                      <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>{new Date(h.id).toLocaleString()}</span>
+              <div style={{ 
+                display: 'flex', flexDirection: 'column', gap: '30px',
+                opacity: (running || executing) ? 0.3 : 1, pointerEvents: (running || executing) ? 'none' : 'auto',
+                filter: (running || executing) ? 'grayscale(0.5)' : 'none', transition: 'all 0.4s ease'
+              }}>
+                {Object.entries(results).map(([missionId, files]) => (
+                  <div key={missionId} className="mission-group">
+                    <h4 style={{ 
+                      fontSize: '11px', color: 'var(--neon-secondary)', borderBottom: '1px solid rgba(0,255,128,0.2)', 
+                      paddingBottom: '5px', marginBottom: '15px', letterSpacing: '2px' 
+                    }}>
+                      {missionId === 'ROOT' ? 'PROJECT DOCUMENTS' : `MISSION :: ${missionId.toUpperCase()}`}
+                    </h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '15px' }}>
+                      {files.map((filename, i) => (
+                        <motion.div 
+                          key={i}
+                          onClick={() => !running && !executing && onOpenDoc && onOpenDoc({ filename, mission_id: missionId })}
+                          style={{ 
+                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
+                            padding: '15px', borderRadius: '8px', cursor: (running || executing) ? 'not-allowed' : 'pointer', textAlign: 'center',
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px'
+                          }}
+                          whileHover={(!running && !executing) ? { scale: 1.05, border: '1px solid var(--neon-secondary)', background: 'rgba(0, 255, 128, 0.05)' } : {}}
+                        >
+                          <div style={{ fontSize: '24px' }}>📄</div>
+                          <div style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold', wordBreak: 'break-all' }}>{filename}</div>
+                          <div style={{ fontSize: '9px', color: 'var(--neon-secondary)', textTransform: 'uppercase' }}>READ MODULE</div>
+                        </motion.div>
+                      ))}
                     </div>
-                    <div style={{ fontSize: '10px', color: 'var(--neon-yellow)' }}>{h.payload.title || 'Mission sans titre'}</div>
                   </div>
                 ))}
               </div>
             )}
           </div>
-
         </div>
+        <div className="hud-resize-handle" onMouseDown={handleResizeRight} />
+        <div className="hud-resize-handle-left" onMouseDown={handleResizeLeft} />
       </motion.div>
-  );
+    );
 }

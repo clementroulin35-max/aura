@@ -3,6 +3,7 @@ GSS Orion V4 — Graph Compiler.
 Builds and executes the LangGraph mission using dynamic skills.
 """
 
+import json
 import logging
 
 from langgraph.graph import START, StateGraph
@@ -71,12 +72,33 @@ async def execute_mission(mission_data: dict) -> dict:
 
     final_state = await compiled.ainvoke(initial_state)
 
+    # 1. Update projects.json structure
     persist_mission_results(mission_data.get("project_id"), final_state.get("team_history", []))
+
+    # 2. Save physical files to Workspace
+    from core.graph.persistence import save_mission_results
+    results = final_state.get("results", [])
+    save_mission_results(
+        mission_data.get("id"), 
+        mission_data.get("project_id"), 
+        results
+    )
+
+    # 3. Emit Completion Signal for HUD
+    event_bus.emit(
+        "GRAPH", "MISSION_COMPLETED", "OK", 
+        json.dumps({
+            "mission_id": initial_state["mission_id"],
+            "project_id": mission_data.get("project_id"),
+            "results": results,
+            "teams_visited": final_state.get("team_history", [])
+        }, ensure_ascii=False)
+    )
 
     return {
         "status": "COMPLETED",
         "mission_id": initial_state["mission_id"],
         "teams_visited": final_state.get("team_history", []),
-        "results": final_state.get("results", []),
+        "results": results,
         "full_state": final_state,
     }
