@@ -29,8 +29,8 @@ export function useOrionIntelligence(isJumping, ui) {
     setDialogueType(next.type);
     setShowBubble(true);
     
-    // Snappy Pacing (V6.6): Fixed 2.5s for better UI responsiveness
-    const duration = 2500;
+    // Snappy Pacing (V6.6): Fixed 4s for better UI readability
+    const duration = 4000;
 
     await new Promise(resolve => setTimeout(resolve, duration));
     
@@ -87,9 +87,26 @@ export function useOrionIntelligence(isJumping, ui) {
       else if (content.includes('[SYS]')) triggerDialogue('log_ok');
     };
 
+    const handleSpoke = (event) => {
+      if (ui?.orionMuted) return;
+      const { text, mood } = event.detail || {};
+      if (!text) return;
+
+      const dialogue = { text, mood: mood || 'neutral', type: 'speech' };
+      if (queue.current.some(d => d.text === dialogue.text)) return;
+      if (queue.current.length >= 3) queue.current.shift();
+
+      queue.current.push(dialogue);
+      processQueue();
+    };
+
     window.addEventListener('ORION_LOG', handleLog);
-    return () => window.removeEventListener('ORION_LOG', handleLog);
-  }, [ui?.orionMuted, triggerDialogue]);
+    window.addEventListener('ORION_SPOKE', handleSpoke);
+    return () => {
+      window.removeEventListener('ORION_LOG', handleLog);
+      window.removeEventListener('ORION_SPOKE', handleSpoke);
+    };
+  }, [ui?.orionMuted, triggerDialogue, processQueue]);
 
   // 🌌 Travel Synchronization
   useEffect(() => {

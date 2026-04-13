@@ -1,200 +1,230 @@
-/* HologramTerminal.css — Orion V3 Hierarchy Edition */
+/* HologramTerminal.css — Orion V4 premium Cyan Edition */
 .hologram-container {
-    /* Dimensions derived from global tokens */
     min-width: var(--terminal-min-w);
     min-height: var(--terminal-min-h);
 }
 
-/* Internal Chat Layout (Inherits aesthetics from .nexus-hud-panel) */
 .hologram-screen {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
-    font-family: var(--font-mono);
-    font-size: 12px;
+    padding: 25px;
+    font-family: var(--font-body); /* More readable for long text */
+    font-size: 13.5px;
     line-height: 1.6;
+    background: radial-gradient(circle at top left, rgba(0, 210, 255, 0.03), transparent);
 }
 
-/* Title and close button now use global .hud-title and .hud-close-btn */
-
-.hologram-screen {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
+/* Tab styling (Premium update) */
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
     font-family: var(--font-mono);
-    font-size: 12px;
-    line-height: 1.6;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 6px 15px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-
+.tab-btn.active {
+    color: var(--neon-blue);
+    border-bottom-color: var(--neon-blue);
+    text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+}
 
 /* Chat Stream */
 .chat-stream .msg {
-    margin-bottom: 15px;
+    margin-bottom: 24px;
     display: flex;
-    gap: 12px;
-    animation: fadeIn 0.3s ease-out;
+    gap: 15px;
 }
 
 .chat-stream .msg .prefix {
     font-weight: bold;
     flex-shrink: 0;
-    color: rgba(255, 255, 255, 0.4);
-}
-
-.chat-stream .msg.system {
-    color: var(--slate-light);
-    font-size: 11px;
-    opacity: 0.8;
+    color: rgba(255, 255, 255, 0.2);
+    margin-top: 5px;
 }
 
 .chat-stream .msg.user {
-    color: #ffffff;
+    color: var(--slate-light);
 }
 
-.chat-stream .msg.orion {
-    color: var(--neon-yellow);
-    text-shadow: 0 0 5px rgba(255, 217, 0, 0.2);
+/* --- ORION CARD (The Premium Look) --- */
+.msg-content.orion-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: 3px solid var(--neon-blue);
+    padding: 20px;
+    border-radius: 4px 12px 12px 4px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(4px);
+    width: 100%;
 }
 
-.msg-content {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.msg-content.orion-card p {
+    margin-bottom: 12px;
 }
 
-.bubble-time {
-    font-size: 9px;
-    opacity: 0.3;
+.msg-content.orion-card p:last-child {
+    margin-bottom: 0;
 }
 
-/* Input Row */
+/* --- Markdown Elements Styling --- */
+.md-table-wrapper {
+    margin: 15px 0;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 210, 255, 0.2);
+}
+
+.md-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.md-table th {
+    background: rgba(0, 210, 255, 0.1);
+    color: var(--neon-blue);
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+}
+
+.md-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.md-inset {
+    background: rgba(0, 210, 255, 0.05);
+    border-left: 2px solid var(--neon-blue);
+    padding: 12px 18px;
+    margin: 15px 0;
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.md-list {
+    margin: 10px 0 10px 20px;
+    list-style: none;
+}
+
+.md-list-item {
+    position: relative;
+    margin-bottom: 6px;
+}
+
+.md-list-item::before {
+    content: "▹";
+    position: absolute;
+    left: -18px;
+    color: var(--neon-blue);
+}
+
+.md-code-block {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 10px 0;
+}
+
+.md-code-inline {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 5px;
+    border-radius: 3px;
+    color: var(--neon-blue);
+}
+
+/* --- Markdown Headers --- */
+.msg-content.orion-card h1, .msg-content.orion-card h2, .msg-content.orion-card h3 {
+    font-family: var(--font-title);
+    color: var(--neon-blue);
+    margin: 20px 0 10px 0;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+}
+
+.msg-content.orion-card h1 { font-size: 1.2rem; border-bottom: 1px solid rgba(0, 210, 255, 0.1); padding-bottom: 5px; }
+.msg-content.orion-card h2 { font-size: 1.1rem; }
+.msg-content.orion-card h3 { font-size: 1rem; }
+
+/* --- Dynamic Input Styling --- */
 .hologram-input {
     display: flex;
-    align-items: center;
-    padding: 12px 15px;
-    background: var(--hud-surface-dark);
-    border-top: var(--hud-border-glow);
-    gap: 10px;
+    align-items: flex-end;
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 12px;
 }
 
-.hologram-input input {
+.hologram-textarea {
     flex: 1;
     background: transparent;
     border: none;
     color: #ffffff;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     outline: none;
+    resize: none;
+    min-height: 20px;
+    max-height: 200px;
+    line-height: 1.5;
+    padding-bottom: 2px;
 }
 
-.hologram-input input::placeholder {
-    color: rgba(255, 255, 255, 0.2);
+.hologram-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.15);
 }
 
 .hologram-send-btn {
     background: transparent;
-    border: 1px solid rgba(255, 217, 0, 0.3);
-    color: var(--neon-yellow);
-    padding: 4px 12px;
+    border: 1px solid rgba(0, 210, 255, 0.3);
+    color: var(--neon-blue);
+    padding: 6px 16px;
     font-family: var(--font-mono);
     font-size: 10px;
+    letter-spacing: 2px;
     cursor: pointer;
-    transition: all 0.2s;
-    border-radius: 2px;
+    transition: all 0.3s;
+    border-radius: 4px;
+    margin-bottom: 5px;
 }
 
 .hologram-send-btn:hover:not(:disabled) {
-    background: var(--neon-yellow);
+    background: var(--neon-blue);
     color: #000;
-    box-shadow: 0 0 10px var(--neon-yellow);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
 }
 
 .hologram-send-btn:disabled {
-    opacity: 0.3;
+    opacity: 0.2;
     cursor: not-allowed;
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Typing indicator parity */
-.typing {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    height: 20px;
-}
-
+/* Typing indicator Cyan Update */
 .typing span {
-    width: 4px;
-    height: 4px;
-    background: var(--neon-yellow);
-    border-radius: 50%;
-    animation: typing 1s infinite ease-in-out;
+    background: var(--neon-blue);
+    box-shadow: 0 0 5px var(--neon-blue);
 }
 
-.typing span:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.typing span:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-@keyframes typing {
-
-    0%,
-    100% {
-        transform: translateY(0);
-        opacity: 0.3;
-    }
-
-    50% {
-        transform: translateY(-4px);
-        opacity: 1;
-    }
-}
-
-/* ── Interactive Handles ────────────────────────────── */
+/* Header & Resize handle updates */
 .hologram-header {
-    cursor: grab;
-    user-select: none;
-}
-
-.hologram-header:active {
-    cursor: grabbing;
-}
-
-.header-drag-zone {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    align-items: center;
+    background: rgba(0, 210, 255, 0.05);
 }
 
 .hologram-resize-handle {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 20px;
-    height: 20px;
-    cursor: nwse-resize;
-    z-index: 5; /* Relative to HUD container */
-    background: linear-gradient(135deg, transparent 50%, rgba(255, 217, 0, 0.3) 50%);
-    border-radius: 0 0 var(--radius-md) 0;
+    background: linear-gradient(135deg, transparent 50%, rgba(0, 210, 255, 0.2) 50%);
 }
 
 .hologram-resize-handle:hover {
-    background: linear-gradient(135deg, transparent 50%, var(--neon-yellow) 50%);
+    background: linear-gradient(135deg, transparent 50%, var(--neon-blue) 50%);
 }

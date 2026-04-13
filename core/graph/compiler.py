@@ -1,171 +1,82 @@
 """
-GSS Orion V3 — Graph Compiler.
-Builds the LangGraph StateGraph and executes tasks.
-
-Architecture:
-  START → supervisor → conditional_edges → team_nodes → supervisor → ... → FINISH
+GSS Orion V4 — Graph Compiler.
+Builds and executes the LangGraph mission using dynamic skills.
 """
 
-import argparse
 import logging
 
-from langchain_core.messages import SystemMessage
-from langgraph.graph import END, START, StateGraph
+from langgraph.graph import START, StateGraph
 
-from core.graph.router import route_task
-from core.graph.state import ALL_TEAMS, GSSState
-from core.graph.teams.dev import dev_node
-from core.graph.teams.integrity import integrity_node
-from core.graph.teams.maintenance import maintenance_node
-from core.graph.teams.quality import quality_node
-from core.graph.teams.strategy import strategy_node
+from core.graph.nodes import dynamic_node_factory, route_conditional, supervisor_node
+from core.graph.persistence import SKILLS, forge_skill, load_skills, persist_mission_results
+from core.graph.state import GSSState
 from core.infra.event_bus import event_bus
-
-try:
-    from ops.dynamic_orchestrator import record_activity
-except ImportError:
-    record_activity = None
 
 logger = logging.getLogger(__name__)
 
-MAX_ITERATIONS = 5
-
-# ── Team node registry ──
-TEAM_NODES = {
-    "INTEGRITY": integrity_node,
-    "QUALITY": quality_node,
-    "STRATEGY": strategy_node,
-    "DEV": dev_node,
-    "MAINTENANCE": maintenance_node,
-}
-
-
-def supervisor_node(state: dict) -> dict:
-    """Supervisor: routes task to the appropriate team."""
-    iteration = state.get("iteration", 0)
-    history = state.get("team_history", [])
-    task = state.get("task", "")
-
-    if iteration >= MAX_ITERATIONS:
-        event_bus.emit("SUPERVISOR", "MaxIterations", "WARN", f"Stopped at iter {iteration}")
-        return {
-            "next_team": "FINISH",
-            "iteration": iteration + 1,
-            "messages": [SystemMessage(content=f"[SUPERVISOR] Max iterations ({MAX_ITERATIONS}) reached. Finishing.")],
-        }
-
-    # First pass: always INTEGRITY preflight
-    if iteration == 0:
-        team = "INTEGRITY"
-    else:
-        team = route_task(task, history)
-        # If team already visited 2+ times, finish
-        if history.count(team) >= 2 and iteration > 2:
-            event_bus.emit("SUPERVISOR", "MissionComplete", "OK", f"iter={iteration}")
-            return {
-                "next_team": "FINISH",
-                "iteration": iteration + 1,
-                "messages": [SystemMessage(content="[SUPERVISOR] Mission complete — teams exhausted.")],
-            }
-
-    event_bus.emit("SUPERVISOR", "RouteDecision", "OK", f"→ {team} (iter {iteration})")
-
-    return {
-        "next_team": team,
-        "current_team": team,
-        "iteration": iteration + 1,
-        "team_history": [team],
-        "messages": [SystemMessage(content=f"[SUPERVISOR] → {team} (iteration {iteration})")],
-    }
-
-
-def _route_conditional(state: dict) -> str:
-    """Conditional edge: map next_team to node name or END."""
-    next_team = state.get("next_team", "FINISH")
-    if next_team == "FINISH":
-        return END
-    return next_team
-
 
 def build_graph() -> StateGraph:
-    """Build the full LangGraph StateGraph."""
+    """Constructs the directed graph linking Supervisor to all loaded skills."""
     graph = StateGraph(GSSState)
-
-    # Add nodes
     graph.add_node("supervisor", supervisor_node)
-    for name, func in TEAM_NODES.items():
-        graph.add_node(name, func)
 
-    # Edges: START → supervisor
+    for skill_id, data in SKILLS.items():
+        graph.add_node(skill_id, dynamic_node_factory(skill_id, data))
+
     graph.add_edge(START, "supervisor")
 
-    # Conditional edges: supervisor → team or END
-    graph.add_conditional_edges("supervisor", _route_conditional, {t: t for t in ALL_TEAMS} | {END: END})
+    cond_map = {s: s for s in SKILLS}
+    cond_map["FINISH"] = "FINISH"  # Virtual marker if needed by LangGraph, but we use END
 
-    # Each team → supervisor (loop back)
-    for name in TEAM_NODES:
-        graph.add_edge(name, "supervisor")
+    # In LangGraph 0.2+, the cond_map values must be the actual node names or END
+    from langgraph.graph import END
+
+    actual_cond_map = {s: s for s in SKILLS}
+    actual_cond_map[END] = END
+
+    # We simplify: any skill maps to its node, everything else to END
+    graph.add_conditional_edges("supervisor", route_conditional)
+
+    for s in SKILLS:
+        graph.add_edge(s, "supervisor")
 
     return graph
 
 
-def execute_graph(task: str) -> dict:
-    """Compile and execute the graph for a given task."""
+async def execute_mission(mission_data: dict) -> dict:
+    """Entry point for the API to run a complete LangGraph mission (Async)."""
+    global SKILLS
+    SKILLS = load_skills()
+
+    selected = mission_data.get("selected_skills", [])
+    for sid in selected:
+        if sid not in SKILLS and forge_skill(sid):
+            SKILLS = load_skills()
+
     graph = build_graph()
     compiled = graph.compile()
 
-    initial_state: dict = {
-        "messages": [SystemMessage(content=f"[INIT] Task: {task}")],
-        "task": task,
-        "next_team": "INTEGRITY",
-        "current_team": "",
+    initial_state = {
+        "mission_id": mission_data.get("id", "M_000"),
+        "mission_title": mission_data.get("title", "Untitled"),
+        "mission_context": mission_data.get("context", ""),
+        "objectives": mission_data.get("objectives", []),
+        "selected_skills": mission_data.get("selected_skills", list(SKILLS.keys())[:2]),
         "team_history": [],
-        "context": {},
         "results": [],
         "iteration": 0,
     }
 
-    event_bus.emit("COMPILER", "MissionStart", "OK", task[:100])
-    final_state = compiled.invoke(initial_state)
-    event_bus.emit("COMPILER", "MissionEnd", "OK", f"Teams: {final_state.get('team_history', [])}")
+    event_bus.emit("GRAPH", "MissionStarted", "INFO", f"Executing: {initial_state['mission_title']}")
 
-    # Score the agents that participated (adaptive learning)
-    teams_visited = final_state.get("team_history", [])
-    if record_activity and teams_visited:
-        # Map team names to agent IDs used in that team
-        agent_map = {
-            "INTEGRITY": ["governance", "core"],
-            "QUALITY": ["critik", "corrector", "qualifier"],
-            "STRATEGY": ["captain", "task", "brainstorming"],
-            "DEV": ["backend_dev"],
-            "MAINTENANCE": ["tester"],
-        }
-        agents_used = []
-        for team in set(teams_visited):
-            agents_used.extend(agent_map.get(team, []))
-        if agents_used:
-            record_activity(agents_used)
-            event_bus.emit("COMPILER", "ScoreUpdate", "OK", f"Scored: {agents_used}")
+    final_state = await compiled.ainvoke(initial_state)
+
+    persist_mission_results(mission_data.get("project_id"), final_state.get("team_history", []))
 
     return {
-        "task": task,
         "status": "COMPLETED",
-        "teams_visited": teams_visited,
-        "iterations": final_state.get("iteration", 0),
+        "mission_id": initial_state["mission_id"],
+        "teams_visited": final_state.get("team_history", []),
         "results": final_state.get("results", []),
+        "full_state": final_state,
     }
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="GSS Orion V3 — Graph Compiler")
-    parser.add_argument("--task", type=str, required=True, help="Task to execute")
-    args = parser.parse_args()
-
-    from core.ui import print_banner, print_step
-
-    print_banner("GSS ORION V3", "LangGraph Compiler")
-    result = execute_graph(args.task)
-    print_step("RESULT", f"Teams: {' → '.join(result['teams_visited'])}", "OK")
-    print_step("STATUS", result["status"], "SUCCESS")
-    for r in result.get("results", []):
-        print_step(r.get("team", "?"), r.get("verdict", ""), "INFO")

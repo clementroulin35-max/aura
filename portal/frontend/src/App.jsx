@@ -6,23 +6,24 @@ import { VIEWS } from './lib/constants.js';
 import Header from './components/layouts/Header.jsx';
 import Footer from './components/layouts/Footer.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
-import CreditsPage from './pages/CreditsPage.jsx';
+import ProjectLandingPage from './pages/ProjectLandingPage.jsx';
 import HyperspaceJump from './components/effects/HyperspaceJump.jsx';
 
 // HUD Components
 import HologramTerminal from './components/hud/HologramTerminal.jsx';
 import LLMConfigWindow from './components/hud/LLMConfigWindow.jsx';
-import TeamsWindow from './components/hud/TeamsWindow.jsx';
+import AgentsHubWindow from './components/hud/AgentsHubWindow.jsx';
+import MissionForgeHUD from './components/hud/MissionForgeHUD.jsx';
+import ProjectTeamsWindow from './components/hud/ProjectTeamsWindow.jsx';
 import MonitoringWindow from './components/hud/MonitoringWindow.jsx';
 import MemoryDocsWindow from './components/hud/MemoryDocsWindow.jsx';
 import MemoryRapportHUD from './components/hud/MemoryRapportHUD.jsx';
 
 import { useSystemStatus } from './hooks/useSystemStatus.js';
 import { useOrionIntelligence } from './hooks/useOrionIntelligence.js';
+import { useSocketEvents } from './hooks/useSocketEvents.js';
 
-// Discover all background images dynamically
-const bgModules = import.meta.glob('./assets/backgrounds/*.{jpg,png,jpeg,webp}', { eager: true });
-const BACKGROUNDS = Object.values(bgModules).map(m => m.default);
+// Note: Backgrounds are now mapped reactively from the projects array instead of statically imported.
 
 function ChromaFilters() {
   return (
@@ -69,21 +70,33 @@ function ChromaFilters() {
 
 const PAGES = {
   [VIEWS.DASHBOARD]: DashboardPage,
-  [VIEWS.INFO]: CreditsPage,
+  [VIEWS.PROJECTS]: ProjectLandingPage,
 };
 
 export default function App() {
-  const [view, setView] = useState(VIEWS.DASHBOARD);
+  const [view, setView] = useState(VIEWS.PROJECTS);
   const [logHistory, setLogHistory] = useState([]);
+  const [missionDraft, setMissionDraft] = useState(null);
+  const [sessionStartTime] = useState(Date.now());
+
+  const [chatMessages, setChatMessages] = useState([
+    { role: 'system', content: '▸ Console GSS connectée au Nexus.' },
+    { role: 'system', content: '▸ Orion actif. Systèmes cockpit stables.' }
+  ]);
+  const [activeWindow, setActiveWindow] = useState(null);
+
+  useSocketEvents();
 
   // HUD State — Windows are manually opened
   const [ui, setUi] = useState({
     chatOpen: false,
     settingsOpen: false,
-    teamsOpen: false,
+    projectTeamsOpen: false,
+    hubOpen: false,
     monitorOpen: false,
     docsOpen: false,
     archivesOpen: false,
+    missionDraftOpen: false,
     executing: false,
     orionMuted: false
   });
@@ -93,23 +106,82 @@ export default function App() {
   const yTerminal = useMotionValue(100);
   const xSettings = useMotionValue(window.innerWidth - 1045);
   const ySettings = useMotionValue(100);
-  const xTeams = useMotionValue(35);
-  const yTeams = useMotionValue(570);
+  const xProjectTeams = useMotionValue(35);
+  const yProjectTeams = useMotionValue(570);
+  const xHub = useMotionValue(400);
+  const yHub = useMotionValue(100);
   const xMonitor = useMotionValue(window.innerWidth - 1365);
   const yMonitor = useMotionValue(100);
   const xDocs = useMotionValue(835);
   const yDocs = useMotionValue(570);
   const xArchives = useMotionValue(370);
   const yArchives = useMotionValue(570);
+  const xDraft = useMotionValue(window.innerWidth / 2 - 275);
+  const yDraft = useMotionValue(100);
 
   const [bgIndex, setBgIndex] = useState(0);
+  const [forceScroll, setForceScroll] = useState(0); // Counter to trigger scroll
   const [isJumping, setIsJumping] = useState(false);
   const [jumpPhase, setJumpPhase] = useState('idle');
 
   const { status: systemStatus, config: systemConfig, ollamaReachability, allModels } = useSystemStatus();
   const orion = useOrionIntelligence(isJumping, ui);
 
+  const [projects, setProjects] = useState([]);
+  useEffect(() => {
+    fetch('/api/v1/resources/projects')
+      .then(res => res.json())
+      .then(data => setProjects(data.projects || []))
+      .catch(err => console.error("Projects fetch error", err));
+  }, []);
+
+  // Load Mission for Active Project
+  useEffect(() => {
+    const activeProject = projects[bgIndex % projects.length];
+    if (activeProject) {
+      fetch(`/api/v1/resources/missions/${activeProject.id}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.mission) {
+                setMissionDraft(data.mission);
+            } else {
+                setMissionDraft(null); // Reset or use defaults
+            }
+        })
+        .catch(err => console.error("Mission load error", err));
+    }
+  }, [bgIndex, projects]);
+
+  const handleUpdateProjects = async (newProjects) => {
+    try {
+      const res = await fetch('/api/v1/resources/projects', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projects: newProjects })
+      });
+      if (res.ok) {
+        setProjects(newProjects);
+      }
+    } catch (e) {
+        console.error("Projects sync error", e);
+    }
+  };
+
+  const activeProject = projects.length > 0 ? projects[bgIndex % projects.length] : null;
+
+  const handleMissionDraft = (payload) => {
+    setMissionDraft(payload);
+    setUi(prev => ({ ...prev, missionDraftOpen: true }));
+    // Ensure the Forge window is focused
+    setActiveWindow("missionDraftOpen");
+  };
+
   const handlePropClick = (panel) => {
+    let key = panel + 'Open';
+    let willOpen = !ui[key];
+    if (panel === 'chat') { key = 'chatOpen'; willOpen = !ui.chatOpen; }
+    if (panel === 'settings') { key = 'settingsOpen'; willOpen = !ui.settingsOpen; }
+    
     setUi(prev => ({
       ...prev,
       [panel + 'Open']: !prev[panel + 'Open'],
@@ -117,22 +189,13 @@ export default function App() {
       settingsOpen: panel === 'settings' ? !prev.settingsOpen : prev.settingsOpen,
       orionMuted: panel === 'mute' ? !prev.orionMuted : prev.orionMuted,
     }));
+    if (willOpen && panel !== 'mute') setActiveWindow(key);
   };
 
   // Improved Generic HUD Toggle
   const toggleHUD = (key) => {
     setUi(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const handleExecute = async () => {
-    setUi(prev => ({ ...prev, executing: true }));
-    try {
-      await fetch('/api/graph/run', { method: 'POST' });
-    } catch (e) {
-      console.error('Execute failed:', e);
-    } finally {
-      setTimeout(() => setUi(prev => ({ ...prev, executing: false })), 2000);
-    }
+    if (!ui[key]) setActiveWindow(key);
   };
 
   useEffect(() => {
@@ -142,12 +205,84 @@ export default function App() {
         time: new Date().toLocaleTimeString()
       }]);
     };
+
+    const handleMissionComplete = async (e) => {
+      const data = e.detail;
+      
+      // Filter out replayed events (Ghost calls fix)
+      // Check data.timestamp (ISO) against sessionStartTime
+      const eventTime = data.timestamp ? Date.parse(data.timestamp) : Date.now();
+      if (eventTime < sessionStartTime) {
+        console.log("[HUD] Ignoring old mission event:", data.event, "time:", new Date(eventTime).toLocaleTimeString());
+        return;
+      }
+
+      console.log("[HUD] Mission completed event received", data);
+      
+      let missionResult = { status: "SUCCESS", teams_visited: [], artifacts: [] };
+      try {
+        if (data.context) {
+          const parsed = JSON.parse(data.context);
+          missionResult.teams_visited = parsed.teams_visited || [];
+          missionResult.mission_id = parsed.mission_id;
+        }
+      } catch (err) {
+        console.warn("[HUD] Could not parse mission context JSON", err);
+      }
+
+      // 1. Refresh Projects (to show new teams/agents)
+      fetch('/api/v1/resources/projects')
+        .then(res => res.json())
+        .then(data => setProjects(data.projects || []))
+        .catch(err => console.error("Projects refresh error", err));
+
+      // 2. Request Orion Interpretation
+      try {
+        const res = await fetch('/api/v1/orion/interpret', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mission_result: missionResult,
+            original_objective: missionDraft?.context || "Mission non spécifiée"
+          })
+        });
+        
+        if (res.ok) {
+          const result = await res.json();
+          // 3. Inject Orion's summary into chat
+          setChatMessages(prev => [...prev, {
+            role: 'assistant',
+            content: result.summary,
+            mood: result.mood || 'neutral',
+            bubble: result.bubble,
+            type: 'orion'
+          }]);
+        }
+      } catch (err) {
+        console.error("Interpretation error", err);
+      } finally {
+        setUi(prev => ({ ...prev, executing: false }));
+      }
+    };
+
     window.addEventListener('ORION_LOG', handleLog);
-    return () => window.removeEventListener('ORION_LOG', handleLog);
+    window.addEventListener('MISSION_COMPLETED', handleMissionComplete);
+    return () => {
+      window.removeEventListener('ORION_LOG', handleLog);
+      window.removeEventListener('MISSION_COMPLETED', handleMissionComplete);
+    };
   }, []);
 
   const initiateJump = (index) => {
     if (index === bgIndex || isJumping) return;
+    
+    // Bypass jump cinematic completely on Project Landing Page
+    if (view === VIEWS.PROJECTS) {
+      setBgIndex(index);
+      setForceScroll(prev => prev + 1);
+      return;
+    }
+
     setIsJumping(true);
     
     // Phase 0: Anticipation (0s - 0.3s)
@@ -172,11 +307,15 @@ export default function App() {
     }, 4400); // 4.4s total cinematic flow
   };
 
+  const BACKGROUNDS = projects.length > 0 
+    ? projects.map(p => p.image || '/backgrounds/l0_vista.jpg') 
+    : ['/backgrounds/l0_vista.jpg'];
+
   const PageComponent = PAGES[view] || DashboardPage;
-  const currentBgSrc = BACKGROUNDS[bgIndex];
+  const currentBgSrc = BACKGROUNDS[bgIndex % BACKGROUNDS.length];
 
   return (
-    <div className={`app-shell state-${jumpPhase} ${isJumping ? 'is-jumping' : ''}`}>
+    <div className={`app-shell state-${jumpPhase} ${isJumping ? 'is-jumping' : ''} view-${view}`}>
       <ChromaFilters />
       <HyperspaceJump isJumping={isJumping} />
 
@@ -193,17 +332,51 @@ export default function App() {
         onToggleHUD={toggleHUD} // Pass generic toggle to header
         status={systemStatus}
         ui={ui}
+        hideHudControls={view === VIEWS.PROJECTS}
       />
 
       {/* Global Desktop HUD Layer — Reversed Order (Terminal on Top) */}
-      <div className="l3-hud-layer global-hud" style={{ top: '0', height: '100vh', pointerEvents: 'none' }}>
+      <div className="l3-hud-layer global-hud" style={{ top: '0', height: '100vh', pointerEvents: 'none', display: view === VIEWS.PROJECTS ? 'none' : 'block' }}>
         {/* Memory Windows (Background) */}
-        {ui.archivesOpen && <MemoryRapportHUD onClose={() => toggleHUD("archivesOpen")} x={xArchives} y={yArchives} />}
-        {ui.docsOpen && <MemoryDocsWindow onClose={() => toggleHUD("docsOpen")} x={xDocs} y={yDocs} />}
+        {ui.archivesOpen && <MemoryRapportHUD onClose={() => toggleHUD("archivesOpen")} x={xArchives} y={yArchives} isFocused={activeWindow === "archivesOpen"} onFocus={() => setActiveWindow("archivesOpen")} />}
+        {ui.docsOpen && <MemoryDocsWindow onClose={() => toggleHUD("docsOpen")} x={xDocs} y={yDocs} isFocused={activeWindow === "docsOpen"} onFocus={() => setActiveWindow("docsOpen")} />}
+
+        {/* Execution Engine Window */}
+        {ui.missionDraftOpen && (
+           <MissionForgeHUD 
+             onClose={() => toggleHUD("missionDraftOpen")} 
+             x={xDraft} 
+             y={yDraft} 
+             mission={missionDraft || { 
+               title: "NOUVELLE MISSION", 
+               context: "Définissez le contexte...", 
+               objectives: ["Objectif 1"], 
+               constraints: ["Contrainte 1"],
+               selected_skills: []
+             }} 
+             setMissionDraft={setMissionDraft}
+             onExecuteStart={() => setUi(prev => ({...prev, executing: true}))}
+             onExecuteEnd={() => setUi(prev => ({...prev, executing: false}))}
+             isFocused={activeWindow === "missionDraftOpen"} 
+             onFocus={() => setActiveWindow("missionDraftOpen")} 
+             activeProject={activeProject}
+           />
+        )}
 
         {/* Supervisor Windows */}
-        {ui.monitorOpen && <MonitoringWindow onClose={() => toggleHUD("monitorOpen")} x={xMonitor} y={yMonitor} status={systemStatus} />}
-        {ui.teamsOpen && <TeamsWindow onClose={() => toggleHUD("teamsOpen")} x={xTeams} y={yTeams} />}
+        {ui.monitorOpen && (
+          <MonitoringWindow 
+            onClose={() => toggleHUD("monitorOpen")} 
+            x={xMonitor} y={yMonitor} 
+            status={systemStatus} 
+            isExecuting={ui.executing}
+            isFocused={activeWindow === "monitorOpen"} 
+            onFocus={() => setActiveWindow("monitorOpen")} 
+            activeProject={activeProject} 
+          />
+        )}
+        {ui.projectTeamsOpen && <ProjectTeamsWindow onClose={() => toggleHUD("projectTeamsOpen")} x={xProjectTeams} y={yProjectTeams} isFocused={activeWindow === "projectTeamsOpen"} onFocus={() => setActiveWindow("projectTeamsOpen")} projects={projects} activeProject={activeProject} onProjectsUpdate={handleUpdateProjects} onOpenHub={(teamId) => { setUi(prev => ({...prev, hubOpen: true, hubTargetTeamId: teamId})); setActiveWindow("hubOpen"); }} />}
+        {ui.hubOpen && <AgentsHubWindow onClose={() => toggleHUD("hubOpen")} x={xHub} y={yHub} isFocused={activeWindow === "hubOpen"} onFocus={() => setActiveWindow("hubOpen")} projects={projects} activeProject={activeProject} onProjectsUpdate={handleUpdateProjects} targetTeamId={ui.hubTargetTeamId} />}
 
         {/* Core Windows (Foreground) */}
         {ui.settingsOpen && (
@@ -214,14 +387,22 @@ export default function App() {
             initialConfig={systemConfig}
             initialReachability={ollamaReachability}
             initialModels={allModels}
+            isFocused={activeWindow === "settingsOpen"}
+            onFocus={() => setActiveWindow("settingsOpen")}
           />
         )}
+
         {ui.chatOpen && (
           <HologramTerminal
             onClose={() => toggleHUD("chatOpen")}
             x={xTerminal}
             y={yTerminal}
             initialLogs={logHistory}
+            chatMessages={chatMessages}
+            setChatMessages={setChatMessages}
+            onMissionDraft={handleMissionDraft}
+            isFocused={activeWindow === "chatOpen"}
+            onFocus={() => setActiveWindow("chatOpen")}
           />
         )}
       </div>
@@ -229,17 +410,25 @@ export default function App() {
       <PageComponent
         ui={ui}
         onPropClick={handlePropClick}
-        onExecute={handleExecute}
         orion={orion}
+        projects={projects}
+        onProjectsUpdate={handleUpdateProjects}
+        onNavigate={setView}
+        setBgIndex={setBgIndex}
+        setForceScroll={setForceScroll}
       />
 
       <Footer
+        currentView={view}
         backgrounds={BACKGROUNDS}
-        activeIndex={bgIndex}
+        activeIndex={bgIndex % BACKGROUNDS.length}
         onSelect={initiateJump}
         isJumping={isJumping}
         ui={ui}
         onMuteToggle={() => handlePropClick("mute")}
+        activeProject={activeProject}
+        projects={projects}
+        forceScrollTrigger={forceScroll}
       />
     </div>
   );

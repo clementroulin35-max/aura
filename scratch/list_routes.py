@@ -1,0 +1,5 @@
+from portal.backend.app import app
+
+for route in app.routes:
+    methods = getattr(route, "methods", "N/A")
+    print(f"{methods} {route.path}")

@@ -22,8 +22,9 @@ FRONTEND_PORT = 5173
 def _kill_port(port: int) -> None:
     """Kill process on a given port (Windows)."""
     try:
-        result = subprocess.run(["netstat", "-ano"], capture_output=True, text=True, timeout=5)
-        for line in result.stdout.splitlines():
+        result = subprocess.run(["netstat", "-ano"], capture_output=True, timeout=5)
+        stdout = result.stdout.decode("utf-8", errors="replace")
+        for line in stdout.splitlines():
             if f":{port}" in line and "LISTENING" in line:
                 pid = line.strip().split()[-1]
                 subprocess.run(["taskkill", "/F", "/PID", pid], capture_output=True, timeout=5)

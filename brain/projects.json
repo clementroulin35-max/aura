@@ -1,0 +1,218 @@
+{
+  "projects": [
+    {
+      "id": "PRJ-ORION-01",
+      "name": "Orion Interface V4",
+      "image": "/backgrounds/l0_vista.jpg",
+      "description": "Refonte des HUDs et intégration de la réactivité émotionnelle du Chat.",
+      "teams": [
+        {
+          "id": "team-strat",
+          "name": "Stratégie & Design",
+          "agents": [
+            "captain",
+            "brainstorming",
+            "design"
+          ],
+          "specs": {
+            "captain": "Configuration spécifique de l'agent 'captain' pour le projet 'Orion Interface V4'"
+          }
+        },
+        {
+          "id": "team-dev",
+          "name": "Développement",
+          "agents": [
+            "frontend_dev",
+            "backend_dev",
+            "task",
+            "core"
+          ]
+        },
+        {
+          "id": "team-qa",
+          "name": "Quality Assurance",
+          "agents": [
+            "critik",
+            "tester",
+            "governance"
+          ],
+          "specs": {
+            "critik": "Configuration spécifique de l'agent 'critik' pour le projet 'Orion Interface V4'"
+          }
+        }
+      ]
+    },
+    {
+      "id": "PRJ-COWBOY-02",
+      "name": "Epopée Spatiale",
+      "image": "/backgrounds/l0_vista_3.jpg",
+      "description": "Scénario narratif avec sarcasme et aventure stellaire.",
+      "teams": [
+        {
+          "id": "team-mission-02",
+          "name": "Mission Squad",
+          "agents": [
+            "corrector",
+            "critik",
+            "task",
+            "brainstorming",
+            "design"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PRJ-TESTN-17",
+      "name": "Test new project",
+      "description": "blablbla ce na rio OOOO",
+      "image": "/backgrounds/l0_vista_4.jpg",
+      "teams": [
+        {
+          "id": "team-corps-55",
+          "name": "corps",
+          "agents": [
+            "core",
+            "governance",
+            "captain"
+          ],
+          "specs": {}
+        },
+        {
+          "id": "team-correct-17",
+          "name": "correct",
+          "agents": [
+            "corrector",
+            "qualifier"
+          ],
+          "specs": {}
+        }
+      ]
+    },
+    {
+      "id": "PRJ-ENCORE-86",
+      "name": "Encore 1 autre",
+      "description": "Je usi ph zhzg",
+      "image": "/backgrounds/l0_vista_1.jpg",
+      "teams": []
+    },
+    {
+      "id": "PRJ-NONMA-75",
+      "name": "Non mas No mais",
+      "description": "je suiho obhbf zgzrh",
+      "image": "/backgrounds/l0_vista_2.jpg",
+      "teams": [
+        {
+          "id": "team-mission-75",
+          "name": "Mission Squad",
+          "agents": [
+            "brainstorming",
+            "design",
+            "task",
+            "critik",
+            "corrector"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PRJ-TEST-98",
+      "name": "test",
+      "description": "Nouveau projet d'exploration.",
+      "image": "/backgrounds/l0_vista.jpg",
+      "teams": [
+        {
+          "id": "team-mission-98",
+          "name": "Mission Squad",
+          "agents": [
+            "design",
+            "brainstorming",
+            "corrector",
+            "critik",
+            "task"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PRJ-UNOOA-89",
+      "name": "Uno oaos",
+      "description": "zgzh",
+      "image": "/backgrounds/l0_vista.jpg",
+      "teams": []
+    },
+    {
+      "id": "PRJ-YFYDFK-70",
+      "name": "yfydfkd",
+      "description": "ykryudtk",
+      "image": "/backgrounds/l0_vista.jpg",
+      "teams": [
+        {
+          "id": "team-kdf-70",
+          "name": "kdf",
+          "agents": [
+            "design",
+            "backend_dev",
+            "qualifier",
+            "critik"
+          ],
+          "specs": {}
+        },
+        {
+          "id": "team-dhet-67",
+          "name": "dhet",
+          "agents": [
+            "governance"
+          ],
+          "specs": {}
+        }
+      ]
+    },
+    {
+      "id": "PRJ-TROPC-66",
+      "name": "Trop classe",
+      "description": "Nouveau projet d'exploration.",
+      "image": "/backgrounds/l0_vista_4.jpg",
+      "teams": []
+    },
+    {
+      "id": "PRJ-DUSAL-95",
+      "name": "Du sale !",
+      "description": "Ouais ouais Roméo",
+      "image": "/backgrounds/l0_vista_3.jpg",
+      "teams": [
+        {
+          "id": "team-mission-95",
+          "name": "Mission Squad",
+          "agents": [
+            "corrector",
+            "critik",
+            "task",
+            "brainstorming",
+            "design"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PRJ-DTHS-6",
+      "name": "dths",
+      "description": "Nouveau projet d'exploration.",
+      "image": "/backgrounds/l0_vista.jpg",
+      "teams": []
+    },
+    {
+      "id": "PRJ-DHDSH-26",
+      "name": "dhdsh",
+      "description": "Nouveau projet d'exploration.",
+      "image": "/backgrounds/l0_vista.jpg",
+      "teams": []
+    },
+    {
+      "id": "PRJ-HDRWH-59",
+      "name": "hdrwh",
+      "description": "Nouveau projet d'exploration.",
+      "image": "/backgrounds/l0_vista.jpg",
+      "teams": []
+    }
+  ]
+}

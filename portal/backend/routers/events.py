@@ -25,13 +25,6 @@ async def events_websocket(ws: WebSocket):
     event_bus.register_ws(ws)
 
     try:
-        # Send last 20 events as initial payload
-        if EVENTS_FILE.exists():
-            lines = EVENTS_FILE.read_text(encoding="utf-8").strip().split("\n")
-            for line in lines[-20:]:
-                with contextlib.suppress(Exception):
-                    await ws.send_json(json.loads(line))
-
         # Heartbeat loop
         while True:
             await asyncio.sleep(15)

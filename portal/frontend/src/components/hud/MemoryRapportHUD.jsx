@@ -8,18 +8,20 @@ const ARCHIVES = [
   { id: "LG-002", title: "Mission Beta — Sovereignty Audit",  date: "2026-04-08" },
 ];
 
-export default function MemoryRapportHUD({ onClose, x, y }) {
+export default function MemoryRapportHUD({ onClose, x, y, isFocused, onFocus }) {
   const dragControls = useDragControls();
   const [dimensions, setDimensions] = useState({ width: 450, height: 380 });
 
   return (
     <motion.div
       className="nexus-hud-panel archives-window"
+      onPointerDownCapture={onFocus}
       drag
       dragControls={dragControls}
       dragListener={false}
       dragMomentum={false}
-      style={{ width: dimensions.width, height: dimensions.height, x, y }}
+      dragConstraints={{ top: 70, left: 10, right: window.innerWidth - dimensions.width - 10, bottom: window.innerHeight - dimensions.height - 110 }}
+      style={{ width: dimensions.width, height: dimensions.height, x, y, zIndex: isFocused ? 'var(--z-hud-top)' : 'var(--z-hud-base)' }}
     >
       <div className="hud-header" onPointerDown={(e) => dragControls.start(e)}>
         <span className="hud-title">MISSION ARCHIVES</span>

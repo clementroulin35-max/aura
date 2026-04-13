@@ -1,23 +1,46 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useDragControls } from 'framer-motion';
+import { motion, useDragControls, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import './hud.css';
 import './HologramTerminal.css';
 import { API_BASE } from '../../lib/constants.js';
 
-const HologramTerminal = ({ onClose, x, y, initialLogs = [] }) => {
-    // Chat State — Seed with default welcome then initialLogs
-    const [messages, setMessages] = useState([
-        { role: 'system', content: '▸ Console GSS connectée au Nexus.' },
-        { role: 'system', content: '▸ Orion actif. Systèmes cockpit stables.' },
-        ...initialLogs.map(log => ({
-            role: log.role || 'system',
-            content: log.content || log.message, // handle legacy 'message' field
-            type: log.type || 'info',
-            time: log.time
-        }))
-    ]);
-    const [input, setInput] = useState('');
+// Defined OUTSIDE to prevent re-mounting and state loss on render (Fixes back-typing/reversed input)
+const AutoExpandingTextarea = ({ value, onChange, onKeyDown, placeholder, disabled }) => {
+    const textareaRef = useRef(null);
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        }
+    }, [value]);
+
+    return (
+        <textarea
+            ref={textareaRef}
+            className="hologram-textarea"
+            rows="1"
+            value={value}
+            onChange={onChange}
+            onKeyDown={onKeyDown}
+            placeholder={placeholder}
+            disabled={disabled}
+            autoFocus
+        />
+    );
+};
+
+const HologramTerminal = ({ 
+    onClose, x, y, initialLogs = [], 
+    chatMessages = [], setChatMessages, 
+    onMissionDraft,
+    isFocused, onFocus 
+}) => {
+    const [chatInput, setChatInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState('chat'); // 'chat' or 'logs'
     const screenRef = useRef(null);
 
     // Window Interaction State
@@ -39,59 +62,49 @@ const HologramTerminal = ({ onClose, x, y, initialLogs = [] }) => {
         }
     };
 
-    // Auto-scroll logic — still needed for state updates like handleSend
     useEffect(() => {
         if (screenRef.current) {
             screenRef.current.scrollTop = screenRef.current.scrollHeight;
         }
-    }, [messages, loading]);
-
-    // Update messages when initialLogs change (from App.jsx)
-    useEffect(() => {
-        if (initialLogs.length > 0) {
-            const lastLog = initialLogs[initialLogs.length - 1];
-            // Only append the new log if it hasn't been added yet
-            setMessages(prev => {
-                const alreadyHas = prev.some(m => m.content === lastLog.content && m.time === lastLog.time);
-                if (alreadyHas) return prev;
-                return [...prev, {
-                    role: lastLog.role || 'system',
-                    content: lastLog.content || lastLog.message,
-                    type: lastLog.type || 'info',
-                    time: lastLog.time
-                }];
-            });
-        }
-    }, [initialLogs]);
+    }, [chatMessages, loading, activeTab, initialLogs]);
 
     const handleSend = async () => {
-        const text = input.trim();
-        if (!text || loading) return;
+        const text = chatInput.trim();
+        if (!text || loading || !setChatMessages) return;
 
-        setInput('');
-        setMessages(prev => [...prev, { role: 'user', content: text, time: new Date().toLocaleTimeString() }]);
+        setChatInput('');
+        setChatMessages(prev => [...prev, { role: 'user', content: text, time: new Date().toLocaleTimeString() }]);
         setLoading(true);
 
         try {
-            const res = await fetch(`${API_BASE}/orion/chat`, {
+            const res = await fetch(`${API_BASE}/v1/orion/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text }),
+                body: JSON.stringify({ message: text, history: chatMessages }),
             });
             const data = await res.json();
-            setMessages(prev => [...prev, {
+            setChatMessages(prev => [...prev, {
                 role: 'orion',
                 content: data.response || '...',
                 time: new Date().toLocaleTimeString()
             }]);
+
+            if (data.bubble || data.mood) {
+                window.dispatchEvent(new CustomEvent('ORION_SPOKE', {
+                    detail: { text: data.bubble || "...", mood: data.mood || "neutral" }
+                }));
+            }
+
+            if (data.mission_payload && typeof onMissionDraft === 'function') {
+                onMissionDraft(data.mission_payload);
+            }
         } catch (e) {
-            setMessages(prev => [...prev, { role: 'system', content: 'Signal perdu. Erreur de routage.' }]);
+            setChatMessages(prev => [...prev, { role: 'system', content: 'Signal perdu. Erreur de routage.' }]);
         } finally {
             setLoading(false);
         }
     };
 
-    // Resizing Logic
     const startResizing = (mouseDownEvent) => {
         mouseDownEvent.preventDefault();
         const startWidth = dimensions.width;
@@ -114,55 +127,100 @@ const HologramTerminal = ({ onClose, x, y, initialLogs = [] }) => {
         document.addEventListener('mouseup', onMouseUp);
     };
 
+    const MarkdownComponents = {
+        table: ({ children }) => (
+            <div className="md-table-wrapper">
+                <table className="md-table">{children}</table>
+            </div>
+        ),
+        blockquote: ({ children }) => (
+            <div className="md-inset">{children}</div>
+        ),
+        ul: ({ children }) => <ul className="md-list">{children}</ul>,
+        li: ({ children }) => <li className="md-list-item">{children}</li>,
+        code: ({ children, inline }) => (
+            inline ? <code className="md-code-inline">{children}</code> : <pre className="md-code-block"><code>{children}</code></pre>
+        )
+    };
+
     return (
         <motion.div
             className="nexus-hud-panel hologram-container"
+            onPointerDownCapture={onFocus}
             drag
             dragControls={dragControls}
-            dragListener={false} // Only drag via header
+            dragListener={false}
             dragMomentum={false}
-            dragConstraints={{ top: 64, left: 0, right: window.innerWidth - dimensions.width, bottom: window.innerHeight - 120 }}
-            dragElastic={0}
+            dragConstraints={{ top: 70, left: 10, right: window.innerWidth - dimensions.width - 10, bottom: window.innerHeight - dimensions.height - 110 }}
             style={{
                 width: dimensions.width,
                 height: dimensions.height,
                 x,
                 y,
-                zIndex: 'var(--z-hud-base)'
+                zIndex: isFocused ? 'var(--z-hud-top)' : 'var(--z-hud-base)'
             }}
             variants={unfoldVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
         >
-            {/* Draggable Header */}
             <div
                 className="hud-header"
                 onPointerDown={(e) => dragControls.start(e)}
+                style={{ fontFamily: 'var(--font-title)', textShadow: 'var(--pixel-shadow)', letterSpacing: '2px' }}
             >
                 <div className="header-drag-zone">
                     <span className="hud-title">ORION TERMINAL V3.6</span>
+                    <div className="terminal-tabs" onPointerDown={e => e.stopPropagation()}>
+                        <button className={`tab-btn ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>CHAT</button>
+                        <button className={`tab-btn ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => setActiveTab('logs')}>LOGS</button>
+                    </div>
                 </div>
                 {onClose && (
                     <button className="hud-close-btn hologram-close-btn" onClick={onClose}>[X]</button>
                 )}
             </div>
 
-            {/* Chat Content */}
             <div className="hologram-screen" ref={screenRef}>
                 <div className="chat-stream">
-                    {messages.map((msg, i) => (
-                        <div key={i} className={`msg ${msg.role} ${msg.type || ''}`}>
-                            <span className="prefix">
-                                {msg.role === 'user' ? '›' : (msg.role === 'system' ? '■' : '⋄')}
-                            </span>
+                    <AnimatePresence initial={false}>
+                        {activeTab === 'chat' && chatMessages.filter(m => m.role !== 'system').map((msg, i) => (
+                            <motion.div 
+                                key={i} 
+                                className={`msg ${msg.role} ${msg.type || ''}`}
+                                initial={{ opacity: 0, x: -10, y: 10 }}
+                                animate={{ opacity: 1, x: 0, y: 0 }}
+                                transition={{ duration: 0.4, ease: "easeOut" }}
+                            >
+                                <span className="prefix">
+                                    {msg.role === 'user' ? '›' : '⋄'}
+                                </span>
+                                <div className={`msg-content ${msg.role === 'orion' ? 'orion-card' : ''}`}>
+                                    {msg.role === 'orion' || msg.role === 'assistant' ? (
+                                        <ReactMarkdown 
+                                            remarkPlugins={[remarkGfm]}
+                                            components={MarkdownComponents}
+                                        >
+                                            {msg.content}
+                                        </ReactMarkdown>
+                                    ) : (
+                                        <span className="content-text">{msg.content}</span>
+                                    )}
+                                    {msg.time && <span className="bubble-time">{msg.time}</span>}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                    {activeTab === 'logs' && initialLogs.map((log, i) => (
+                        <div key={i} className={`msg system ${log.type || 'info'}`}>
+                            <span className="prefix">■</span>
                             <div className="msg-content">
-                                <span className="content-text">{msg.content}</span>
-                                {msg.time && <span className="bubble-time">{msg.time}</span>}
+                                <span className="content-text">{log.content || log.message}</span>
+                                {log.time && <span className="bubble-time">{log.time}</span>}
                             </div>
                         </div>
                     ))}
-                    {loading && (
+                    {activeTab === 'chat' && loading && (
                         <div className="msg orion">
                             <span className="prefix">⋄</span>
                             <span className="typing"><span /><span /><span /></span>
@@ -171,26 +229,28 @@ const HologramTerminal = ({ onClose, x, y, initialLogs = [] }) => {
                 </div>
             </div>
 
-            {/* Input Row */}
             <div className="hologram-input">
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder="Saisissez une commande..."
-                    autoFocus
+                <AutoExpandingTextarea
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSend();
+                        }
+                    }}
+                    placeholder="Engager Orion..."
+                    disabled={loading}
                 />
                 <button
                     className="hologram-send-btn"
                     onClick={handleSend}
-                    disabled={loading || !input.trim()}
+                    disabled={loading || !chatInput.trim()}
                 >
-                    EXEC
+                    ENGAGE
                 </button>
             </div>
 
-            {/* Resize Handle */}
             <div
                 className="hud-resize-handle hologram-resize-handle"
                 onMouseDown={startResizing}

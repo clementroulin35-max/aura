@@ -11,6 +11,21 @@
   transition: filter 0.5s ease;
 }
 
+/* Allow Landing Page to scroll vertically while cockpit stays fixed */
+.app-shell.view-PROJECTS {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-scroll-container {
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  scroll-behavior: smooth;
+}
+
 /* ── L0 — THE VISTA (fixed deep background) ─────────── */
 .l0-vista {
   position: fixed;

@@ -2,7 +2,7 @@ import "./DashboardPage.css";
 import chassisImg from "../assets/decors/l1_dashboard.jpg";
 import OrionCompanion from "../components/props/OrionCompanion";
 import BrainJar from "../components/props/BrainJar";
-export default function DashboardPage({ ui, onPropClick, onExecute, orion }) {
+export default function DashboardPage({ ui, onPropClick, orion }) {
   return (
     <>
       {/* L1 — Cockpit Chassis (chroma green windows -> transparent) */}

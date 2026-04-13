@@ -1,0 +1,158 @@
+ ===== CAHIER DES CHARGES =====
+
+Tu es un expert architecture / produit / codebase. 
+Ta mission est d’analyser mon projet existant et d’identifier les modifications nécessaires pour transformer le site actuel en une “usine à projets” pilotée par LLM.
+
+Contexte global
+J’ai un site local qui simule un environnement de bureau Windows : dashboard avec fenêtres flottantes, déplaçables et redimensionnables.
+Un petit chat permet d’ouvrir une fenêtre de conversation avec un LLM configurable.
+Je veux que ce chat serve de phase de brainstorming, puis que cette phase alimente un superviseur LangGraph.
+
+Vision produit
+Le système final doit permettre de passer :
+1. d’une idée brute,
+2. à un cadrage structuré de mission,
+3. à une orchestration par un superviseur LangGraph,
+4. à l’utilisation dynamique de skills / équipes d’agents,
+5. à une production finale structurée (JSON, markdown, code, images, etc.),
+6. à un archivage des projets, équipes utilisées, résultats, et apprentissages.
+
+Séparation stricte des intelligences
+Je veux cloisonner 3 couches distinctes :
+
+1) LLM de dev
+- Sert uniquement à m’aider à développer et maintenir le site.
+- Il a un contexte fixe : code, architecture, bugs, refactor.
+- Il ne doit pas être mélangé avec la logique de brainstorming produit.
+- Son rôle n’est pas d’orchestrer les missions utilisateur.
+
+2) LLM de brainstorming / chat produit
+- Sert à explorer une idée avec l’utilisateur.
+- Son rôle est de poser des questions, faire émerger le besoin, détecter les zones floues, les contraintes, les objectifs, les livrables et les impacts.
+- Il doit transformer une idée informelle en une fiche mission exploitable.
+- Il doit apprendre des projets passés, mémoriser les préférences, les oublis, les points noirs déjà rencontrés, et proposer des questions de rattrapage.
+- Il ne doit pas exécuter le projet ; il prépare le terrain.
+
+3) Superviseur LangGraph
+- Reçoit une mission structurée issue du brainstorming.
+- Décide quels skills sont nécessaires.
+- Constitue ou réutilise des équipes d’agents standardisées.
+- Distribue les sous-missions.
+- Agrège les résultats.
+- Renvoie un objet structuré au chat pour mise en page, synthèse, visualisation ou export.
+- Son périmètre doit être orienté vers l’extérieur du projet de dev : il traite les missions métier / produit, pas le débogage du code du site.
+
+Objectif de produit
+Je veux que le site devienne une usine à projets :
+- on brainstorme une idée,
+- on formalise une mission,
+- le superviseur orchestre les équipes,
+- les équipes produisent,
+- le chat reformule, met en page et synthétise.
+
+Fonctions attendues dans l’interface
+Je veux pouvoir afficher dans des fenêtres indépendantes :
+- la conversation de brainstorming,
+- la mission structurée en cours,
+- la liste des skills existants,
+- le rôle / mission / comportement / contraintes de chaque skill,
+- les équipes disponibles et leur composition,
+- les projets déjà réalisés,
+- le résultat final de chaque projet en markdown,
+- l’historique des décisions et apprentissages,
+- éventuellement les artefacts produits : code, images, schémas, JSON.
+
+Besoin central
+Je veux que le système n’agisse pas seulement comme un chat, mais comme un pipeline de conception et d’orchestration :
+entrée = idée vague,
+sortie = mission claire, équipes choisies, exécution, résultat structuré.
+
+Ce que je veux que tu analyses dans le code source
+1. L’architecture actuelle du site.
+2. La séparation réelle ou non entre :
+   - LLM de dev,
+   - LLM de brainstorming,
+   - superviseur LangGraph.
+3. Les composants UI nécessaires pour visualiser :
+   - skills,
+   - teams,
+   - projets,
+   - outputs.
+4. Le flux de données entre chat, mission, superviseur et rendu final.
+5. Les modèles de données à introduire ou refactorer.
+6. Les endroits où le code mélange actuellement le rôle “dev assistant” et le rôle “superviseur produit”.
+7. Les changements minimaux pour obtenir une séparation propre.
+8. Les évolutions structurelles recommandées pour rendre le système extensible.
+
+Ce que j’attends de toi
+- Fais un audit du code et de l’architecture actuelle.
+- Identifie ce qui doit être modifié, déplacé, séparé ou renommé.
+- Propose une architecture cible.
+- Propose une structure de données pour :
+  - mission,
+  - skill,
+  - team,
+  - project,
+  - result,
+  - memory / feedback.
+- Propose les composants UI à créer ou refondre.
+- Propose les points d’intégration LangGraph.
+- Propose les événements / messages entre chat, supervisor et UI.
+- Propose un plan de migration par étapes.
+
+Contraintes de conception
+- Le superviseur ne doit pas être un simple correcteur de code.
+- Le LLM de brainstorming doit pousser à préciser le besoin avant exécution.
+- Les skills doivent être standardisés, réutilisables et paramétrables.
+- Les équipes doivent pouvoir être créées dynamiquement selon le besoin.
+- Le système doit pouvoir gérer des sorties variées : texte, markdown, code, images, schémas.
+- Le système doit conserver la mémoire des projets passés pour améliorer les prochains cadrages.
+- Je veux une solution modulaire, lisible et maintenable.
+
+Sortie attendue de ton analyse
+Réponds sous cette forme :
+1. Diagnostic de l’existant
+2. Architecture cible
+3. Liste des changements code nécessaires
+4. Modèle de données recommandé
+5. Flux d’exécution recommandé
+6. Risques / dette technique
+7. Plan de migration priorisé
+8. Recommandations concrètes pour le MVP
+9. Questions restantes à clarifier
+
+Important
+Ne me donne pas seulement des idées générales.
+Je veux une analyse orientée implémentation, avec des décisions concrètes et priorisées.
+
+ ===== VISION =====
+
+Je construis un site local qui fonctionne comme un bureau Windows avec des fenêtres flottantes.
+Ce site n’est pas seulement un dashboard : c’est une usine à projets.
+
+Le système doit permettre :
+- d’explorer une idée via un chat LLM de brainstorming,
+- de transformer cette idée en mission claire,
+- de transmettre cette mission à un superviseur LangGraph,
+- de faire choisir au superviseur les skills et équipes nécessaires,
+- de distribuer les sous-tâches,
+- de récupérer des résultats structurés,
+- de les afficher, les archiver et les réutiliser comme mémoire de projet.
+
+Je veux séparer strictement :
+- le LLM de développement, qui aide à coder le site,
+- le LLM de brainstorming, qui aide à cadrer une idée utilisateur,
+- le superviseur LangGraph, qui orchestre l’exécution.
+
+Le superviseur ne doit pas servir à corriger le code du site.
+Il doit servir à résoudre les missions externes que l’utilisateur soumet au système.
+
+Le site doit exposer visuellement :
+- les skills,
+- les équipes,
+- les missions,
+- les projets passés,
+- les résultats,
+- les mémoires et apprentissages.
+
+Je veux une architecture modulaire, extensible, et pensée pour évoluer vers la génération de contenu, de code ou d’images.

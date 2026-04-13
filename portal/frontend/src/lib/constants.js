@@ -2,8 +2,8 @@
 export const API_BASE = '/api';
 
 export const VIEWS = {
+  PROJECTS: 'PROJECTS',
   DASHBOARD: 'DASHBOARD',
-  INFO: 'INFO',
 };
 
 export const CHROMA_GREEN = '#00ff00';

@@ -3,7 +3,7 @@
    Source of truth: docs/design/ORION_V3_VIBE.md
    ═══════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Handlee&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=Space+Grotesk:wght@300;400;500;600&family=Outfit:wght@300;400;600&family=JetBrains+Mono:wght@400;500&family=Pixelify+Sans:wght@400;500;600&family=Handlee&display=swap');
 
 /* ── Reset ────────────────────────────────────────────── */
 *,
@@ -19,6 +19,8 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 /* ── Global Scrollbar (Replaces specific overrides) ───── */
@@ -45,11 +47,17 @@ body {
   --chroma-green: #00ff00;
   --chroma-blue: #0000ff;
   --grey-light: #ebeae4;
-  --cool-slate: #2c3e50;
-  --slate-mid: #636e72;
-  --slate-light: #b2bec3;
+  --cool-slate: #5b768f;
+  --slate-mid: #b8c7cd;
+  --slate-light: #e5edf0;
 
-  /* 2. Narrative Matrix Moods & Neons */
+  /* 2. Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #d1dde3;
+  --text-dim: #9aa8b1;
+  --text-neon: #ffd900;
+
+  /* 3. Narrative Matrix Moods & Neons */
   --neon-yellow: #ffd900;
   --neon-blue: #00d2ff;
   --neon-orange: #803605;
@@ -60,13 +68,13 @@ body {
   --purple-glow: #bc13fe;
   --error-red: #ff3030;
 
-  /* 3. Status */
+  /* 4. Status */
   --status-ok: #00b894;
   --status-warn: #fdcb6e;
   --status-error: #d63031;
   --status-success: #00ff64;
 
-  /* 4. Surfaces & Glass (Transparents & Backgrounds) */
+  /* 5. Surfaces & Glass (Transparents & Backgrounds) */
   --surface-glass: rgba(248, 249, 250, 0.55);
   --surface-glass-high: rgba(248, 249, 250, 0.80);
   --surface-glass-low: rgba(248, 249, 250, 0.30);
@@ -81,7 +89,7 @@ body {
   --hud-surface-dark: rgba(0, 0, 0, 0.55);
   --hud-surface-light: rgba(255, 255, 255, 0.08);
   
-  /* Translucent Action Surfaces (Replaces hardcodes) */
+  /* Translucent Action Surfaces */
   --action-white-dim: rgba(255, 255, 255, 0.02);
   --action-white-low: rgba(255, 255, 255, 0.05);
   --action-white-mid: rgba(255, 255, 255, 0.1);
@@ -93,10 +101,13 @@ body {
   --action-green-low: rgba(0, 255, 100, 0.1);
   --action-red-low: rgba(255, 50, 50, 0.1);
 
+  /* Effects */
+  --pixel-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+
   /* 5. Typography */
   --font-brand: 'Cinzel', serif;
-  --font-title: 'Cinzel Decorative', serif;
-  --font-ui: 'Space Grotesk', sans-serif;
+  --font-title: 'Pixelify Sans', cursive;
+  --font-ui: 'Pixelify Sans', cursive;
   --font-body: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --font-cartoon: 'Handlee', cursive;
@@ -129,6 +140,7 @@ body {
   --z-hud-base: 30;
   --z-l3-hud: 30;
   --z-hud-focus: 35;
+  --z-hud-top: 38;
   --z-overlay: 40;
   --z-header: 50;
   --z-modal: 60;
@@ -167,4 +179,12 @@ body {
   height: 100vh;
   overflow: hidden;
   position: relative;
+}
+
+/* Utilities */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

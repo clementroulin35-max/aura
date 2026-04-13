@@ -6,7 +6,7 @@ Provides fixtures for LLM mocking and temporary project structures.
 import json
 import sys
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -24,18 +24,16 @@ def mock_llm():
         "model": "test-mock",
         "source": "simulation",
     }
-    try:
-        with (
-            patch("core.llm.call_llm", return_value=mock_response) as mock,
-            patch("core.llm._detect_ollama", return_value=False),
-            patch("core.llm._has_cloud_keys", return_value=False),
-            patch("core.graph.teams.quality.call_llm", return_value=mock_response),
-            patch("core.graph.teams.strategy.call_llm", return_value=mock_response),
-            patch("core.graph.teams.dev.call_llm", return_value=mock_response),
-        ):
-            yield mock
-    except (AttributeError, ModuleNotFoundError):
-        yield None
+
+    # We patch both sync and async versions to support all tests
+    with (
+        patch("core.llm.acall_llm", new_callable=AsyncMock) as mock_async,
+        patch("core.llm.call_llm", return_value=mock_response),
+        patch("core.llm._detect_ollama", return_value=False),
+        patch("core.llm._has_cloud_keys", return_value=False),
+    ):
+        mock_async.return_value = mock_response
+        yield mock_async
 
 
 @pytest.fixture

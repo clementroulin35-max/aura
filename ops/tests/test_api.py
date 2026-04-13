@@ -29,12 +29,20 @@ class TestAPI:
         assert "telemetry" in data
 
     def test_graph_run(self, client, mock_llm):
-        resp = client.post("/v1/graph/run", json={"task": "Test audit"})
+        payload = {
+            "id": "M_TEST_API",
+            "title": "API Verification",
+            "context": "Automated testing",
+            "objectives": ["Connect", "Validate"],
+            "constraints": [],
+            "expected_deliverables": ["Report"],
+            "selected_skills": ["core"],
+        }
+        resp = client.post("/v1/graph/run", json=payload)
         assert resp.status_code == 200
         data = resp.json()
-        assert data["status"] == "COMPLETED"
-        assert "teams_visited" in data
-        assert "INTEGRITY" in data["teams_visited"]
+        assert data["status"] == "MISSION_DISPATCHED"
+        assert data["mission_id"] == "M_TEST_API"
 
     def test_graph_run_invalid(self, client):
         resp = client.post("/v1/graph/run", json={})

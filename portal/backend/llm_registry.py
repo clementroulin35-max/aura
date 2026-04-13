@@ -76,7 +76,7 @@ MODELS = {
     "gemini": [
         {"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "params": "—", "ctx": "1M", "type": "chat", "input": 0.15, "output": 0.60, "date": "2025-04"},
         {"id": "gemini-2.5-pro", "name": "Gemini 2.5 Pro", "params": "—", "ctx": "1M", "type": "chat", "input": 1.25, "output": 10.00, "date": "2025-03"},
-        {"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash", "params": "—", "ctx": "1M", "type": "chat", "input": 0.10, "output": 0.40, "date": "2025-02"},
+        {"id": "gemini-3.1-pro-preview", "name": "Gemini 3.1 Pro", "params": "—", "ctx": "2M", "type": "chat", "input": 0.20, "output": 0.80, "date": "2026-03"},
     ],
     "openai": [
         {"id": "gpt-4o", "name": "GPT-4o", "params": "—", "ctx": "128K", "type": "chat", "input": 2.50, "output": 10.00, "date": "2024-05"},

@@ -199,6 +199,9 @@ validate: ## 🔬 Full validation protocol (10 steps, hot sentinels)
 
 clean: ## Purge logs and Python caches
 	@if exist logs\*.log del /q logs\*.log
+
+install-frontend: ## 📦 INSTALL: install frontend dependencies
+	cd portal/frontend && npm install
 	@if exist logs\*.jsonl del /q logs\*.jsonl
 	@if exist logs\*.json del /q logs\*.json
 	@if exist logs\*.pid del /q logs\*.pid

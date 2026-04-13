@@ -59,7 +59,7 @@ const TierSelector = ({ activeTier, onChange }) => {
 
 // --- Main Window ---
 
-const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, initialModels }) => {
+const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, initialModels, isFocused, onFocus }) => {
     const [config, setConfig] = useState(initialConfig || null);
     const [allModels, setAllModels] = useState(initialModels || {});
     const [saving, setSaving] = useState(false);
@@ -391,25 +391,25 @@ const LLMConfigWindow = ({ onClose, x, y, initialConfig, initialReachability, in
     return (
         <motion.div
             className="nexus-hud-panel config-panel"
+            onPointerDownCapture={onFocus}
             drag
             dragControls={dragControls}
             dragListener={false}
             dragMomentum={false}
-            dragConstraints={{ top: 64, left: 0, right: window.innerWidth - dimensions.width, bottom: window.innerHeight - 120 }}
-            dragElastic={0}
+            dragConstraints={{ top: 70, left: 10, right: window.innerWidth - dimensions.width - 10, bottom: window.innerHeight - dimensions.height - 110 }}
             style={{
                 width: dimensions.width,
                 height: dimensions.height,
                 x,
                 y,
-                zIndex: 'var(--z-hud-focus)'
+                zIndex: isFocused ? 'var(--z-hud-top)' : 'var(--z-hud-focus)'
             }}
             variants={unfoldVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
         >
-            <div className="hud-header" onPointerDown={(e) => dragControls.start(e)}>
+            <div className="hud-header" onPointerDown={(e) => dragControls.start(e)} style={{ fontFamily: 'var(--font-title)', textShadow: 'var(--pixel-shadow)', letterSpacing: '2px' }}>
                 <div className="header-drag-zone">
                     <span className="hud-title">ATLANTIS SYSTEM — NEURAL SYNC</span>
                 </div>

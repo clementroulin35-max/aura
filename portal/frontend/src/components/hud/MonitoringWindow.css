@@ -26,62 +26,39 @@
   height: 90px;
   border-radius: 50%;
   border: 2px solid var(--slate-mid);
-  position: relative;
-  transition: all 0.5s ease;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.pulse-green {
-  border-color: var(--status-ok);
-  color: var(--status-ok);
-  box-shadow: 0 0 25px rgba(0, 184, 148, 0.4);
+.section-header {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--slate-mid);
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  opacity: 0.6;
 }
 
-.pulse-red {
-  border-color: var(--status-error);
-  color: var(--status-error);
-  box-shadow: 0 0 25px rgba(214, 48, 49, 0.4);
-}
-
-.pulse-ring::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  border: 1px solid currentColor;
-  opacity: 0.2;
-  animation: pulse-ring-expand 2s ease-out infinite;
-}
-
-.pulse-green::after { color: var(--status-success); }
-.pulse-red::after { color: var(--status-error); }
-
-@keyframes pulse-ring-expand {
-  0% { transform: scale(1); opacity: 0.4; }
-  100% { transform: scale(1.5); opacity: 0; }
+/* ── Pulse Animation Override ─────────────────────── */
+.pulse-gauge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
 }
 
 .pulse-label {
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.15em;
-  opacity: 0.8;
-  transition: color 0.5s ease;
+  letter-spacing: 1px;
 }
 
-.is-online .pulse-label { color: var(--status-success); }
-.is-offline .pulse-label { color: var(--status-error); }
-
-/* Telemetry Metrics */
-.section-header {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--slate-mid);
-  letter-spacing: 0.2em;
-  margin-bottom: 15px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
+/* ── Metric Grid ────────────────────────────────── */
 .metric-list {
   display: flex;
   flex-direction: column;

@@ -25,6 +25,7 @@ export function useSystemStatus() {
       const configData = data.config || data;
       const providers = configData.providers || {};
       
+      console.log("[SYS] Neural Sync Config:", configData);
       setConfig(configData);
 
       // --- HIGH PRIORITY: Llama Connectivity Test ---

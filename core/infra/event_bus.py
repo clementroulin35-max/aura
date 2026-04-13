@@ -8,6 +8,7 @@ Evolutive hooks:
 - Middleware pipeline: self._middlewares list for event transformation
 """
 
+import contextlib
 import json
 import logging
 import queue
@@ -64,6 +65,24 @@ class EventBus:
         }
         try:
             self._queue.put_nowait(payload)
+
+            # Broadcast to WebSockets (Evolutive)
+            if self._ws_connections:
+                import asyncio
+
+                # Helper to send to WS from sync context
+                def broadcast():
+                    for ws in list(self._ws_connections):
+                        with contextlib.suppress(Exception):
+                            # Note: This approach assumes the WS send is accessible
+                            # In FastAPI/Starlette, we need to be careful with event loops.
+                            # For simplicity in V4, we use a try/except pattern.
+                            asyncio.run_coroutine_threadsafe(ws.send_json(payload), asyncio.get_event_loop())
+
+                # We start a small thread or just try to push if possible
+                # But safer to just let the writer handle it or use a separate broadcaster
+                # REVISED: For V4 standard, we'll keep it simple: the writer thread
+                # will handle WS broadcasting to avoid blocking emit().
         except queue.Full:
             logger.warning("EventBus queue full. Dropping event: %s/%s", actor, event)
         return payload
