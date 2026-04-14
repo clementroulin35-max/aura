@@ -10,8 +10,8 @@ import pytest
 
 
 @pytest.fixture
-def fast_config(tmp_project: Path) -> Path:
-    cfg = {"sovereignty": {"mode": "fast", "active_model": "gemini-2.5-flash"}}
+def flash_config(tmp_project: Path) -> Path:
+    cfg = {"sovereignty": {"mode": "flash", "active_model": "gemini-2.5-flash"}}
     path = tmp_project / "brain" / "llm_config.json"
     path.write_text(json.dumps(cfg), encoding="utf-8")
     return path
@@ -26,10 +26,10 @@ def high_config(tmp_project: Path) -> Path:
 
 
 class TestPromoteToMain:
-    def test_fast_mode_is_noop(self, fast_config: Path):
-        """FAST mode must skip promotion silently (return True)."""
+    def test_flash_mode_is_noop(self, flash_config: Path):
+        """FLASH mode must skip promotion silently (return True)."""
         with (
-            patch("ops.promote.CONFIG_PATH", fast_config),
+            patch("ops.promote.CONFIG_PATH", flash_config),
             patch("ops.promote.print_step"),
             patch("ops.promote.subprocess.check_call") as mock_push,
         ):

@@ -15,9 +15,9 @@ def tmp_seal_env(tmp_project: Path):
     """Extend tmp_project with a minimal llm_config.json for seal tests."""
     llm_config = {
         "sovereignty": {
-            "mode": "fast",
+            "mode": "flash",
             "active_model": "gemini-2.5-flash",
-            "tiers": {"fast": [], "high": []},
+            "tiers": {"flash": [], "high": []},
         }
     }
     (tmp_project / "brain" / "llm_config.json").write_text(json.dumps(llm_config), encoding="utf-8")
@@ -76,11 +76,11 @@ class TestIdentitySeal:
             auto_seal()
 
         data = json.loads(seal_path.read_text(encoding="utf-8"))
-        assert data["nature"] == "fast"
+        assert data["nature"] == "flash"
         assert data["model"] == "gemini-2.5-flash"
 
     def test_auto_seal_fallback_when_config_missing(self, tmp_project: Path):
-        """auto_seal() must fall back to fast/unknown if llm_config.json is absent."""
+        """auto_seal() must fall back to flash/unknown if llm_config.json is absent."""
         seal_path = tmp_project / "logs" / "identity_seal.json"
         missing_config = tmp_project / "brain" / "llm_config_missing.json"
 
@@ -95,5 +95,5 @@ class TestIdentitySeal:
             auto_seal()
 
         data = json.loads(seal_path.read_text(encoding="utf-8"))
-        assert data["nature"] == "fast"
+        assert data["nature"] == "flash"
         assert data["model"] == "unknown"

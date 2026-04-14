@@ -106,12 +106,12 @@ main  ←────────────── promotes on successful HIGH 
  ↑                              │
 high  ← audits + refines flash  │
  ↑                              │
-flash ← FAST dev (synced from main at session start via flash-sync)
+flash ← FLASH dev (synced from main at session start via flash-sync)
 ```
 
 | Branch | Tier | Session Start | make shadow-sync | make build |
 |:-------|:-----|:--------------|:-----------------|:-----------|
-| `flash` | FAST | `make flash-sync` (rebase from main) | push → `origin/flash` | push → `origin/flash` |
+| `flash` | FLASH | `make flash-sync` (rebase from main) | push → `origin/flash` | push → `origin/flash` |
 | `high`  | HIGH | `git checkout high` | push → `origin/high` | push → `origin/high` + promote `high→main` |
 
 ## Quick Start
@@ -121,8 +121,8 @@ flash ← FAST dev (synced from main at session start via flash-sync)
 make install                               # venv + deps + git config
 
 # 2. Session boot
-make llm-align MODE=fast MODEL=gemini-2.5-flash  # or MODE=high MODEL=claude-sonnet-4-6
-make flash-sync                            # (FAST only) rebase flash from main
+make llm-align MODE=flash MODEL=gemini-2.5-flash  # or MODE=high MODEL=claude-sonnet-4-6
+make flash-sync                            # (FLASH only) rebase flash from main
 make boot                                  # identity-seal + sentinels + sync + status
 
 # 3. Work cycle
@@ -130,7 +130,7 @@ make test                                  # 100 tests, 2 workers
 make shadow-sync                           # commit + push to origin/<branch>
 
 # 4. Build + push
-make build                                 # Full cycle — FAST pushes flash, HIGH pushes high + main
+make build                                 # Full cycle — FLASH pushes flash, HIGH pushes high + main
 
 # 5. Run a LangGraph mission
 make graph TASK="Audit the system architecture"
@@ -170,7 +170,7 @@ make portal
 |:--------|:------------|
 | `make llm-align MODE=X MODEL=Y` | 🎯 Align architect mode AND model atomically (session start) |
 | `make boot` | 🚀 Identity-seal → sentinels → sync → status |
-| `make flash-sync` | 🔄 Rebase flash on main (FAST agents, session start) |
+| `make flash-sync` | 🔄 Rebase flash on main (FLASH agents, session start) |
 | `make build` | 🛡️ Full cycle: guard → lint → test → sync → audit → commit → push → promote |
 | `make shadow-sync` | 📸 Commit + push to `origin/<branch>` (mid-session snapshot) |
 | `make exit` | 🚪 Crystallize → shutdown sentinels |

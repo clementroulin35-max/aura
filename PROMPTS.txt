@@ -3,11 +3,11 @@
 ═══════════════════════════════════════════
 Détecte ton identité réelle et aligne-toi :
 
-1. Détermine ton tier : Flash/Gemini = FAST | Claude/GPT-4o = HIGH
-2. make llm-align MODE=<fast|high> MODEL=<ton-modèle-exact>
-   ex FAST  : make llm-align MODE=fast MODEL=gemini-2.5-flash
+1. Détermine ton tier : Flash/Gemini = FLASH | Claude/GPT-4o = HIGH
+2. make llm-align MODE=<flash|high> MODEL=<ton-modèle-exact>
+   ex FLASH  : make llm-align MODE=flash MODEL=gemini-2.5-flash
    ex HIGH  : make llm-align MODE=high MODEL=claude-sonnet-4-6
-3. make flash-sync      → (FAST uniquement) rebase flash sur main avant de travailler
+3. make flash-sync      → (FLASH uniquement) rebase flash sur main avant de travailler
    OU git checkout high → (HIGH uniquement) basculer sur la bonne branche
 4. make boot            → identity-seal + sentinels + sync + status
 5. make test            → vérifier la santé de la suite

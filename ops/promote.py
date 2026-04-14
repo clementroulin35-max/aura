@@ -2,7 +2,7 @@
 GSS Orion V3 — Promote to Main.
 
 In HIGH mode on the 'high' branch: push high → main after a successful build.
-Called automatically at the end of `make build`. No-op in FAST mode.
+Called automatically at the end of `make build`. No-op in FLASH mode.
 """
 
 import json
@@ -21,13 +21,13 @@ CONFIG_PATH = ROOT / "brain" / "llm_config.json"
 def _get_mode() -> str:
     """Read current sovereignty mode from config."""
     if not CONFIG_PATH.exists():
-        return "fast"
+        return "flash"
     try:
         config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-        return config.get("sovereignty", {}).get("mode", "fast").lower()
+        return config.get("sovereignty", {}).get("mode", "flash").lower()
     except Exception as e:
         logger.warning("Failed to read llm_config: %s", e)
-        return "fast"
+        return "flash"
 
 
 def _get_branch() -> str:

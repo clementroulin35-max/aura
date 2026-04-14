@@ -17,7 +17,7 @@ SEAL_PATH = ROOT / "logs" / "identity_seal.json"
 
 # Branch rules: which branches each tier can push to
 ALLOWED_BRANCHES = {
-    "fast": ["flash"],
+    "flash": ["flash"],
     "high": ["high", "main", "master"],
 }
 
@@ -34,12 +34,12 @@ def get_current_branch():
 def get_sovereignty_mode():
     """Read configured sovereignty mode from llm_config.json."""
     if not CONFIG_PATH.exists():
-        return "fast"
+        return "flash"
     try:
         config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-        return config.get("sovereignty", {}).get("mode", "fast")
+        return config.get("sovereignty", {}).get("mode", "flash")
     except Exception:
-        return "fast"
+        return "flash"
 
 
 def get_identity_seal():
@@ -60,7 +60,7 @@ def validate_push():
     Full sovereignty validation (3-way check).
     1. Config mode must match Identity Seal.
     2. Branch must be in the allowed list for that tier.
-    3. FAST tier is strictly forbidden from branches: high, main.
+    3. FLASH tier is strictly forbidden from branches: high, main.
     """
     mode = get_sovereignty_mode()
     branch = get_current_branch()
@@ -78,17 +78,17 @@ def validate_push():
         if seal == "STALE":
             print_step("GUARD", "Identity Seal expired. Re-certify identity before building.", "FAIL")
             return False
-        if seal == "fast":
-            print_step("GUARD", "ELEVATION DENIED: Fast model attempting HIGH-tier operation.", "FAIL")
+        if seal == "flash":
+            print_step("GUARD", "ELEVATION DENIED: Flash model attempting HIGH-tier operation.", "FAIL")
             return False
 
-    # 2. Branch scope enforcement for FAST tier
-    if mode == "fast":
-        if branch not in ALLOWED_BRANCHES["fast"]:
-            print_step("GUARD", f"FAST tier BLOCKED on branch '{branch}'. Only 'flash' is authorized.", "FAIL")
+    # 2. Branch scope enforcement for FLASH tier
+    if mode == "flash":
+        if branch not in ALLOWED_BRANCHES["flash"]:
+            print_step("GUARD", f"FLASH tier BLOCKED on branch '{branch}'. Only 'flash' is authorized.", "FAIL")
             print_step("GUARD", "Run: git checkout flash", "INFO")
             return False
-        print_step("GUARD", f"Sovereignty Valid: FAST on '{branch}'.", "OK")
+        print_step("GUARD", f"Sovereignty Valid: FLASH on '{branch}'.", "OK")
         return True
 
     # 3. HIGH tier branch check

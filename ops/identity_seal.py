@@ -1,6 +1,6 @@
 """
 GSS Orion V3 — Identity Seal.
-Certifies the Agent's real model nature (FAST/HIGH).
+Certifies the Agent's real model nature (FLASH/HIGH).
 
 Executed by the Agent before any privileged action.
 Supports --auto mode (reads brain/llm_config.json) or manual --nature/--model.
@@ -23,7 +23,7 @@ CONFIG_PATH = ROOT / "brain" / "llm_config.json"
 def load_llm_config() -> dict:
     """Load LLM sovereignty config from brain/llm_config.json."""
     if not CONFIG_PATH.exists():
-        logger.warning("llm_config.json not found — defaulting to fast/unknown.")
+        logger.warning("llm_config.json not found — defaulting to flash/unknown.")
         return {}
     try:
         return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
@@ -48,7 +48,7 @@ def auto_seal() -> None:
     """Auto-detect nature and model from brain/llm_config.json and seal."""
     config = load_llm_config()
     sov = config.get("sovereignty", {})
-    nature = sov.get("mode", "fast")
+    nature = sov.get("mode", "flash")
     model = sov.get("active_model", "unknown")
     seal_identity(nature=nature, model=model)
 
@@ -62,8 +62,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--nature",
-        choices=["fast", "high"],
-        help="Self-identified nature (fast/high). Required if --auto not set.",
+        choices=["flash", "high"],
+        help="Self-identified nature (flash/high). Required if --auto not set.",
     )
     parser.add_argument(
         "--model",

@@ -171,10 +171,10 @@ leaderboard: ## Agent score/weight rankings
 knowledge: ## Knowledge sentinel one-shot check
 	$(PYTHON) -m core.sentinels.knowledge
 
-llm-align: ## 🎯 Aligner mode ET modèle (MODE=fast|high MODEL=nom-exact)
+llm-align: ## 🎯 Aligner mode ET modèle (MODE=flash|high MODEL=nom-exact)
 	$(PYTHON) -m ops.llm_tool --align "$(MODE)" "$(MODEL)"
 
-llm-switch: ## Toggle sovereignty mode fast ↔ high (legacy: préférer llm-align)
+llm-switch: ## Toggle sovereignty mode flash ↔ high (legacy: préférer llm-align)
 	$(PYTHON) -m ops.llm_tool --toggle
 
 llm-status: ## Afficher le mode, modèle et diagnostic de cohérence

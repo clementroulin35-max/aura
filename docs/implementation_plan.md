@@ -1,6 +1,6 @@
 # Optimization of Git Workflow and Makefile
 
-The current Git strategy is well-defined in `processus_git.md` using three branches (`flash`, `high`, `main`). However, transitions between these branches and their corresponding LLM tiers (FAST vs HIGH) are currently manual or partially automated.
+The current Git strategy is well-defined in `processus_git.md` using three branches (`flash`, `high`, `main`). However, transitions between these branches and their corresponding LLM tiers (FLASH vs HIGH) are currently manual or partially automated.
 
 This plan aims to harden these transitions and provide a more fluid developer experience.
 
@@ -14,8 +14,8 @@ This plan aims to harden these transitions and provide a more fluid developer ex
 ### [Makefile](file:///c:/Users/Clement/Gravity/AdaptativeIA/orion_v3/Makefile)
 
 #### [MODIFY] [Makefile](file:///c:/Users/Clement/Gravity/AdaptativeIA/orion_v3/Makefile)
-- Add `align-fast` and `align-high` shortcuts.
-- Add `handover` command to automate the transition from FAST to HIGH tier.
+- Add `align-flash` and `align-high` shortcuts.
+- Add `handover` command to automate the transition from FLASH to HIGH tier.
 - Add `back-to-flash` command to return to development after a main promotion.
 - Add `checkpoint` command for rapid progress saving on the current branch.
 - Add `git-status` for a clear overview of branch synchronization.
@@ -38,6 +38,6 @@ This plan aims to harden these transitions and provide a more fluid developer ex
 - Verify `make llm-status` displays correct mode after alignment.
 
 ### Manual Verification
-- Test `make align-fast` and `make align-high` transitions.
+- Test `make align-flash` and `make align-high` transitions.
 - Test `make handover` with dummy changes on `flash`.
 - Verify `make git-status` output visibility.

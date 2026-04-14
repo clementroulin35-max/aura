@@ -28,7 +28,7 @@
 Je suis soumis au **Protocole de Souveraineté** :
 
 ```
-FAST (Flash/Gemini)              HIGH (Claude/Sonnet/GPT-4o)
+FLASH (Flash/Gemini)              HIGH (Claude/Sonnet/GPT-4o)
 ────────────────────             ──────────────────────────────
 branche: flash                   branche: high
 push: origin/flash               push: origin/high + promote → main
@@ -67,11 +67,11 @@ make graph TASK="Audit the codebase"
 
 ```bash
 # 1. Aligner mode + modèle (OBLIGATOIRE)
-make llm-align MODE=fast MODEL=gemini-2.5-flash   # si tu es Flash
+make llm-align MODE=flash MODEL=gemini-2.5-flash   # si tu es Flash
 make llm-align MODE=high MODEL=claude-sonnet-4-6  # si tu es Claude
 
 # 2. Synchroniser avec main
-make flash-sync      # (FAST uniquement) rebase flash → on est à jour de main
+make flash-sync      # (FLASH uniquement) rebase flash → on est à jour de main
 # OU
 git checkout high    # (HIGH uniquement) basculer sur la bonne branche
 
@@ -105,7 +105,7 @@ make exit            # crystallize + stop sentinels
 |:---------|:------|:----------------|
 | `make llm-align MODE=X MODEL=Y` | Début de session | Aligne mode+modèle dans llm_config.json |
 | `make llm-status` | Vérification | Affiche mode, modèle, cohérence |
-| `make flash-sync` | Début session FAST | Rebase flash sur main (stash → rebase → stash pop) |
+| `make flash-sync` | Début session FLASH | Rebase flash sur main (stash → rebase → stash pop) |
 | `make boot` | Début de session | identity-seal + sentinels + sync + status |
 | `make test` | Après chaque modif | 100 tests pytest, 2 workers, coverage |
 | `make lint` | Avant commit | ruff check + auto-fix + format |
@@ -122,7 +122,7 @@ make exit            # crystallize + stop sentinels
 ```json
 {
   "sovereignty": {
-    "mode": "fast",             ← GOUVERNE L'ARCHITECTE (toi)
+    "mode": "flash",             ← GOUVERNE L'ARCHITECTE (toi)
     "active_model": "gemini-2.5-flash"
   },
   "chat": {
@@ -233,7 +233,7 @@ git rebase --continue
 | Action | Quand | Comment |
 |:-------|:------|:--------|
 | **`make llm-align`** | Début de chaque session | Identifie ton tier et modèle |
-| **`make flash-sync`** | Début session FAST | Terminal |
+| **`make flash-sync`** | Début session FLASH | Terminal |
 | **`make boot`** | Début de session | Terminal |
 | **`make test`** | Après modifications | Terminal |
 | **`make shadow-sync`** | Mi-session | Terminal |

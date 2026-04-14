@@ -1,6 +1,6 @@
 """
 GSS Orion V3 — LLM Tool.
-Manages the sovereignty mode (fast/high), active model name, and consistency status.
+Manages the sovereignty mode (flash/high), active model name, and consistency status.
 Primary alignment command: --align MODE MODEL
 """
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 CONFIG_PATH = ROOT / "brain" / "llm_config.json"
 
 # Tier classification hints (for consistency check only — not enforcement)
-_FAST_HINTS = ("flash", "llama", "gemini", "mistral", "deepseek")
+_FLASH_HINTS = ("flash", "llama", "gemini", "mistral", "deepseek")
 _HIGH_HINTS = ("claude", "opus", "sonnet", "gpt-4", "gpt4")
 
 
@@ -37,7 +37,7 @@ def save_config(config: dict) -> None:
 def _ensure_sovereignty(config: dict) -> dict:
     """Ensure the sovereignty section exists with safe defaults."""
     if "sovereignty" not in config:
-        config["sovereignty"] = {"mode": "fast", "active_model": "unknown"}
+        config["sovereignty"] = {"mode": "flash", "active_model": "unknown"}
     return config
 
 
@@ -53,13 +53,13 @@ def get_status() -> None:
     print_step("MODEL", model, "OK")
 
     model_lower = model.lower()
-    is_fast = any(h in model_lower for h in _FAST_HINTS)
+    is_flash = any(h in model_lower for h in _FLASH_HINTS)
     is_high = any(h in model_lower for h in _HIGH_HINTS)
 
-    if mode == "FAST" and is_high:
-        print_step("GUARD", "Mode/Model mismatch — FAST mode with HIGH-tier model.", "WARN")
-    elif mode == "HIGH" and is_fast:
-        print_step("GUARD", "Mode/Model mismatch — HIGH mode with FAST-tier model.", "WARN")
+    if mode == "FLASH" and is_high:
+        print_step("GUARD", "Mode/Model mismatch — FLASH mode with HIGH-tier model.", "WARN")
+    elif mode == "HIGH" and is_flash:
+        print_step("GUARD", "Mode/Model mismatch — HIGH mode with FLASH-tier model.", "WARN")
     else:
         print_step("GUARD", "Mode/Model consistent.", "OK")
 
@@ -80,12 +80,12 @@ def align(mode: str, model: str) -> None:
 
 
 def toggle(model: str = None) -> None:
-    """Toggle mode fast↔high. Optionally update active_model at the same time."""
+    """Toggle mode flash↔high. Optionally update active_model at the same time."""
     config = load_config()
     _ensure_sovereignty(config)
     sov = config["sovereignty"]
-    old_mode = sov.get("mode", "fast")
-    new_mode = "high" if old_mode == "fast" else "fast"
+    old_mode = sov.get("mode", "flash")
+    new_mode = "high" if old_mode == "flash" else "flash"
     sov["mode"] = new_mode
     if model:
         sov["active_model"] = model
@@ -98,7 +98,7 @@ def toggle(model: str = None) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Orion V3 LLM Sovereignty Tool")
     parser.add_argument("--status", action="store_true", help="Show status + consistency check")
-    parser.add_argument("--toggle", action="store_true", help="Toggle mode fast ↔ high")
+    parser.add_argument("--toggle", action="store_true", help="Toggle mode flash ↔ high")
     parser.add_argument(
         "--align",
         nargs=2,
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--switch",
-        choices=["fast", "high"],
+        choices=["flash", "high"],
         help="Switch to a specific mode (keeps current model unless --model given)",
     )
     parser.add_argument("--model", help="Model name for --toggle or --switch")
