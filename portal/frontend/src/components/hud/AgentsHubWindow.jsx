@@ -40,7 +40,7 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
       const deltaX = moveEvent.pageX - startX;
       const newWidth = Math.max(500, startWidth - deltaX);
       const actualDeltaX = startWidth - newWidth;
-      
+
       width.set(newWidth);
       height.set(Math.max(400, startHeight + (moveEvent.pageY - startY)));
       x.set(startXPos + actualDeltaX);
@@ -52,7 +52,7 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   };
-  
+
   const [agents, setAgents] = useState([]);
   const [selectedAgentId, setSelectedAgentId] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -109,12 +109,12 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
       exit="hidden"
     >
       <div className="hud-header" onPointerDown={(e) => dragControls.start(e)}>
-         <span className="hud-title">AGENTS HUB DIRECTORY</span>
-         {onClose && <button className="hud-close-btn" onClick={onClose}>X</button>}
+        <span className="hud-title">AGENTS HUB DIRECTORY</span>
+        {onClose && <button className="hud-close-btn" onClick={onClose}>X</button>}
       </div>
 
       <div className="hud-content" style={{ display: 'flex', flex: 1, overflow: 'hidden', padding: 0 }}>
-        
+
         {/* Sidebar Roster */}
         <div style={{ width: '250px', borderRight: '1px solid rgba(255,255,255,0.1)', overflowY: 'auto', padding: '15px' }}>
           {loading ? (
@@ -127,12 +127,12 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {list.map(agent => (
-                    <div 
+                    <div
                       key={agent.id}
                       onClick={() => setSelectedAgentId(agent.id)}
                       style={{
                         padding: '8px 12px',
-                        background: selectedAgentId === agent.id ? 'rgba(0, 255, 128, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                        background: selectedAgentId === agent.id ? 'var(--action-blue-mid)' : 'rgba(255, 255, 255, 0.05)',
                         border: `1px solid ${selectedAgentId === agent.id ? 'var(--neon-secondary)' : 'transparent'}`,
                         borderRadius: '4px',
                         cursor: 'pointer',
@@ -142,13 +142,13 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
                         transition: 'all 0.2s'
                       }}
                     >
-                      <div style={{ 
-                        width: '30px', height: '30px', borderRadius: '50%', 
+                      <div style={{
+                        width: '30px', height: '30px', borderRadius: '50%',
                         background: 'rgba(0,0,0,0.4)', border: '1px solid var(--slate-light)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px',
                         color: 'var(--text-dim)'
                       }}>
-                        {agent.id.substring(0,2).toUpperCase()}
+                        {agent.id.substring(0, 2).toUpperCase()}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <span style={{ fontSize: '12px', fontWeight: 'bold', color: selectedAgentId === agent.id ? '#fff' : 'var(--slate-light)' }}>
@@ -171,7 +171,7 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '15px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                   <div style={{ width: '80px', height: '80px', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--neon-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', letterSpacing: '2px' }}>
-                    {selectedAgent.id.substring(0,3).toUpperCase()}
+                    {selectedAgent.id.substring(0, 3).toUpperCase()}
                   </div>
                   <div>
                     <h2 style={{ margin: 0, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
@@ -186,7 +186,7 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
                   <button
                     onClick={() => setShowConfirm(true)}
                     style={{
-                      background: 'rgba(0, 255, 128, 0.1)',
+                      background: 'var(--add-button)',
                       border: '1px solid var(--neon-secondary)',
                       color: 'var(--neon-secondary)',
                       padding: '10px 15px',
@@ -227,12 +227,12 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
               )}
 
               {selectedAgent.output_format && (
-                 <div>
-                 <h3 style={{ fontSize: '11px', color: 'var(--slate-light)', textTransform: 'uppercase', marginBottom: '8px' }}>Format de Sortie</h3>
-                 <pre style={{ background: '#090a0f', padding: '10px', borderRadius: '4px', fontSize: '11px', overflowX: 'auto', border: '1px solid rgba(255,255,255,0.05)' }}>
-                   {selectedAgent.output_format}
-                 </pre>
-               </div>
+                <div>
+                  <h3 style={{ fontSize: '11px', color: 'var(--slate-light)', textTransform: 'uppercase', marginBottom: '8px' }}>Format de Sortie</h3>
+                  <pre style={{ background: '#090a0f', padding: '10px', borderRadius: '4px', fontSize: '11px', overflowX: 'auto', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    {selectedAgent.output_format}
+                  </pre>
+                </div>
               )}
 
               {/* Confirmation Overlay */}
@@ -256,35 +256,35 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
                       textAlign: 'center'
                     }}
                   >
-                    <div style={{ 
-                      width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(0, 255, 128, 0.1)', 
+                    <div style={{
+                      width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(0, 255, 128, 0.1)',
                       border: '1px solid var(--neon-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       marginBottom: '20px', color: 'var(--neon-secondary)'
                     }}>
                       <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 5v14M5 12h14"/>
+                        <path d="M12 5v14M5 12h14" />
                       </svg>
                     </div>
-                    
+
                     <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px' }}>
                       Assigner l'agent {selectedAgent.id} ?
                     </h3>
                     <p style={{ margin: '0 0 30px 0', fontSize: '12px', color: 'var(--slate-light)' }}>
-                      L'agent sera ajouté à l'équipe <strong style={{color: 'var(--neon-yellow)'}}>{activeProject.teams.find(t => t.id === targetTeamId)?.name || targetTeamId}</strong>.
+                      L'agent sera ajouté à l'équipe <strong style={{ color: 'var(--neon-yellow)' }}>{activeProject.teams.find(t => t.id === targetTeamId)?.name || targetTeamId}</strong>.
                     </p>
 
                     {/* Toggle Switch Confirmation */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
                       <div style={{ position: 'relative', width: '200px', height: '60px', borderRadius: '30px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', overflow: 'hidden' }}>
-                        
-                        <div 
+
+                        <div
                           onClick={() => setShowConfirm(false)}
                           style={{ fontSize: '12px', color: 'var(--text-dim)', cursor: 'pointer', zIndex: 2 }}
                         >
                           ANNULER
                         </div>
 
-                        <div 
+                        <div
                           onClick={() => {
                             const newProjects = projects.map(p => {
                               if (p.id !== activeProject.id) return p;
@@ -325,7 +325,7 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
                               setShowConfirm(false);
                               if (onClose) onClose();
                             } else if (info.point.x < -20) {
-                               setShowConfirm(false);
+                              setShowConfirm(false);
                             }
                           }}
                           style={{
@@ -337,7 +337,7 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
                           }}
                         >
                           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#000" strokeWidth="3">
-                            <path d="M9 18l6-6-6-6"/>
+                            <path d="M9 18l6-6-6-6" />
                           </svg>
                         </motion.div>
                       </div>
@@ -346,16 +346,16 @@ const AgentsHubWindow = ({ onClose, x, y, width, height, dragConstraints, isFocu
                   </motion.div>
                 )}
               </AnimatePresence>
-              
+
             </div>
           ) : (
             <div style={{ color: 'var(--text-dim)', textAlign: 'center', marginTop: '100px' }}>Sélectionnez un agent pour voir sa carte d'identité.</div>
           )}
         </div>
-        </div>
-        <div className="hud-resize-handle" onMouseDown={handleResizeRight} />
-        <div className="hud-resize-handle-left" onMouseDown={handleResizeLeft} />
-      </motion.div>
+      </div>
+      <div className="hud-resize-handle" onMouseDown={handleResizeRight} />
+      <div className="hud-resize-handle-left" onMouseDown={handleResizeLeft} />
+    </motion.div>
   );
 };
 

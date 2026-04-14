@@ -39,7 +39,7 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
       const deltaX = moveEvent.pageX - startX;
       const newWidth = Math.max(600, startWidth - deltaX);
       const actualDeltaX = startWidth - newWidth;
-      
+
       width.set(newWidth);
       height.set(Math.max(400, startHeight + (moveEvent.pageY - startY)));
       x.set(startXPos + actualDeltaX);
@@ -91,15 +91,15 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
     if (selectedAgentId && activeProject) {
       const activeTeam = activeProject.teams.find(t => t.agents.includes(selectedAgentId));
       if (activeTeam && activeTeam.specs && activeTeam.specs[selectedAgentId]) {
-         const specs = activeTeam.specs[selectedAgentId];
-         // If specs is an object, format it for the textarea
-         if (typeof specs === 'object' && specs !== null) {
-           setAgentSpecs(JSON.stringify(specs, null, 2));
-         } else {
-           setAgentSpecs(specs);
-         }
+        const specs = activeTeam.specs[selectedAgentId];
+        // If specs is an object, format it for the textarea
+        if (typeof specs === 'object' && specs !== null) {
+          setAgentSpecs(JSON.stringify(specs, null, 2));
+        } else {
+          setAgentSpecs(specs);
+        }
       } else {
-         setAgentSpecs(`Configuration spécifique de l'agent '${selectedAgentId}' pour le projet '${activeProject.name}'.`);
+        setAgentSpecs(`Configuration spécifique de l'agent '${selectedAgentId}' pour le projet '${activeProject.name}'.`);
       }
       setUnlockDelete(false);
       setSaveStatus('idle');
@@ -113,7 +113,7 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
   const handleSave = () => {
     if (!activeTeam || !selectedAgentId || !onProjectsUpdate) return;
     setSaveStatus('saving');
-    
+
     const newProjects = projects.map(p => {
       if (p.id !== activeProject.id) return p;
       const newTeams = p.teams.map(t => {
@@ -126,14 +126,14 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
     });
 
     onProjectsUpdate(newProjects).then(() => {
-        setSaveStatus('success');
-        setTimeout(() => setSaveStatus('idle'), 2000);
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus('idle'), 2000);
     });
   };
 
   const handleDelete = () => {
     if (!unlockDelete || !activeTeam || !selectedAgentId || !onProjectsUpdate) return;
-    
+
     // Find next agent or team to select
     const currentAgentIndex = activeTeam.agents.indexOf(selectedAgentId);
     let nextAgentToSelect = null;
@@ -171,15 +171,15 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
     });
 
     onProjectsUpdate(newProjects).then(() => {
-       setSelectedTeamId(nextTeamIdToSelect);
-       setSelectedAgentId(nextAgentToSelect);
+      setSelectedTeamId(nextTeamIdToSelect);
+      setSelectedAgentId(nextAgentToSelect);
     });
     setUnlockDelete(false);
   };
 
   const handleCreateTeam = async () => {
     if (!newTeamName || !activeProject || !onProjectsUpdate) return;
-    
+
     const newTeam = {
       id: `team-${newTeamName.toLowerCase().replace(/[^a-z0-9]/g, '')}-${Math.floor(Math.random() * 100)}`,
       name: newTeamName,
@@ -227,23 +227,23 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
       exit="hidden"
     >
       <div className="hud-header" onPointerDown={(e) => dragControls.start(e)} style={{ fontFamily: 'var(--font-title)', textShadow: 'var(--pixel-shadow)', letterSpacing: '2px' }}>
-         <span className="hud-title">PROJECT TEAMS ORCHESTRATION</span>
-         {onClose && <button className="hud-close-btn" onClick={onClose}>X</button>}
+        <span className="hud-title">PROJECT TEAMS ORCHESTRATION</span>
+        {onClose && <button className="hud-close-btn" onClick={onClose}>X</button>}
       </div>
 
       <div className="hud-content" style={{ flex: 1, overflowY: 'hidden', display: 'flex', flexDirection: 'column', background: 'rgba(0,0,0,0.2)' }}>
-        
+
         {!activeProject ? (
           <div style={{ color: 'var(--slate-light)', textAlign: 'center', marginTop: '50px' }}>Aucun projet actif dans le Nexus. Veuillez sélectionner une destination.</div>
         ) : (
           <>
             {/* Top Row: Teams Grids */}
-            <div style={{ 
+            <div style={{
               display: 'flex', gap: '20px', padding: '20px', overflowX: 'auto', borderBottom: '1px solid rgba(255,255,255,0.1)'
             }}>
               {activeProject.teams.map(team => (
-                <div 
-                  key={team.id} 
+                <div
+                  key={team.id}
                   onClick={() => {
                     setSelectedTeamId(team.id);
                   }}
@@ -263,11 +263,11 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
                     </h3>
                     <span style={{ fontSize: '10px', color: 'var(--slate-light)' }}>{team.agents.length} AGENTS</span>
                   </div>
-                  
+
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                     {team.agents.map(agentId => (
-                      <motion.div 
-                        key={agentId} 
+                      <motion.div
+                        key={agentId}
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={(e) => {
@@ -277,34 +277,34 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
                         }}
                         style={{
                           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
-                          background: selectedAgentId === agentId ? 'rgba(0, 255, 128, 0.2)' : 'rgba(0,0,0,0.4)', 
+                          background: selectedAgentId === agentId ? 'var(--hud-surface-dark)' : 'rgba(0,0,0,0.4)',
                           padding: '10px', borderRadius: '4px', width: '60px',
                           cursor: 'pointer', border: `1px solid ${selectedAgentId === agentId ? 'var(--neon-secondary)' : 'transparent'}`,
-                          boxShadow: selectedAgentId === agentId ? '0 0 10px rgba(0, 255, 128, 0.3)' : 'none'
+                          boxShadow: selectedAgentId === agentId ? '0 0 6px var(--grey-light)' : 'none'
                         }}
                       >
-                        <div style={{ 
-                          width: '35px', height: '35px', borderRadius: '50%', 
+                        <div style={{
+                          width: '35px', height: '35px', borderRadius: '50%',
                           background: 'var(--hud-bg-dark)', border: '1px solid var(--slate-light)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px',
                           color: selectedAgentId === agentId ? 'var(--neon-secondary)' : 'var(--slate-light)'
                         }}>
-                          {agentId.substring(0,2).toUpperCase()}
+                          {agentId.substring(0, 2).toUpperCase()}
                         </div>
                         <span style={{ fontSize: '9px', color: selectedAgentId === agentId ? '#fff' : 'var(--text-dim)', textAlign: 'center', wordBreak: 'break-all' }}>
                           {agentId}
                         </span>
                       </motion.div>
                     ))}
-                    
+
                     {/* Add Agent Button / Reticle */}
-                    <motion.div 
+                    <motion.div
                       whileHover={{ scale: 1.05, y: -2, borderStyle: 'solid', borderColor: 'var(--neon-yellow)' }}
                       whileTap={{ scale: 0.95 }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedTeamId(team.id);
-                        if(onOpenHub) onOpenHub(team.id);
+                        if (onOpenHub) onOpenHub(team.id);
                       }}
                       style={{
                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -313,8 +313,8 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
                         gap: '5px'
                       }}
                     >
-                      <div style={{ 
-                        width: '30px', height: '30px', borderRadius: '50%', 
+                      <div style={{
+                        width: '30px', height: '30px', borderRadius: '50%',
                         background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center'
                       }}>
@@ -329,7 +329,7 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
                 </div>
               ))}
 
-              <motion.div 
+              <motion.div
                 onClick={() => setSelectedTeamId('new_team')}
                 whileHover={{ scale: 1.02, borderColor: 'var(--neon-yellow)', boxShadow: '0 0 15px rgba(255, 255, 0, 0.1)' }}
                 style={{
@@ -339,7 +339,7 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px'
                 }}
               >
-                <motion.div 
+                <motion.div
                   whileHover={{ rotate: 90, scale: 1.1 }}
                   style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--slate-light)', border: '1px solid rgba(255,255,255,0.1)' }}
                 >
@@ -357,14 +357,14 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
             {/* Bottom Row: Agent Editor or Team Creator */}
             {selectedTeamId === 'new_team' ? (
               <div style={{ padding: '30px', flex: 1, overflowY: 'auto' }}>
-                <h3 style={{ 
-                  color: 'var(--neon-secondary)', margin: '0 0 20px 0', textTransform: 'uppercase', 
-                  letterSpacing: '2px', fontSize: '14px', fontFamily: 'var(--font-title)', textShadow: 'var(--pixel-shadow)' 
+                <h3 style={{
+                  color: 'var(--neon-secondary)', margin: '0 0 20px 0', textTransform: 'uppercase',
+                  letterSpacing: '2px', fontSize: '14px', fontFamily: 'var(--font-title)', textShadow: 'var(--pixel-shadow)'
                 }}>FORGER UNE NOUVELLE ÉQUIPE</h3>
-                
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '600px' }}>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="NOM DE L'ÉQUIPE"
                     value={newTeamName}
                     onChange={(e) => setNewTeamName(e.target.value)}
@@ -375,35 +375,35 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
                     <div style={{ fontSize: '11px', color: 'var(--slate-light)', marginBottom: '10px', textTransform: 'uppercase' }}>SÉLECTIONNER LES AGENTS ({newTeamAgents.length})</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                       {availableAgents.map(a => {
-                         const isSelected = newTeamAgents.includes(a.id);
-                         return (
-                           <div 
-                             key={a.id}
-                             onClick={() => {
-                               setNewTeamAgents(prev => 
-                                 prev.includes(a.id) ? prev.filter(x => x !== a.id) : [...prev, a.id]
-                               );
-                             }}
-                             style={{
-                               padding: '8px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase',
-                               border: `1px solid ${isSelected ? 'var(--neon-secondary)' : 'rgba(255,255,255,0.1)'}`,
-                               background: isSelected ? 'rgba(0, 255, 128, 0.15)' : 'rgba(0,0,0,0.3)',
-                               color: isSelected ? '#fff' : 'var(--text-dim)', transition: 'all 0.2s'
-                             }}
-                           >
-                             {a.id}
-                           </div>
-                         );
+                        const isSelected = newTeamAgents.includes(a.id);
+                        return (
+                          <div
+                            key={a.id}
+                            onClick={() => {
+                              setNewTeamAgents(prev =>
+                                prev.includes(a.id) ? prev.filter(x => x !== a.id) : [...prev, a.id]
+                              );
+                            }}
+                            style={{
+                              padding: '8px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase',
+                              border: `1px solid ${isSelected ? 'var(--neon-secondary)' : 'rgba(255,255,255,0.1)'}`,
+                              background: isSelected ? 'var(--action-blue-mid)' : 'rgba(0,0,0,0.3)',
+                              color: isSelected ? '#fff' : 'var(--text-dim)', transition: 'all 0.2s'
+                            }}
+                          >
+                            {a.id}
+                          </div>
+                        );
                       })}
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     onClick={handleCreateTeam}
                     disabled={!newTeamName}
-                    style={{ 
-                      marginTop: '20px', background: 'rgba(0, 255, 128, 0.2)', border: '1px solid var(--neon-secondary)', color: 'var(--neon-secondary)', 
-                      padding: '15px', fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px', cursor: !newTeamName ? 'not-allowed' : 'pointer', 
+                    style={{
+                      marginTop: '20px', background: 'var(--action-blue-mid)', border: '1px solid var(--neon-secondary)', color: 'var(--neon-secondary)',
+                      padding: '15px', fontSize: '14px', fontWeight: 'bold', letterSpacing: '2px', cursor: !newTeamName ? 'not-allowed' : 'pointer',
                       textTransform: 'uppercase', borderRadius: '4px', opacity: !newTeamName ? 0.5 : 1
                     }}
                   >
@@ -413,138 +413,138 @@ const ProjectTeamsWindow = ({ onClose, x, y, width, height, dragConstraints, isF
               </div>
             ) : (
               <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-              {/* Leaft 1/3: Team Agents List */}
-              <div style={{ width: '33%', borderRight: '1px solid rgba(255,255,255,0.1)', padding: '20px', overflowY: 'auto' }}>
-                <h4 style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '15px', textTransform: 'uppercase' }}>
-                  {activeTeam ? `Roster: ${activeTeam.name}` : 'SÉLECTIONNEZ UNE ÉQUIPE'}
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {activeTeam?.agents?.map(agentId => (
-                    <div 
-                      key={agentId}
-                      onClick={() => setSelectedAgentId(agentId)}
-                      style={{
-                        padding: '10px 15px',
-                        background: selectedAgentId === agentId ? 'rgba(0, 255, 128, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                        border: `1px solid ${selectedAgentId === agentId ? 'var(--neon-secondary)' : 'transparent'}`,
-                        borderLeft: `3px solid ${selectedAgentId === agentId ? 'var(--neon-secondary)' : 'transparent'}`,
-                        cursor: 'pointer',
-                        fontSize: '11px',
-                        fontWeight: 'bold',
-                        color: selectedAgentId === agentId ? '#fff' : 'var(--text-secondary)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '1px'
-                      }}
-                    >
-                      {'>'} {agentId}
+                {/* Leaft 1/3: Team Agents List */}
+                <div style={{ width: '33%', borderRight: '1px solid rgba(255,255,255,0.1)', padding: '20px', overflowY: 'auto' }}>
+                  <h4 style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '15px', textTransform: 'uppercase' }}>
+                    {activeTeam ? `Roster: ${activeTeam.name}` : 'SÉLECTIONNEZ UNE ÉQUIPE'}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {activeTeam?.agents?.map(agentId => (
+                      <div
+                        key={agentId}
+                        onClick={() => setSelectedAgentId(agentId)}
+                        style={{
+                          padding: '10px 15px',
+                          background: selectedAgentId === agentId ? 'var(--action-blue-mid)' : 'rgba(255, 255, 255, 0.05)',
+                          border: `1px solid ${selectedAgentId === agentId ? 'var(--neon-secondary)' : 'transparent'}`,
+                          borderLeft: `3px solid ${selectedAgentId === agentId ? 'var(--neon-secondary)' : 'transparent'}`,
+                          cursor: 'pointer',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          color: selectedAgentId === agentId ? '#fff' : 'var(--text-secondary)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px'
+                        }}
+                      >
+                        {'>'} {agentId}
+                      </div>
+                    ))}
+                    {(!activeTeam?.agents || activeTeam.agents.length === 0) && (
+                      <div style={{ fontSize: '11px', color: 'var(--slate-light)' }}>L'équipe est vide. Ajoutez des agents depuis le Hub.</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right 2/3: Specification Editor */}
+                <div style={{ width: '67%', padding: '20px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+                  {selectedAgentId ? (
+                    <>
+                      <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h4 style={{
+                          fontSize: '11px', color: 'var(--neon-secondary)', margin: 0, textTransform: 'uppercase',
+                          fontFamily: 'var(--font-title)', textShadow: 'var(--pixel-shadow)'
+                        }}>
+                          SPÉCIFICATIONS DIRECTIVES: {selectedAgentId}
+                        </h4>
+                      </div>
+
+                      <textarea
+                        value={agentSpecs}
+                        onChange={(e) => setAgentSpecs(e.target.value)}
+                        style={{
+                          flex: 1,
+                          background: 'rgba(0,0,0,0.5)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          padding: '15px',
+                          color: 'var(--text-primary)',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '12px',
+                          lineHeight: '1.6',
+                          resize: 'none',
+                          outline: 'none',
+                          borderRadius: '4px',
+                          marginBottom: '15px'
+                        }}
+                      />
+
+                      {/* Actions bar (Checkbox and Buttons) */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '10px 15px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={unlockDelete}
+                            onChange={(e) => setUnlockDelete(e.target.checked)}
+                            style={{ appearance: 'none', width: '16px', height: '16px', background: unlockDelete ? 'var(--neon-error, #ff3366)' : 'transparent', border: '1px solid var(--slate-light)', borderRadius: '2px', cursor: 'pointer', outline: 'none' }}
+                          />
+                          <span style={{ fontSize: '10px', color: 'var(--slate-light)', fontStyle: 'italic' }}>
+                            Déverrouiller le retrait d'agent
+                          </span>
+                        </label>
+
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                          <button
+                            onClick={handleDelete}
+                            disabled={!unlockDelete}
+                            style={{
+                              background: unlockDelete ? 'rgba(255, 51, 102, 0.2)' : 'transparent',
+                              border: `1px solid ${unlockDelete ? '#ff3366' : 'rgba(255,255,255,0.1)'}`,
+                              color: unlockDelete ? '#ffffffff' : 'rgba(255,255,255,0.3)',
+                              padding: '8px 16px',
+                              fontSize: '10px',
+                              cursor: unlockDelete ? 'pointer' : 'not-allowed',
+                              textTransform: 'uppercase',
+                              letterSpacing: '2px',
+                              fontFamily: 'var(--font-ui)',
+                              textShadow: unlockDelete ? 'var(--pixel-shadow)' : 'none'
+                            }}
+                          >
+                            SUPPRIMER
+                          </button>
+
+                          <button
+                            onClick={handleSave}
+                            disabled={saveStatus !== 'idle'}
+                            style={{
+                              background: saveStatus === 'success' ? 'var(--neon-blue)' : 'var(--neon-blue)',
+                              border: `1px solid ${saveStatus === 'success' ? '#fff' : 'var(--neon-secondary)'}`,
+                              color: saveStatus === 'success' ? '#fff' : 'var(--text-primary)',
+                              padding: '8px 16px',
+                              fontSize: '10px',
+                              cursor: saveStatus !== 'idle' ? 'default' : 'pointer',
+                              textTransform: 'uppercase',
+                              letterSpacing: '1px',
+                              transition: 'all 0.2s',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '5px'
+                            }}
+                          >
+                            {saveStatus === 'saving' ? (
+                              <svg className="spinner-detect" viewBox="0 0 50 50" style={{ width: '12px', height: '12px' }}>
+                                <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5" stroke="currentColor"></circle>
+                              </svg>
+                            ) : saveStatus === 'success' ? 'OK' : 'SAUVEGARDER'}
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ color: 'var(--text-dim)', textAlign: 'center', marginTop: '100px' }}>
+                      Aucun agent sélectionné pour l'édition de spécifications.
                     </div>
-                  ))}
-                  {(!activeTeam?.agents || activeTeam.agents.length === 0) && (
-                     <div style={{ fontSize: '11px', color: 'var(--slate-light)' }}>L'équipe est vide. Ajoutez des agents depuis le Hub.</div>
                   )}
                 </div>
               </div>
-
-              {/* Right 2/3: Specification Editor */}
-              <div style={{ width: '67%', padding: '20px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-                {selectedAgentId ? (
-                  <>
-                    <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h4 style={{ 
-                        fontSize: '11px', color: 'var(--neon-secondary)', margin: 0, textTransform: 'uppercase',
-                        fontFamily: 'var(--font-title)', textShadow: 'var(--pixel-shadow)'
-                      }}>
-                        SPÉCIFICATIONS DIRECTIVES: {selectedAgentId}
-                      </h4>
-                    </div>
-                    
-                    <textarea 
-                      value={agentSpecs}
-                      onChange={(e) => setAgentSpecs(e.target.value)}
-                      style={{
-                        flex: 1,
-                        background: 'rgba(0,0,0,0.5)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        padding: '15px',
-                        color: 'var(--text-primary)',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '12px',
-                        lineHeight: '1.6',
-                        resize: 'none',
-                        outline: 'none',
-                        borderRadius: '4px',
-                        marginBottom: '15px'
-                      }}
-                    />
-
-                    {/* Actions bar (Checkbox and Buttons) */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '10px 15px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-                        <input 
-                          type="checkbox" 
-                          checked={unlockDelete} 
-                          onChange={(e) => setUnlockDelete(e.target.checked)} 
-                          style={{ appearance: 'none', width: '16px', height: '16px', background: unlockDelete ? 'var(--neon-error, #ff3366)' : 'transparent', border: '1px solid var(--slate-light)', borderRadius: '2px', cursor: 'pointer', outline: 'none' }}
-                        />
-                        <span style={{ fontSize: '10px', color: 'var(--slate-light)', fontStyle: 'italic' }}>
-                          Déverrouiller le retrait d'agent
-                        </span>
-                      </label>
-
-                      <div style={{ display: 'flex', gap: '15px' }}>
-                        <button 
-                          onClick={handleDelete}
-                          disabled={!unlockDelete}
-                          style={{
-                            background: unlockDelete ? 'rgba(255, 51, 102, 0.2)' : 'transparent',
-                            border: `1px solid ${unlockDelete ? '#ff3366' : 'rgba(255,255,255,0.1)'}`,
-                            color: unlockDelete ? '#ff3366' : 'rgba(255,255,255,0.3)',
-                            padding: '8px 16px',
-                            fontSize: '10px',
-                            cursor: unlockDelete ? 'pointer' : 'not-allowed',
-                            textTransform: 'uppercase',
-                            letterSpacing: '2px',
-                            fontFamily: 'var(--font-ui)',
-                            textShadow: unlockDelete ? 'var(--pixel-shadow)' : 'none'
-                          }}
-                        >
-                          SUPPRIMER
-                        </button>
-
-                        <button 
-                          onClick={handleSave}
-                          disabled={saveStatus !== 'idle'}
-                          style={{
-                            background: saveStatus === 'success' ? 'rgba(0, 255, 128, 0.4)' : 'rgba(0, 255, 128, 0.2)',
-                            border: `1px solid ${saveStatus === 'success' ? '#fff' : 'var(--neon-secondary)'}`,
-                            color: saveStatus === 'success' ? '#fff' : 'var(--text-primary)',
-                            padding: '8px 16px',
-                            fontSize: '10px',
-                            cursor: saveStatus !== 'idle' ? 'default' : 'pointer',
-                            textTransform: 'uppercase',
-                            letterSpacing: '1px',
-                            transition: 'all 0.2s',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '5px'
-                          }}
-                        >
-                          {saveStatus === 'saving' ? (
-                            <svg className="spinner-detect" viewBox="0 0 50 50" style={{ width: '12px', height: '12px' }}>
-                                <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5" stroke="currentColor"></circle>
-                            </svg>
-                          ) : saveStatus === 'success' ? 'OK' : 'SAUVEGARDER'}
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div style={{ color: 'var(--text-dim)', textAlign: 'center', marginTop: '100px' }}>
-                    Aucun agent sélectionné pour l'édition de spécifications.
-                  </div>
-                )}
-              </div>
-            </div>
             )}
           </>
         )}

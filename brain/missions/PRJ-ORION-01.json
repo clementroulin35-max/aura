@@ -1,0 +1,12 @@
+{
+  "project_id": "PRJ-ORION-01",
+  "title": "NOUVELLE MISSION",
+  "context": "Définissez le contexte...",
+  "objectives": [
+    "Objectif 1"
+  ],
+  "constraints": [
+    "Contrainte 1"
+  ],
+  "selected_skills": []
+}

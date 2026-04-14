@@ -13,7 +13,10 @@
             "captain",
             "brainstorming",
             "design"
-          ]
+          ],
+          "specs": {
+            "captain": "Configuration spécifique de l'agent 'captain' pour le projet 'Orion Interface V4'."
+          }
         },
         {
           "id": "team-dev",
@@ -21,9 +24,11 @@
           "agents": [
             "frontend_dev",
             "backend_dev",
-            "task",
-            "core"
-          ]
+            "task"
+          ],
+          "specs": {
+            "frontend_dev": "Configuration spécifique de l'agent 'frontend_dev' pour le projet 'Orion Interface V4'"
+          }
         },
         {
           "id": "team-qa",
@@ -39,7 +44,7 @@
     {
       "id": "PRJ-COWBOY-02",
       "name": "Epopée Spatiale",
-      "image": "/backgrounds/l0_vista_3.jpg",
+      "image": "/backgrounds/l0_vista_4.jpg",
       "description": "Scénario narratif avec sarcasme et aventure stellaire.",
       "teams": [
         {
@@ -54,6 +59,13 @@
           ]
         }
       ]
+    },
+    {
+      "id": "PRJ-TEST-96",
+      "name": "TEST",
+      "description": "Nouveau projet d'exploration.",
+      "image": "/backgrounds/l0_vista_1.jpg",
+      "teams": []
     }
   ]
 }
