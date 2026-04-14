@@ -1,0 +1,81 @@
+{
+  "version": "1.0",
+  "chat": {
+    "provider": "gemini",
+    "model": "gemini-2.5-flash",
+    "temperature": 0.3,
+    "max_tokens": 4096
+  },
+  "supervisor": {
+    "provider": "gemini",
+    "model": "gemini-2.5-flash",
+    "temperature": 0.2,
+    "max_tokens": 8192
+  },
+  "sovereignty": {
+    "mode": "high",
+    "active_model": "claude-sonnet-4-6"
+  },
+  "providers": {
+    "ollama": {
+      "enabled": false,
+      "base_url": "",
+      "gpu_layers": 0
+    },
+    "gemini": {
+      "enabled": false,
+      "api_key": ""
+    },
+    "openai": {
+      "enabled": false,
+      "api_key": ""
+    },
+    "anthropic": {
+      "enabled": false,
+      "api_key": ""
+    },
+    "mistral": {
+      "enabled": false,
+      "api_key": ""
+    },
+    "xai": {
+      "enabled": false,
+      "api_key": ""
+    }
+  },
+  "presets": {
+    "local_light": {
+      "name": "Local L\u00e9ger (CPU)",
+      "chat": {
+        "provider": "ollama",
+        "model": "llama3.2:1b"
+      },
+      "supervisor": {
+        "provider": "ollama",
+        "model": "llama3.2:1b"
+      }
+    },
+    "local_full": {
+      "name": "Local Standard",
+      "chat": {
+        "provider": "ollama",
+        "model": "llama3.2"
+      },
+      "supervisor": {
+        "provider": "ollama",
+        "model": "llama3.2"
+      }
+    },
+    "cloud_gemini": {
+      "name": "Cloud Gemini",
+      "chat": {
+        "provider": "gemini",
+        "model": "gemini-2.5-flash"
+      },
+      "supervisor": {
+        "provider": "gemini",
+        "model": "gemini-2.5-flash"
+      }
+    }
+  }
+}
