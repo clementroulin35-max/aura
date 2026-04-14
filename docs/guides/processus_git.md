@@ -99,3 +99,17 @@ Pour voir où tu en es : make git-status.
 Pour passer en revue (FLASH -> High) : make align-high -> make handover.
 
 Pour finir proprement : make build.
+
+5. Ajouter le nouveau dépôt (le "Remote")
+
+On va donner un petit nom à ce nouveau dépôt pour ne pas le confondre avec ton dépôt de travail actuel. Appelons-le public.
+git remote add public https://github.com/clementroulin35-max/aura
+
+# Vérifier que c'est bien enregistré
+git remote -v
+Tu devrais voir origin (ton dépôt actuel) et public (le nouveau) s'afficher.
+
+# Pousser ton code vers ce dépôt
+Si tu veux envoyer ta branche main (la version propre) sur ce dépôt public :
+git push public main
+Si tu veux envoyer une autre branche, remplace main par high ou flash.
