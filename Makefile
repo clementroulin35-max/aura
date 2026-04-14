@@ -32,8 +32,9 @@ help: ## Show available commands
 	@echo   [RAG]      rag-index / rag-query Q=...
 	@echo   [INTEL]    leaderboard / knowledge
 	@echo   [MAINT]    crystallize / shadow-sync / integrity / check-flags
-	@echo   [STATUS]   status / clean / validate / help
-	@echo   [LLM]      llm-align MODE=.. MODEL=.. / llm-switch / llm-status
+	@echo   [STATUS]   status / clean / validate / help / git-status
+	@echo   [LLM]      llm-align MODE=.. MODEL=.. / align-flash / align-high / llm-switch / llm-status
+	@echo   [GIT]      handover / back-to-flash / checkpoint
 	@echo ""
 
 # ══════════════════════════════════════════════════
@@ -64,14 +65,6 @@ build: ## 🛡️ BUILD: guard → lint → test → sync → audit → crystall
 promote: ## 🚀 PROMOTE: push high → main (HIGH mode only)
 	$(PYTHON) -m ops.promote
 
-flash-sync: ## 🔄 FLASH-SYNC: Rebase flash sur main (safe: stash → rebase → stash pop)
-	-git stash
-	git checkout flash
-	git rebase origin/main
-	-git stash pop
-	@echo   Flash branch rebased from origin/main.
-
-
 exit: crystallize sentinels-stop ## 🚪 EXIT: Crystallize → Shutdown
 	@echo ""
 	@echo   == SESSION CLOSED — $(VERSION) ==
@@ -83,6 +76,29 @@ shadow-sync: ## 📸 SHADOW-SYNC: commit + push to origin/<branch>
 	-git commit -m "chore(shadow): GSS snapshot $(VERSION)" || echo Nothing to commit
 	git push origin $(shell git branch --show-current)
 	@echo   Shadow sync OK + pushed.
+
+handover: ## 🔄 HANDOVER: Merge flash into high (switch from FLASH to HIGH tier)
+	-git stash
+	git checkout high
+	git merge flash --no-edit
+	-git stash pop
+	@echo   Handover complete: flash merged into high.
+
+flash-sync: ## 🔄 FLASH-SYNC: Rebase flash sur main (safe: stash → rebase → stash pop)
+	-git stash
+	git checkout flash
+	git rebase origin/main
+	-git stash pop
+	@echo   Flash branch rebased from origin/main.
+
+checkpoint: ## 🚩 CHECKPOINT: Quick commit + push on current branch
+	git add -A
+	-git commit -m "checkpoint: save progress [$(VERSION)]" || echo Nothing to commit
+	git push origin $(shell git branch --show-current)
+	@echo   Checkpoint saved.
+
+git-status: ## 📊 GIT-STATUS: Comparison of flash, high, and main branches
+	@$(PYTHON) -m ops.git_status
 
 # ══════════════════════════════════════════════════
 # 🔧  CORE OPERATIONS
@@ -173,6 +189,12 @@ knowledge: ## Knowledge sentinel one-shot check
 
 llm-align: ## 🎯 Aligner mode ET modèle (MODE=flash|high MODEL=nom-exact)
 	$(PYTHON) -m ops.llm_tool --align "$(MODE)" "$(MODEL)"
+
+align-flash: ## 🎯 ALIGN-FLASH: Shortcut for gemini-3-flash alignment
+	$(MAKE) llm-align MODE=flash MODEL=gemini-3-flash
+
+align-high: ## 🎯 ALIGN-HIGH: Shortcut for claude-sonnet-4-6 alignment
+	$(MAKE) llm-align MODE=high MODEL=claude-sonnet-4-6
 
 llm-switch: ## Toggle sovereignty mode flash ↔ high (legacy: préférer llm-align)
 	$(PYTHON) -m ops.llm_tool --toggle

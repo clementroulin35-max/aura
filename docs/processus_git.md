@@ -15,59 +15,60 @@ Local Repo : Ta base de données locale (quand tu fais git commit).
 
 Remote Repo : Le serveur distant, GitHub/GitLab (quand tu fais git push).
 
-2. Ton Workflow : La boucle "Flash -> High -> Main"
-Voici les commandes exactes pour ton cycle de développement :
+2. Ton Workflow : La boucle "FLASH -> High -> Main"
+Voici les commandes automatisées pour ton cycle de développement :
 
-Étape A : Le bac à sable (flash)
-Tu codes en local et tu envoies tes idées.
+Étape A : Le bac à sable (FLASH)
+Tu codes en local et tu sauvegardes régulièrement.
 
 Bash
-git checkout flash           # Tu te mets sur flash
+make align-flash           # Aligne l'identité sur FLASH (Gemini)
+make flash-sync            # Récupère le dernier main (au début de session)
 # ... Tu codes ...
-git add .                    # Tu prépares tes changements
-git commit -m "Dev rapide"   # Tu valides en local
-git push origin flash        # Tu envoies sur le serveur
+make checkpoint            # Sauvegarde rapide (add + commit + push)
+
 Étape B : La montée en gamme (high)
-Le modèle Flash a galéré, tu passes sur un LLM plus costaud. Tu veux récupérer le travail de flash dans high.
+Le modèle FLASH a galéré, tu passes sur un LLM plus costaud. Tu veux transférer le travail.
 
 Bash
-git checkout high            # Tu passes sur la branche robuste
-git merge flash              # Tu ramènes le travail de flash dans high
+make align-high            # Aligne l'identité sur High (Claude/GPT4)
+make handover              # Automatise : stash -> checkout high -> merge FLASH
 # ... Tu corriges les erreurs avec le gros modèle ...
-git add .
-git commit -m "Correction via modèle High"
-git push origin high         # Tu sauvegardes le propre
+make build                 # Teste tout + commit + push sur origin/high
+
 Étape C : La mise en production (main)
-C'est stable, on scelle la version.
+C'est stable, on scelle la version. Elle est poussée sur main AUTOMATIQUEMENT à la fin du `make build` si tu es en mode HIGH.
+
+Étape D : Retour au développement
+Tu veux repartir sur FLASH pour la suite.
 
 Bash
-git checkout main            # Tu vas sur la branche sacrée
-git merge high               # Tu ramènes le résultat corrigé
-git push origin main         # C'est officiellement la version stable
+make align-flash
+make back-to-flash         # Automatise : checkout FLASH -> rebase main
+
 3. Le Rebase : Utile ou pas ?
 Oui, c'est très utile pour toi.
 Le but du rebase est de "réaligner" ta branche de départ sur la version la plus récente de main sans créer un nœud de fusion (merge commit) illisible.
 
 Quand le faire ?
-Juste après avoir poussé sur main. Ta branche flash est maintenant "en retard" par rapport à main.
+Juste après avoir poussé sur main. Ta branche FLASH est maintenant "en retard" par rapport à main.
 
 Bash
-git checkout flash
-git rebase main
-Cela va "débrancher" ton historique flash et le "recoller" au bout du dernier commit de main. C'est propre, c'est linéaire.
+make back-to-flash
+Cela va "débrancher" ton historique FLASH et le "recoller" au bout du dernier commit de main. C'est propre, c'est linéaire.
 
 Attention : On ne fait un rebase que sur du travail local ou des branches de dev dont tu es le seul maître. Ne rebase jamais main !
 
 4. Tes questions de "secours"
 "Comment je fais en manuel si les procédures échouent ?"
-Si tu as fait n'importe quoi sur les branches et que tu veux juste que high devienne exactement comme flash (en écrasant tout), tu peux faire :
+Si tu as fait n'importe quoi sur les branches et que tu veux juste que high devienne exactement comme FLASH (en écrasant tout), tu peux faire :
 
 Bash
 git checkout high
-git reset --hard flash  # ATTENTION : ça supprime ce qu'il y avait sur high pour copier flash
-Si tu veux juste fusionner flash dans high manuellement malgré des conflits :
+git reset --hard FLASH  # ATTENTION : ça supprime ce qu'il y avait sur high pour copier FLASH
+Si tu veux juste fusionner FLASH dans high manuellement malgré des conflits :
 
-git merge flash
+git merge FLASH
 
 Git va te dire "CONFLIT". Ouvre tes fichiers, cherche les balises <<<< HEAD, choisis le code que tu veux garder.
 
@@ -89,9 +90,12 @@ Si tu lances un rebase et que ça se passe mal, Git te permet de revenir en arri
 
 Bash
 git rebase --abort
-Résumé de ton réflexe de survie :
-Pour sauvegarder : add + commit + push.
 
-Pour changer de branche proprement : git stash -> git checkout -> git stash pop.
+Résumé de tes nouveaux réflexes :
+Pour sauvegarder : make checkpoint.
 
-Pour synchroniser flash avec le nouveau main : git checkout flash -> git rebase main.
+Pour voir où tu en es : make git-status.
+
+Pour passer en revue (FLASH -> High) : make align-high -> make handover.
+
+Pour finir proprement : make build.

@@ -56,6 +56,19 @@ def promote_to_main() -> bool:
         print_step("PROMOTE", f"Skipped (branch={branch}, promotion only runs from 'high').", "INFO")
         return True
 
+    # Safety: Ensure we are not behind origin/high
+    try:
+        subprocess.check_call(["git", "fetch", "origin", "high"], stderr=subprocess.DEVNULL)
+        behind = subprocess.check_output(
+            ["git", "rev-list", "HEAD..origin/high", "--count"], text=True, stderr=subprocess.DEVNULL
+        ).strip()
+        if int(behind) > 0:
+            print_step("PROMOTE", f"Blocked: Local 'high' is {behind} commits behind origin/high.", "FAIL")
+            print_step("PROMOTE", "Run 'git pull origin high' then rebuild.", "INFO")
+            return False
+    except Exception as e:
+        logger.warning("Promotion safety check (behind) failed: %s", e)
+
     try:
         subprocess.check_call(["git", "push", "origin", "high:main"])
         print_step("PROMOTE", "high → main promotion complete.", "OK")

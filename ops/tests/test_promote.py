@@ -57,31 +57,41 @@ class TestPromoteToMain:
 
     def test_high_mode_high_branch_pushes_to_main(self, high_config: Path):
         """HIGH mode on 'high' branch must push high:main."""
+        import subprocess
         with (
             patch("ops.promote.CONFIG_PATH", high_config),
             patch("ops.promote._get_branch", return_value="high"),
             patch("ops.promote.print_step"),
-            patch("ops.promote.subprocess.check_call") as mock_push,
+            patch("ops.promote.subprocess.check_call") as mock_call,
+            patch("ops.promote.subprocess.check_output", return_value="0") as mock_output,
         ):
             from ops.promote import promote_to_main
 
             result = promote_to_main()
 
         assert result is True
-        mock_push.assert_called_once_with(["git", "push", "origin", "high:main"])
+        # Check that we pushed
+        mock_call.assert_any_call(["git", "push", "origin", "high:main"])
+        # Check that we ran the safety check
+        mock_output.assert_called_with(
+            ["git", "rev-list", "HEAD..origin/high", "--count"], text=True, stderr=subprocess.DEVNULL
+        )
 
     def test_git_failure_returns_false(self, high_config: Path):
         """A git push failure must return False without raising."""
         import subprocess
 
+        def side_effect(cmd, **kwargs):
+            if "push" in cmd:
+                raise subprocess.CalledProcessError(1, "git push")
+            return None
+
         with (
             patch("ops.promote.CONFIG_PATH", high_config),
             patch("ops.promote._get_branch", return_value="high"),
             patch("ops.promote.print_step"),
-            patch(
-                "ops.promote.subprocess.check_call",
-                side_effect=subprocess.CalledProcessError(1, "git"),
-            ),
+            patch("ops.promote.subprocess.check_call", side_effect=side_effect),
+            patch("ops.promote.subprocess.check_output", return_value="0"),
         ):
             from ops.promote import promote_to_main
 
